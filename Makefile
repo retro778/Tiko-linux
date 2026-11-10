@@ -22,10 +22,16 @@ $(SCI_LIB): $(DEPS)/scintilla/gtk/makefile
 $(LEX_LIB): $(DEPS)/lexilla/src/makefile
 	$(MAKE) -C $(DEPS)/lexilla/src
 
-tiko: $(SCI_LIB) $(LEX_LIB) src/*.bas src/*.bi src/*.inc src/lnx/*
-	$(FBC) $(FBFLAGS) src/tiko.bas -x tiko -a $(SCI_LIB) -a $(LEX_LIB) -l gmodule-2.0 -l pangoft2-1.0 -l fontconfig -l X11
+LEXTIKO_OBJ = obj/LexTiko.o
+
+$(LEXTIKO_OBJ): src/lexer/LexTiko.cxx $(LEX_LIB)
+	mkdir -p obj
+	g++ -c -O2 -std=c++17 -fPIC -I $(DEPS)/lexilla/include -I $(DEPS)/lexilla/lexlib -I $(DEPS)/scintilla/include $< -o $@
+
+tiko: $(SCI_LIB) $(LEX_LIB) $(LEXTIKO_OBJ) src/*.bas src/*.bi src/*.inc src/lnx/*
+	$(FBC) $(FBFLAGS) src/tiko.bas -x tiko -a $(LEXTIKO_OBJ) -a $(SCI_LIB) -a $(LEX_LIB) -l gmodule-2.0 -l pangoft2-1.0 -l fontconfig -l X11
 
 clean:
-	rm -f tiko
+	rm -f tiko $(LEXTIKO_OBJ)
 
 .PHONY: all clean

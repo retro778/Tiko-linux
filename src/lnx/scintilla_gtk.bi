@@ -19,6 +19,8 @@ extern "C"
     ' Lexilla
     declare function LnxLexCreateLexer alias "CreateLexer" ( byval name as const zstring ptr ) as any ptr
     declare function LnxLexGetLexerCount alias "GetLexerCount" () as long
+    ' The "tiko" lexer (src/lexer/LexTiko.cxx)
+    declare function TikoCreateLexer() as any ptr
     declare sub LnxLexGetLexerName alias "GetLexerName" ( byval index as ulong, byval name as zstring ptr, byval buflength as long )
 end extern
 

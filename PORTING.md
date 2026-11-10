@@ -92,10 +92,13 @@ Linux specific behaviour:
 * Desktop shortcuts may take keys before tiko sees them (XFCE: Ctrl+F1..F12 switch
   workspaces, so Ctrl+F5 "Compile" needs the menu or a different binding).
 
+Also implemented: single instance (unix socket IPC, `src/lnx/ipc.inc`), drag & drop of
+files, debug console window for the program being debugged (gdb `inferior-tty`), the
+"tiko" lexer (`src/lexer/LexTiko.cxx`, derived from Lexilla's FreeBASIC lexer: all number
+forms incl. `&h`/`&b`/`&o` styled as numbers), F1 opens the topic in kchmviewer.
+
 Known issues / next steps:
-1. A restored session tab shows the "modified" marker although nothing changed.
-2. Program output while debugging goes to gdb's pipe (Windows gives it a console).
-3. Single instance (`MultipleInstances = false`) needs IPC (unix socket / D-Bus).
-4. Lexer: upstream's private "tiko" lexer is not published; stock Lexilla "freebasic" is used
-   (`&h` hex literals style slightly differently) – consider a LexTiko.cxx.
-5. Drag & drop files (WM_DROPFILES), Wayland (currently forced to X11/XWayland).
+1. Native Wayland is not supported; tiko runs through XWayland (GDK_BACKEND=x11) because
+   Win32 style popups need absolute positioning.
+2. gdb prints a harmless "Failed to set controlling terminal" line in the debug console.
+3. F6 while debugging restarts the session (same as upstream; its tooltip says Continue).

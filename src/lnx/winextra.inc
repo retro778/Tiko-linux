@@ -564,9 +564,10 @@ private function AfxSetWindowText overload ( byval hwnd as HWND, byval pwszText 
     return SetWindowText( hwnd, pwszText )
 end function
 
-' The custom "tiko" lexer of the Windows build is not published; use it when present in the
-' linked Lexilla, otherwise the stock FreeBASIC lexer (same SCE_B_* style numbers).
+' The "tiko" lexer comes from src/lexer/LexTiko.cxx (the Windows build's lexer is not
+' published); other names are created by the linked Lexilla.
 private function LnxCreateTikoLexer cdecl ( byval name_ as const zstring ptr ) as any ptr
+    if name_ andalso lcase(*name_) = "tiko" then return TikoCreateLexer()
     dim as any ptr p = LnxLexCreateLexer( name_ )
     if p = 0 then p = LnxLexCreateLexer( "freebasic" )
     return p
