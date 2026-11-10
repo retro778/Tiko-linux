@@ -140,8 +140,8 @@ end function
 private function LnxMapFontFamily( byref wszFace as const wstring ) as string
     dim as string face = WideToUtf8(@wszFace)
     select case lcase(face)
-        case "segoe ui", "ms shell dlg", "ms shell dlg 2", "tahoma", "microsoft sans serif", ""
-            return face & ", Noto Sans, Cantarell, DejaVu Sans, Sans"
+        case "segoe ui", "segoe ui semibold", "ms shell dlg", "ms shell dlg 2", "tahoma", "microsoft sans serif", ""
+            return face & ", Selawik, Noto Sans, Cantarell, DejaVu Sans, Sans"
         case "consolas", "courier new", "lucida console", "cascadia code", "cascadia mono"
             return face & ", DejaVu Sans Mono, Noto Sans Mono, Monospace"
     end select

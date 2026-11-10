@@ -60,6 +60,13 @@ private sub LnxInit()
     g_object_set( gtk_settings_get_default(), "gtk-theme-name", @"Adwaita", NULL )
     dim as gboolean bFalse = 0
     g_object_set( gtk_settings_get_default(), "gtk-application-prefer-dark-theme", bFalse, NULL )
+    ' Selawik: metric compatible Segoe UI replacement (bin/selawk*.ttf)
+    dim as DWSTRING wszFont
+    dim as string fonts(2) = { "selawk.ttf", "selawkb.ttf", "selawksb.ttf" }
+    for i as long = 0 to 2
+        wszFont = AfxGetExePathName & "bin/" & fonts(i)
+        AddFontResourceEx( wszFont.vptr, 0, NULL )
+    next
     LnxInstallControlCss()
 end sub
 #endif

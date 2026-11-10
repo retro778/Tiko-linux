@@ -123,12 +123,14 @@ type LNXRTFSTATE
     fontSize  as long         ' half points
     colorIdx  as long
     skip      as boolean      ' inside an ignorable destination
-    mono      as boolean
+    fontIdx   as long
 end type
+
+dim shared as string gLnxRtfFonts(any)
 
 private function LnxRtfTag( byval buf as GtkTextBuffer ptr, byref st as LNXRTFSTATE, colors() as COLORREF ) as GtkTextTag ptr
     dim as string nm = "rtf" & iif(st.bold, "b", "") & iif(st.italic, "i", "") & iif(st.underline, "u", "") & _
-                       "_s" & st.fontSize & "_c" & st.colorIdx
+                       "_s" & st.fontSize & "_c" & st.colorIdx & "_f" & st.fontIdx
     dim as GtkTextTagTable ptr tbl = gtk_text_buffer_get_tag_table( buf )
     dim as GtkTextTag ptr tag = gtk_text_tag_table_lookup( tbl, strptr(nm) )
     if tag then return tag
@@ -137,8 +139,13 @@ private function LnxRtfTag( byval buf as GtkTextBuffer ptr, byref st as LNXRTFST
     if st.italic then g_object_set( G_OBJECT(tag), "style", PANGO_STYLE_ITALIC, NULL )
     if st.underline then g_object_set( G_OBJECT(tag), "underline", PANGO_UNDERLINE_SINGLE, NULL )
     if st.fontSize > 0 then
-        ' RTF half points at 96 DPI -> pixels
-        g_object_set( G_OBJECT(tag), "size", cint(st.fontSize / 2 * 96 / 72) * PANGO_SCALE, NULL )
+        ' RTF sizes are half points
+        dim as double pts = st.fontSize / 2
+        g_object_set( G_OBJECT(tag), "size-points", pts, NULL )
+    end if
+    if st.fontIdx >= 0 andalso st.fontIdx <= ubound(gLnxRtfFonts) andalso len(gLnxRtfFonts(st.fontIdx)) then
+        dim as string fam = LnxMapFontFamily( DWSTRING(gLnxRtfFonts(st.fontIdx)) )
+        g_object_set( G_OBJECT(tag), "family", LnxZ(fam), NULL )
     end if
     if st.colorIdx > 0 andalso st.colorIdx <= ubound(colors) then
         dim as GdkRGBA c
@@ -233,7 +240,40 @@ private function RichEdit_LoadRtfFromFile( byval hRichEdit as HWND, byref wszFil
                     if mid(rtf, k, 1) = " " then k += 1
                     i = k
                     select case word
-                        case "fonttbl", "stylesheet", "info", "pict", "generator", "listtable", "listoverridetable", "rsidtbl", "themedata", "fldinst"
+                        case "fonttbl"
+                            ' read the font names directly: {\fN\fnil\fcharset0 Name;}
+                            erase gLnxRtfFonts
+                            dim as long depthTbl = 1, p = i
+                            dim as long curF = -1
+                            while p <= n andalso depthTbl > 0
+                                dim as string ch = mid(rtf, p, 1)
+                                if ch = "{" then
+                                    depthTbl += 1 : p += 1
+                                elseif ch = "}" then
+                                    depthTbl -= 1 : p += 1
+                                elseif ch = "\" then
+                                    dim as long q = p + 1
+                                    while q <= n andalso mid(rtf, q, 1) >= "a" andalso mid(rtf, q, 1) <= "z" : q += 1 : wend
+                                    dim as string w = mid(rtf, p + 1, q - p - 1)
+                                    dim as long r = q
+                                    while r <= n andalso mid(rtf, r, 1) >= "0" andalso mid(rtf, r, 1) <= "9" : r += 1 : wend
+                                    if w = "f" then curF = valint(mid(rtf, q, r - q))
+                                    if mid(rtf, r, 1) = " " then r += 1
+                                    p = r
+                                else
+                                    dim as long sc = instr(p, rtf, ";")
+                                    if sc = 0 then exit while
+                                    if curF >= 0 then
+                                        if curF > ubound(gLnxRtfFonts) then redim preserve gLnxRtfFonts(curF)
+                                        gLnxRtfFonts(curF) = trim(mid(rtf, p, sc - p))
+                                    end if
+                                    p = sc + 1
+                                end if
+                            wend
+                            i = p
+                            if depth > 0 then depth -= 1 : st = stack(depth)
+                        case "f": LnxRtfFlush( buf, st, colors(), pending ) : st.fontIdx = param
+                        case "stylesheet", "info", "pict", "generator", "listtable", "listoverridetable", "rsidtbl", "themedata", "fldinst"
                             st.skip = true
                         case "colortbl"
                             inColorTbl = true

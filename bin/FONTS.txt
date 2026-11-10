@@ -1,0 +1,4 @@
+SegoeFluentIcons.ttf - icon font shipped with the Windows Tiko editor (upstream bin folder).
+selawk*.ttf          - Selawik, Microsoft's open source (SIL Open Font License 1.1) metric
+                       compatible replacement for Segoe UI: https://github.com/microsoft/Selawik
+                       Used so that dialog layouts measure like Windows.

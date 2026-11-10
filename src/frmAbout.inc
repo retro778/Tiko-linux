@@ -1,4 +1,4 @@
-'    tiko editor - Programmer's Code Editor for the FreeBASIC Compiler
+﻿'    tiko editor - Programmer's Code Editor for the FreeBASIC Compiler
 '    Copyright (C) 2016-2026 Paul Squires, PlanetSquires Software
 '
 '    This program is free software: you can redistribute it and/or modify
@@ -128,7 +128,7 @@ function frmAbout_Show( byval hWndParent as HWND ) as LRESULT
     pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLAPPCOPYRIGHT, APPCOPYRIGHT, 200, 115, 370, 20, _
         WS_CHILD or WS_VISIBLE or SS_LEFT or SS_NOTIFY, WS_EX_LEFT or WS_EX_LTRREADING)
 
-    pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLJOSE, "Special thanks to: Jos� Roca (AfxNova Framework)", _
+    pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLJOSE, "Special thanks to: José Roca (AfxNova Framework)", _
         200, 143, 300, 18, WS_CHILD or WS_VISIBLE or SS_LEFT or SS_NOTIFY, WS_EX_LEFT or WS_EX_LTRREADING)
 
     pWindow->AddControl("LABEL", , IDC_FRMABOUT_LBLOTHERS, "Paul Doe and ImortisInglorian for ideas and testing", _

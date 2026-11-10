@@ -271,7 +271,7 @@ function WinMain( _
     ' Free the Scintilla, CaptureConsole and HTML help libraries
     if pLibLexilla then dylibfree(pLibLexilla)
     if pLibScintilla then dylibfree(pLibScintilla)
-    dylibfree(gpHelpLib)
+    if gpHelpLib then dylibfree(gpHelpLib)
     
     ' Unload the font file
     if len(wszFontFile) then RemoveFontResource(wszFontFile)

@@ -428,7 +428,7 @@ private sub LnxInstallControlCss()
     if done then exit sub
     done = true
     dim as string css = _
-        ".lnxctl { font-family: 'Segoe UI', 'Noto Sans', 'DejaVu Sans', sans-serif; font-size: 9pt; }" & _
+        ".lnxctl { font-family: 'Segoe UI', 'Selawik', 'Noto Sans', 'DejaVu Sans', sans-serif; font-size: 9pt; }" & _
         "entry.lnxctl { min-height: 0; padding: 0px 4px; border-radius: 0; border: 1px solid #7a7a7a; background: #ffffff; color: #000000; box-shadow: none; }" & _
         "entry.lnxctl:focus { border-color: #0078d7; }" & _
         "entry.lnxctl:disabled { background: #f0f0f0; color: #6d6d6d; border-color: #cccccc; }" & _
@@ -438,7 +438,8 @@ private sub LnxInstallControlCss()
         "button.lnxctl.default { border: 2px solid #0078d7; }" & _
         "button.lnxctl:disabled { background: #cccccc; color: #838383; border-color: #bfbfbf; }" & _
         "checkbutton.lnxctl, radiobutton.lnxctl { min-height: 0; padding: 0; color: #000000; }" & _
-        "checkbutton.lnxctl check, radiobutton.lnxctl radio { min-width: 13px; min-height: 13px; margin: 0 4px 0 0; }" & _
+        "checkbutton.lnxctl check, radiobutton.lnxctl radio { min-width: 13px; min-height: 13px; margin: 0 3px 0 0; padding: 0; -gtk-icon-transform: scale(0.93); }" & _
+        "checkbutton.lnxctl > label, radiobutton.lnxctl > label { padding: 0; margin: 0; }" & _
         "combobox.lnxctl button { min-height: 0; padding: 0px 4px; border-radius: 0; border: 1px solid #adadad; background: #e1e1e1; box-shadow: none; }" & _
         "combobox.lnxctl entry { min-height: 0; padding: 0px 4px; border-radius: 0; }" & _
         "combobox.lnxctl box.linked > entry { border-right-width: 0; }" & _
@@ -566,6 +567,23 @@ private function LnxOnCtlFocusOut cdecl ( byval w as GtkWidget ptr, byval ev as 
     end select
     SendMessage( hwnd, WM_KILLFOCUS, 0, 0 )
     return FALSE
+end function
+
+' Static controls are painted through WM_PAINT so that subclass procedures can owner draw
+' them (tiko paints tab strips and list headers this way). If the procedure chain reaches the
+' default handler, GTK draws the label normally.
+private function LnxOnLabelDraw cdecl ( byval w as GtkWidget ptr, byval cr as cairo_t ptr, byval hwnd as HWND ) as gboolean
+    if IsWindow(hwnd) = 0 orelse ubound(hwnd->subclasses) < 0 then return FALSE
+    cairo_save( cr )
+    cairo_rectangle( cr, 0, 0, gtk_widget_get_allocated_width(w), gtk_widget_get_allocated_height(w) )
+    cairo_clip( cr )
+    hwnd->paintCr = cr
+    hwnd->lbAnchor = 0          ' reused as "default paint reached" flag for labels
+    SendMessage( hwnd, WM_PAINT, 0, 0 )
+    dim as boolean bDefault = (hwnd->lbAnchor <> 0)
+    if IsWindow(hwnd) then hwnd->paintCr = 0
+    cairo_restore( cr )
+    return iif( bDefault, FALSE, TRUE )
 end function
 
 private function LnxOnLabelClick cdecl ( byval w as GtkWidget ptr, byval ev as GdkEventButton ptr, byval hwnd as HWND ) as gboolean
@@ -1480,7 +1498,8 @@ private function LnxListViewProc( byval hwnd as HWND, byval uMsg as UINT, byval 
             dim as string title = iif(pc andalso pc->pszText, WideToUtf8(pc->pszText), "")
             dim as GtkTreeViewColumn ptr col = gtk_tree_view_column_new_with_attributes( LnxZ(title), rend, "text", ncol, NULL )
             gtk_tree_view_column_set_sizing( col, GTK_TREE_VIEW_COLUMN_FIXED )
-            if pc then gtk_tree_view_column_set_fixed_width( col, iif(pc->cx > 0, pc->cx, 50) )
+            if pc then gtk_tree_view_column_set_fixed_width( col, iif(pc->cx > 0, pc->cx, 1) )
+            if pc andalso pc->cx <= 0 then gtk_tree_view_column_set_visible( col, FALSE )
             gtk_tree_view_column_set_resizable( col, TRUE )
             if pc andalso (pc->mask and LVCF_FMT) then
                 if pc->fmt = LVCFMT_RIGHT then g_object_set( G_OBJECT(rend), "xalign", 1.0, NULL )
@@ -1490,7 +1509,10 @@ private function LnxListViewProc( byval hwnd as HWND, byval uMsg as UINT, byval 
             return ncol
         case LVM_SETCOLUMNWIDTH
             dim as GtkTreeViewColumn ptr col = gtk_tree_view_get_column( tv, wParam )
-            if col then gtk_tree_view_column_set_fixed_width( col, iif(cast(long, lParam) > 0, lParam, 50) )
+            if col then
+                gtk_tree_view_column_set_fixed_width( col, iif(cast(long, lParam) > 0, lParam, 1) )
+                gtk_tree_view_column_set_visible( col, iif(cast(long, lParam) > 0, TRUE, FALSE) )
+            end if
             return 1
         case LVM_INSERTITEM
             dim as LVITEMW ptr pi = cast(LVITEMW ptr, lParam)
@@ -1896,6 +1918,9 @@ private function LnxCreateControl( byref wszClass as const wstring, byval hParen
     hwnd->wndproc = @LnxControlProc
     hwnd->hFont = hFontDefault()
 
+    ' Win32 combobox heights include the drop down list; only the edit part is visible.
+    if kind = LK_COMBOBOX andalso hwnd->h > 30 then hwnd->h = 23
+
     dim as GtkWidget ptr inner, outer
     select case kind
         case LK_BUTTON
@@ -1933,6 +1958,7 @@ private function LnxCreateControl( byref wszClass as const wstring, byval hParen
             gtk_event_box_set_visible_window( GTK_EVENT_BOX(outer), FALSE )
             gtk_container_add( GTK_CONTAINER(outer), inner )
             g_signal_connect( G_OBJECT(outer), "button-press-event", G_CALLBACK(@LnxOnLabelClick), hwnd )
+            g_signal_connect( G_OBJECT(outer), "draw", G_CALLBACK(@LnxOnLabelDraw), hwnd )
         case LK_TEXTBOX
             inner = gtk_entry_new()
             gtk_entry_set_width_chars( GTK_ENTRY(inner), 1 )
@@ -2033,7 +2059,7 @@ private function LnxCreateControl( byref wszClass as const wstring, byval hParen
     gtk_widget_set_sensitive( hwnd->widget, iif(hwnd->enabled, TRUE, FALSE) )
 
     ' Mouse input for native widgets is observed (so the message loop pre-filters see it)
-    LnxConnectInputSignals( hwnd, inner, true )
+    LnxConnectInputSignals( hwnd, iif(kind = LK_LABEL, outer, inner), true )
     g_signal_connect( G_OBJECT(inner), "focus-in-event", G_CALLBACK(@LnxOnCtlFocusIn), hwnd )
     g_signal_connect( G_OBJECT(inner), "focus-out-event", G_CALLBACK(@LnxOnCtlFocusOut), hwnd )
 
@@ -2310,6 +2336,7 @@ private function LnxControlProc( byval hwnd as HWND, byval uMsg as UINT, byval w
             return 0
 
         case WM_PAINT, WM_ERASEBKGND
+            if hwnd->kind = LK_LABEL andalso uMsg = WM_PAINT then hwnd->lbAnchor = 1   ' let GTK draw the label
             return 0
         case WM_CONTEXTMENU
             ' passed to the parent like DefWindowProc does for child windows

@@ -179,6 +179,16 @@ function RedirConsoleToFile( _
     if ProcessInfo.hThread  then CloseHandle( ProcessInfo.hThread )
     if hChildStdOutRead     then CloseHandle( hChildStdOutRead )
 
+#ifdef __FB_LINUX__
+    ' Linux tools write LF line endings; the log parser (like Windows) expects CRLF.
+    dim as string sNorm
+    for i as long = 1 to len(sConsoleText)
+        dim as string c = mid(sConsoleText, i, 1)
+        if c = !"\n" andalso (i = 1 orelse mid(sConsoleText, i - 1, 1) <> !"\r") then sNorm &= !"\r\n" else sNorm &= c
+    next
+    sConsoleText = sNorm
+#endif
+
     function = 0
 end function
 

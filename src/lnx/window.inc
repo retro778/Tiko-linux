@@ -304,6 +304,12 @@ private function LnxToplevelOf( byval hwnd as HWND ) as HWND
     return hwnd
 end function
 
+' The GdkWindow that receives a window's input / defines its coordinates
+private function LnxGdkWin( byval hwnd as HWND ) as GdkWindow ptr
+    if hwnd = 0 then return 0
+    return gtk_widget_get_window( iif(hwnd->client, hwnd->client, hwnd->widget) )
+end function
+
 private function LnxIsNative( byval hwnd as HWND ) as boolean
     select case hwnd->kind
         case LK_TOPLEVEL, LK_CUSTOM, LK_LISTBOX: return false
@@ -614,7 +620,7 @@ private function LnxHoverTimeout cdecl ( byval hwnd as HWND ) as gboolean
         dim as POINT pt
         GetCursorPos( @pt )
         dim as long ox, oy
-        gdk_window_get_origin( gtk_widget_get_window(hwnd->client), @ox, @oy )
+        gdk_window_get_origin( LnxGdkWin(hwnd), @ox, @oy )
         LnxPostInput( hwnd, WM_MOUSEHOVER, 0, MAKELPARAM(pt.x - ox, pt.y - oy) )
     end if
     return FALSE
@@ -669,7 +675,7 @@ private function LnxOnButtonRelease cdecl ( byval w as GtkWidget ptr, byval ev a
         ' translate into capture window coordinates
         dim as long ox, oy, tx, ty
         gdk_window_get_origin( ev->window, @ox, @oy )
-        gdk_window_get_origin( gtk_widget_get_window(target->client), @tx, @ty )
+        gdk_window_get_origin( LnxGdkWin(target), @tx, @ty )
         x = x + ox - tx : y = y + oy - ty
     end if
     dim as UINT uMsg
@@ -697,7 +703,7 @@ private function LnxOnMotion cdecl ( byval w as GtkWidget ptr, byval ev as GdkEv
         target = gLnxCapture
         dim as long ox, oy, tx, ty
         gdk_window_get_origin( ev->window, @ox, @oy )
-        gdk_window_get_origin( gtk_widget_get_window(target->client), @tx, @ty )
+        gdk_window_get_origin( LnxGdkWin(target), @tx, @ty )
         x = x + ox - tx : y = y + oy - ty
     end if
     gLnxMouseHwnd = target
@@ -705,7 +711,7 @@ private function LnxOnMotion cdecl ( byval w as GtkWidget ptr, byval ev as GdkEv
     if bNative = false then
         ' default WM_SETCURSOR behaviour: the arrow cursor (window procedures may override with SetCursor)
         if target->cursor = 0 then
-            gdk_window_set_cursor( gtk_widget_get_window(target->client), NULL )
+            if LnxGdkWin(target) then gdk_window_set_cursor( LnxGdkWin(target), NULL )
         end if
     end if
     ' restart hover timer
@@ -1486,6 +1492,7 @@ private function SetWindowPos( byval hwnd as HWND, byval hWndInsertAfter as HWND
     if (uFlags and SWP_NOSIZE) = 0 then
         if cx < 0 then cx = 0
         if cy < 0 then cy = 0
+        if hwnd->kind = LK_COMBOBOX andalso cy > 30 then cy = 23    ' height includes the drop down list
         if hwnd->w <> cx orelse hwnd->h <> cy then
             hwnd->w = cx : hwnd->h = cy : bSized = true
         end if

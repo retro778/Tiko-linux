@@ -1063,6 +1063,10 @@ end function
 ' Process prefix {CURDRIVE} and convert to current drive letter.
 ' ========================================================================================
 function ProcessToCurdriveApp( byval wszFilename as DWSTRING ) as DWSTRING
+#ifdef __FB_LINUX__
+    ' Linux has no drive letters: paths are stored as they are.
+    return wszFilename
+#endif
     ' for each folder location determine if it resides on the same drive as
     ' the editor. if it does then substitute the replaceable parameter
     ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -1086,6 +1090,10 @@ end function
 ' Process current drive to prefix {CURDRIVE} 
 ' ========================================================================================
 function ProcessFromCurdriveApp( byval wszFilename as DWSTRING ) as DWSTRING
+#ifdef __FB_LINUX__
+    ' Linux has no drive letters: paths are stored as they are.
+    return wszFilename
+#endif
     ' for each folder location determine if it resides on the same drive as
     ' the editor. if it does then substitute the replaceable parameter
     ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -1105,6 +1113,10 @@ end function
 ' Process prefix {CURDRIVE} and convert to current drive letter.
 ' ========================================================================================
 function ProcessToCurdriveProject( byval wszFilename as DWSTRING ) as DWSTRING
+#ifdef __FB_LINUX__
+    ' Linux has no drive letters: paths are stored as they are.
+    return wszFilename
+#endif
     ' for each folder location determine if it resides on the same drive as
     ' the project file. if it does then substitute the replaceable parameter
     ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
@@ -1128,6 +1140,10 @@ end function
 ' Process current drive to prefix {CURDRIVE} 
 ' ========================================================================================
 function ProcessFromCurdriveProject( byval wszFilename as DWSTRING ) as DWSTRING
+#ifdef __FB_LINUX__
+    ' Linux has no drive letters: paths are stored as they are.
+    return wszFilename
+#endif
     ' for each folder location determine if it resides on the same drive as
     ' the project file. if it does then substitute the replaceable parameter
     ' {CURDRIVE} for the drive letter. This allows you to easily run the editor
