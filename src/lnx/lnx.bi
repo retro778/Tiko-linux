@@ -26,6 +26,7 @@
 #include once "process.inc"
 #include once "winextra.inc"
 #include once "afxextra.inc"
+#include once "ipc.inc"
 
 ' CreateWindowEx: used for Scintilla windows and generic child windows
 private function CreateWindowEx( byval dwExStyle as DWORD, byval lpClassName as LPCWSTR, byval lpWindowName as LPCWSTR, _

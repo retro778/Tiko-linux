@@ -1129,12 +1129,15 @@ private function GetModuleHandle( byval lpModuleName as LPCWSTR ) as HINSTANCE
 end function
 #define GetModuleHandleW GetModuleHandle
 
+declare function LnxIpcFindRemote( byref wszClass as const wstring ) as HWND
 private function FindWindow( byval lpClassName as LPCWSTR, byval lpWindowName as LPCWSTR ) as HWND
     ' Only windows of this process can be found on Linux
     for i as long = 0 to gLnxWindowCount - 1
         dim as HWND h = gLnxWindows(i)
         if h->kind = LK_TOPLEVEL andalso lpClassName andalso h->classname = *lpClassName then return h
     next
+    ' A window of another tiko process (single instance feature, see ipc.inc)
+    if lpClassName andalso len(*lpClassName) then return LnxIpcFindRemote( *lpClassName )
     return 0
 end function
 #define FindWindowW FindWindow

@@ -245,6 +245,9 @@ declare function DestroyWindow( byval hwnd as HWND ) as BOOL
 declare function IsWindow( byval hwnd as HWND ) as BOOL
 declare function GetParent( byval hwnd as HWND ) as HWND
 declare function PostMessage( byval hwnd as HWND, byval uMsg as UINT, byval wParam as WPARAM, byval lParam as LPARAM ) as BOOL
+declare sub LnxIpcStartListener( byval hwnd as HWND )
+declare sub LnxIpcStopListener( byval hwnd as HWND )
+declare function LnxIpcRemoteMessage( byval hwnd as HWND, byval uMsg as UINT, byval wParam as WPARAM, byval lParam as LPARAM ) as LRESULT
 declare sub LnxConnectInputSignals( byval hwnd as HWND, byval w as GtkWidget ptr, byval bNative as boolean )
 
 #define DefWindowProcW  DefWindowProc
@@ -447,6 +450,7 @@ end function
 
 private function SendMessage( byval hwnd as HWND, byval uMsg as UINT, byval wParam as WPARAM, byval lParam as LPARAM ) as LRESULT
     if IsWindow(hwnd) = 0 then return 0
+    if hwnd->kind = LK_REMOTE then return LnxIpcRemoteMessage( hwnd, uMsg, wParam, lParam )
     return LnxCallChain( hwnd, uMsg, wParam, lParam, ubound(hwnd->subclasses) + 1 )
 end function
 
@@ -1058,6 +1062,8 @@ private function LnxCreateWindow( byval kind as LNX_KIND, byref wszClass as cons
         SendMessage( hwnd, WM_SIZE, SIZE_RESTORED, MAKELPARAM(hwnd->w, hwnd->h) )
     end if
     if kind = LK_TOPLEVEL andalso hwnd->visible then gtk_widget_show( hwnd->widget )
+    ' top level windows with a class name can be found by other tiko processes (FindWindow)
+    if kind = LK_TOPLEVEL andalso hwnd->owner = 0 andalso len(hwnd->classname) then LnxIpcStartListener( hwnd )
     return hwnd
 end function
 
@@ -1078,6 +1084,7 @@ private function DestroyWindow( byval hwnd as HWND ) as BOOL
     wend
     if IsWindow(hwnd) = 0 then return 1
     SendMessage( hwnd, WM_NCDESTROY, 0, 0 )
+    if hwnd->kind = LK_TOPLEVEL then LnxIpcStopListener( hwnd )
     hwnd->destroyed = true
     if gLnxCapture = hwnd then gLnxCapture = 0
     if gLnxMouseHwnd = hwnd then gLnxMouseHwnd = 0
@@ -1754,7 +1761,12 @@ end function
 #define GetForegroundWindow GetActiveWindow
 #define GetForeGroundWindow GetActiveWindow
 
+declare function LnxIpcSend( byref sPath as const string, byref sMsg as const string ) as boolean
 private function SetForegroundWindow( byval hwnd as HWND ) as BOOL
+    ' Window of another tiko process: any message over the socket activates it
+    if IsWindow(hwnd) andalso hwnd->kind = LK_REMOTE then
+        return iif( LnxIpcSend( hwnd->text.utf8, "ACTIVATE" & !"\n" ), 1, 0 )
+    end if
     dim as HWND top = LnxToplevelOf( hwnd )
     if top = 0 then return 0
     gtk_window_present( GTK_WINDOW(top->widget) )

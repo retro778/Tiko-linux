@@ -251,6 +251,7 @@ enum LNX_KIND
     LK_RICHEDIT
     LK_SCINTILLA
     LK_TOOLTIP
+    LK_REMOTE          ' top level window of another tiko process (ipc.inc)
 end enum
 
 type LNX_SUBCLASS
