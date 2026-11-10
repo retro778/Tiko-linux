@@ -49,6 +49,9 @@ Key behaviours:
   event is re-injected only when the message reaches the end of the window procedure chain
   (so accelerators, menu pre-filters and subclass procedures work exactly like on Windows).
 * Painting: GTK "draw" → WM_PAINT; BeginPaint returns an HDC wrapping the cairo context.
+* SetWindowPos on child windows allocates the new geometry immediately (GTK drops relayout
+  requests made during a size-allocate, e.g. when tiko repositions children in WM_SIZE).
+* GetWindowPlacement returns the outer window rectangle (frame included) like Win32.
 * WS_POPUP: untitled/no-activate → GTK popup; layered → managed undecorated (no focus);
   titled (Find/Replace) → undecorated focusable window.
 
@@ -77,11 +80,10 @@ Working: main window, menubar & popup menus, top tabs, explorer/panels, status b
 keyboard accelerators, open file from command line, compile with the system fbc (F5).
 
 Known issues / next steps:
-1. Status bar stays empty when a file is opened from the command line (works with Ctrl+N).
-2. Verify every dialog (Build Configurations, Keyboard Shortcuts, Find in Files, User Tools,
+1. Verify every dialog (Build Configurations, Keyboard Shortcuts, Find in Files, User Tools,
    Project Options, Goto, Help viewer, Debugger) and compile‑error navigation.
-3. Single instance (`MultipleInstances = false`) needs IPC (unix socket / D‑Bus).
-4. FreeBASIC manual is `.chm` on Windows: use the HTML manual / external viewer on Linux.
-5. Lexer: upstream's private "tiko" lexer is not published; stock Lexilla "freebasic" is used
+2. Single instance (`MultipleInstances = false`) needs IPC (unix socket / D‑Bus).
+3. FreeBASIC manual is `.chm` on Windows: use the HTML manual / external viewer on Linux.
+4. Lexer: upstream's private "tiko" lexer is not published; stock Lexilla "freebasic" is used
    (`&h` hex literals style slightly differently) – consider a LexTiko.cxx.
-6. Drag & drop files (WM_DROPFILES), Wayland (currently forced to X11/XWayland).
+5. Drag & drop files (WM_DROPFILES), Wayland (currently forced to X11/XWayland).

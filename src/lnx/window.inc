@@ -1493,7 +1493,20 @@ private function SetWindowPos( byval hwnd as HWND, byval hWndInsertAfter as HWND
     if hwnd->widget andalso hwnd->parent andalso hwnd->parent->client then
         if bMoved then gtk_layout_move( GTK_LAYOUT(hwnd->parent->client), hwnd->widget, hwnd->x, hwnd->y )
         if bSized then gtk_widget_set_size_request( hwnd->widget, iif(hwnd->w < 1, 1, hwnd->w), iif(hwnd->h < 1, 1, hwnd->h) )
-        if bMoved orelse bSized then gtk_widget_queue_resize( hwnd->parent->client )
+        if bMoved orelse bSized then
+            ' Win32 applies the new geometry immediately. Allocate it now: a queued relayout is
+            ' dropped by GTK when SetWindowPos is called from within a size-allocate (WM_SIZE).
+            if hwnd->visible andalso gtk_widget_get_realized( hwnd->parent->client ) then
+                dim as GtkRequisition req
+                gtk_widget_get_preferred_size( hwnd->widget, @req, NULL )
+                dim as GtkAllocation a
+                a.x = hwnd->x : a.y = hwnd->y
+                a.width = iif(hwnd->w < 1, 1, hwnd->w) : a.height = iif(hwnd->h < 1, 1, hwnd->h)
+                gtk_widget_size_allocate( hwnd->widget, @a )
+                gtk_widget_queue_draw( hwnd->widget )
+            end if
+            gtk_widget_queue_resize( hwnd->parent->client )
+        end if
     end if
     if hWndInsertAfter = HWND_TOP andalso (uFlags and SWP_NOZORDER) = 0 andalso hwnd->widget then
         dim as GdkWindow ptr gw = gtk_widget_get_window( hwnd->widget )
@@ -1525,15 +1538,13 @@ end function
 
 private function GetWindowPlacement( byval hwnd as HWND, byval lpwndpl as WINDOWPLACEMENT ptr ) as BOOL
     if IsWindow(hwnd) = 0 orelse lpwndpl = 0 then return 0
-    dim as long x, y, w, h
-    gtk_window_get_position( GTK_WINDOW(hwnd->widget), @x, @y )
-    gtk_window_get_size( GTK_WINDOW(hwnd->widget), @w, @h )
     ' the normal (restored) position is remembered while maximized
     dim as RECT ptr prc = g_object_get_data( G_OBJECT(hwnd->widget), "lnxnormalrect" )
     if IsZoomed(hwnd) andalso prc then
         lpwndpl->rcNormalPosition = *prc
     else
-        SetRect( @lpwndpl->rcNormalPosition, x, y, x + w, y + h )
+        ' Win32 window rectangles include the frame (title bar and borders)
+        GetWindowRect( hwnd, @lpwndpl->rcNormalPosition )
     end if
     lpwndpl->showCmd = iif( IsZoomed(hwnd), SW_MAXIMIZE, iif(IsIconic(hwnd), SW_SHOWMINIMIZED, SW_SHOWNORMAL) )
     return 1
