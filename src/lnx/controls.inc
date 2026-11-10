@@ -2348,6 +2348,18 @@ private function LnxControlProc( byval hwnd as HWND, byval uMsg as UINT, byval w
             end if
             return 0
 
+        case WM_GETDLGCODE
+            ' Same answers as the Win32 controls (decides how IsDialogMessage treats keys)
+            select case hwnd->kind
+                case LK_SCINTILLA: return DLGC_WANTALLKEYS or &h0008                          ' DLGC_HASSETSEL
+                case LK_EDITMULTI, LK_RICHEDIT: return DLGC_WANTALLKEYS or DLGC_WANTCHARS or DLGC_WANTARROWS or &h0008
+                case LK_TEXTBOX: return DLGC_WANTCHARS or DLGC_WANTARROWS or &h0008
+                case LK_LISTBOX, LK_LISTVIEW, LK_TREEVIEW: return DLGC_WANTARROWS or DLGC_WANTCHARS
+                case LK_COMBOBOX: return DLGC_WANTARROWS or DLGC_WANTCHARS
+                case LK_BUTTON: return iif((hwnd->style and &hF) = BS_DEFPUSHBUTTON, &h0010, &h0020)   ' DEFPUSHBUTTON / UNDEFPUSHBUTTON
+                case LK_CHECKBOX, LK_RADIOBUTTON: return &h2000                                    ' DLGC_BUTTON
+            end select
+            return 0
         case WM_PAINT, WM_ERASEBKGND
             if hwnd->kind = LK_LABEL andalso uMsg = WM_PAINT then hwnd->lbAnchor = 1   ' let GTK draw the label
             return 0
