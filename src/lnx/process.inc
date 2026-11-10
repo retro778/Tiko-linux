@@ -546,6 +546,34 @@ end function
 ' FreeBASIC context help (F1). Windows uses the .chm with HTML Help keyword lookup.
 ' Linux: a CHM viewer when installed (kchmviewer supports index lookup), otherwise the
 ' online FreeBASIC manual page of the keyword (https://www.freebasic.net/wiki/KeyPg<word>).
+' Returns the exact (case sensitive) name of a page stored in a CHM file, e.g. "/KeyPgPrint.html".
+' The CHM directory stores page names as plain text, so they are collected once from the file.
+private function LnxChmFindPage( byref sChm as const string, byref sPage as const string ) as string
+    static as string cachedFile, names
+    if cachedFile <> sChm then
+        cachedFile = sChm
+        names = chr(10)
+        dim as string raw
+        if ReadFileBytes( DWSTRING(sChm), raw ) = false then return ""
+        dim as long i = 1
+        do
+            i = instr(i, raw, "/KeyPg")
+            if i = 0 then exit do
+            dim as long j = instr(i, raw, ".html")
+            if j = 0 then exit do
+            if j - i < 80 then
+                dim as string nm = mid(raw, i, j - i + 5)
+                if instr(names, chr(10) & nm & chr(10)) = 0 then names &= nm & chr(10)
+            end if
+            i += 6
+        loop
+    end if
+    if len(sPage) <= len("KeyPg.html") then return ""
+    dim as long k = instr(lcase(names), chr(10) & "/" & lcase(sPage) & chr(10))
+    if k = 0 then return ""
+    return mid(names, k + 1, len(sPage) + 1)
+end function
+
 private sub LnxShowFBHelp( byref wszHelpFile as const wstring, byref wszKeyword as const wstring )
     dim as string kw = trim(WideToUtf8(@wszKeyword))
     if left(kw, 1) = "#" then kw = mid(kw, 2)
@@ -555,7 +583,16 @@ private sub LnxShowFBHelp( byref wszHelpFile as const wstring, byref wszKeyword 
     if hasChm then
         dim as zstring ptr p = g_find_program_in_path( "kchmviewer" )
         if p then
-            dim as string cmd = *p & iif(len(kw), " -sindex " & q & kw & q, "") & " " & q & chm & q
+            ' Like HtmlHelp keyword lookup: open the keyword's topic page when the CHM has one
+            ' (KeyPg<keyword>.html), otherwise search the index.
+            dim as string pg = LnxChmFindPage( chm, "KeyPg" & kw & ".html" )
+            dim as string opt
+            if len(pg) then
+                opt = " -showPage " & q & pg & q
+            elseif len(kw) then
+                opt = " -index " & q & kw & q
+            end if
+            dim as string cmd = *p & opt & " " & q & chm & q
             g_free( p )
             g_spawn_command_line_async( strptr(cmd), NULL )
             exit sub
