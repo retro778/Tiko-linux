@@ -11,3 +11,6 @@ tests/demo2
 *.png
 !bin/*.png
 _debug.txt
+settings/settings.ini
+settings/default.session
+settings/keybindings.ini

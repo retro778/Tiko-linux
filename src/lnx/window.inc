@@ -33,6 +33,7 @@ dim shared as long gLnxQHead, gLnxQTail, gLnxQCap
 dim shared as GdkEvent ptr gLnxReinjectEvent  ' key event currently being re-injected
 dim shared as HWND gLnxCapture
 dim shared as boolean gLnxTrace
+dim shared as GdkEvent ptr gLnxLastInputEvent    ' trigger event for popup menus
 dim shared as HWND gLnxMouseHwnd              ' window under the mouse (last motion)
 dim shared as HCURSOR gLnxCurrentCursor
 dim shared as boolean gLnxAppActive
@@ -626,8 +627,14 @@ private function LnxHoverTimeout cdecl ( byval hwnd as HWND ) as gboolean
     return FALSE
 end function
 
+private sub LnxRememberInputEvent( byval ev as GdkEvent ptr )
+    if gLnxLastInputEvent then gdk_event_free( gLnxLastInputEvent )
+    gLnxLastInputEvent = gdk_event_copy( ev )
+end sub
+
 private function LnxOnButtonPress cdecl ( byval w as GtkWidget ptr, byval ev as GdkEventButton ptr, byval hwnd as HWND ) as gboolean
     if IsWindow(hwnd) = 0 then return FALSE
+    LnxRememberInputEvent( cast(GdkEvent ptr, ev) )
     if ev->type <> GDK_BUTTON_PRESS then return iif(LnxIsNative(hwnd), FALSE, TRUE)   ' own double click logic
     dim as boolean bNative = LnxIsNative(hwnd)
     dim as long x = ev->x, y = ev->y
@@ -667,6 +674,7 @@ end function
 
 private function LnxOnButtonRelease cdecl ( byval w as GtkWidget ptr, byval ev as GdkEventButton ptr, byval hwnd as HWND ) as gboolean
     if IsWindow(hwnd) = 0 then return FALSE
+    LnxRememberInputEvent( cast(GdkEvent ptr, ev) )
     dim as boolean bNative = LnxIsNative(hwnd)
     dim as HWND target = hwnd
     if gLnxCapture andalso IsWindow(gLnxCapture) andalso gLnxCapture <> hwnd then target = gLnxCapture
@@ -761,6 +769,7 @@ end function
 private function LnxOnKey cdecl ( byval w as GtkWidget ptr, byval ev as GdkEventKey ptr, byval hwndTop as HWND ) as gboolean
     if cast(GdkEvent ptr, ev) = gLnxReinjectEvent then return FALSE     ' re-injected: let GTK handle it
     if IsWindow(hwndTop) = 0 then return FALSE
+    if ev->type = GDK_KEY_PRESS then LnxRememberInputEvent( cast(GdkEvent ptr, ev) )
     ' Target is the window owning the focus widget
     dim as HWND target = 0
     dim as GtkWidget ptr fw = gtk_window_get_focus( GTK_WINDOW(w) )
@@ -1299,6 +1308,23 @@ private function GetDlgCtrlID( byval hwnd as HWND ) as long
     return hwnd->id
 end function
 
+' Applies a child window's geometry immediately (Win32 semantics). A queued GTK relayout is
+' not enough: GTK drops relayout requests made while a size-allocate is in progress, which
+' happens whenever tiko repositions windows from WM_SIZE.
+private sub LnxAllocateChild( byval hwnd as HWND )
+    if hwnd = 0 orelse hwnd->widget = 0 orelse hwnd->parent = 0 orelse hwnd->parent->client = 0 then exit sub
+    if hwnd->visible andalso gtk_widget_get_realized( hwnd->parent->client ) then
+        dim as GtkRequisition req
+        gtk_widget_get_preferred_size( hwnd->widget, @req, NULL )
+        dim as GtkAllocation a
+        a.x = hwnd->x : a.y = hwnd->y
+        a.width = iif(hwnd->w < 1, 1, hwnd->w) : a.height = iif(hwnd->h < 1, 1, hwnd->h)
+        gtk_widget_size_allocate( hwnd->widget, @a )
+        gtk_widget_queue_draw( hwnd->widget )
+    end if
+    gtk_widget_queue_resize( hwnd->parent->client )
+end sub
+
 private function IsWindowVisible( byval hwnd as HWND ) as BOOL
     if IsWindow(hwnd) = 0 then return 0
     while hwnd
@@ -1342,7 +1368,7 @@ private function ShowWindow( byval hwnd as HWND, byval nCmdShow as long ) as BOO
                     end if
                 else
                     gtk_widget_show( hwnd->widget )
-                    if hwnd->parent andalso hwnd->parent->client then gtk_widget_queue_resize( hwnd->parent->client )
+                    LnxAllocateChild( hwnd )
                 end if
             end if
     end select
@@ -1503,16 +1529,7 @@ private function SetWindowPos( byval hwnd as HWND, byval hWndInsertAfter as HWND
         if bMoved orelse bSized then
             ' Win32 applies the new geometry immediately. Allocate it now: a queued relayout is
             ' dropped by GTK when SetWindowPos is called from within a size-allocate (WM_SIZE).
-            if hwnd->visible andalso gtk_widget_get_realized( hwnd->parent->client ) then
-                dim as GtkRequisition req
-                gtk_widget_get_preferred_size( hwnd->widget, @req, NULL )
-                dim as GtkAllocation a
-                a.x = hwnd->x : a.y = hwnd->y
-                a.width = iif(hwnd->w < 1, 1, hwnd->w) : a.height = iif(hwnd->h < 1, 1, hwnd->h)
-                gtk_widget_size_allocate( hwnd->widget, @a )
-                gtk_widget_queue_draw( hwnd->widget )
-            end if
-            gtk_widget_queue_resize( hwnd->parent->client )
+            LnxAllocateChild( hwnd )
         end if
     end if
     if hWndInsertAfter = HWND_TOP andalso (uFlags and SWP_NOZORDER) = 0 andalso hwnd->widget then

@@ -242,7 +242,9 @@ private function AfxPathRelativePathTo( byref wszFrom as const wstring, byval dw
         for i as long = 1 to nUp : result &= "../" : next
     end if
     result &= mid(wTo, nCommon + 1)
-    return result
+    ' Relative paths are only stored in project/session files: write them the way the Windows
+    ' version does (".\src\file.bas") so the files stay interchangeable. Reading accepts both.
+    return PortablePath( result )
 end function
 
 private function AfxGetFileName( byref wszPath as const wstring ) as DWSTRING

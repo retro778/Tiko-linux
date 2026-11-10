@@ -486,9 +486,9 @@ private function TrackPopupMenu( byval hMenu as HMENU, byval uFlags as UINT, byv
         dim as GdkGravity menuAnchor = GDK_GRAVITY_NORTH_WEST
         if (uFlags and TPM_RIGHTALIGN) then menuAnchor = GDK_GRAVITY_NORTH_EAST
         if (uFlags and TPM_BOTTOMALIGN) then menuAnchor = iif(uFlags and TPM_RIGHTALIGN, GDK_GRAVITY_SOUTH_EAST, GDK_GRAVITY_SOUTH_WEST)
-        gtk_menu_popup_at_rect( GTK_MENU(menu), gw, @r, GDK_GRAVITY_NORTH_WEST, menuAnchor, NULL )
+        gtk_menu_popup_at_rect( GTK_MENU(menu), gw, @r, GDK_GRAVITY_NORTH_WEST, menuAnchor, gLnxLastInputEvent )
     else
-        gtk_menu_popup_at_pointer( GTK_MENU(menu), NULL )
+        gtk_menu_popup_at_pointer( GTK_MENU(menu), gLnxLastInputEvent )
     end if
 
     ' modal loop like the Win32 TrackPopupMenu

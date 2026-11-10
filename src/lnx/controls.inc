@@ -452,6 +452,9 @@ private sub LnxInstallControlCss()
         "treeview.lnxctl { background: #ffffff; color: #000000; }" & _
         "treeview.lnxctl:selected { background: #cce8ff; color: #000000; }" & _
         "tooltip { border-radius: 0; }" & _
+        "window.popup.csd, menu, .menu, .context-menu { box-shadow: none; border-radius: 0; }" & _
+        "window.popup decoration, window.csd.popup decoration { box-shadow: none; margin: 0; border-radius: 0; }" & _
+        "menu { border: 1px solid #a0a0a0; padding: 2px 0; }" & _
         "tooltip.background { background-color: #ffffff; border: 1px solid #767676; }" & _
         "tooltip label { color: #575757; padding: 2px 4px; }"
     dim as GtkCssProvider ptr prov = gtk_css_provider_new()
