@@ -339,6 +339,16 @@ public function ShowContextHelp( byval id as long ) as long
             end if
     end select
 
+#ifdef __FB_LINUX__
+    ' No HTML Help on Linux: CHM viewer or the online manual (see LnxShowFBHelp)
+    scope
+        dim pDocHelp as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
+        dim as DWSTRING wszWord
+        if pDocHelp then wszWord = pDocHelp->GetWord
+        LnxShowFBHelp( wszHelpFilename, wszWord )
+        return 0
+    end scope
+#endif
     if AfxFileExists(wszHelpFilename) = 0 then
         MessageBoxW( HWND_FRMMAIN, wszLabel & L(244,"Help file not found."), L(201,"Error"), _
                     MB_OK or MB_ICONWARNING or MB_DEFBUTTON1 or MB_APPLMODAL )

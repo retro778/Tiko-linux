@@ -2151,8 +2151,10 @@ private function LnxControlProc( byval hwnd as HWND, byval uMsg as UINT, byval w
         case BM_SETCHECK
             if hwnd->kind = LK_CHECKBOX orelse hwnd->kind = LK_RADIOBUTTON then
                 hwnd->blockSignals += 1
+                ' Like Windows, any non zero value other than BST_INDETERMINATE checks the box
+                ' (tiko passes FreeBASIC booleans, i.e. -1 for true).
                 gtk_toggle_button_set_inconsistent( GTK_TOGGLE_BUTTON(hwnd->inner), iif(wParam = BST_INDETERMINATE, TRUE, FALSE) )
-                gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(hwnd->inner), iif(wParam = BST_CHECKED, TRUE, FALSE) )
+                gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(hwnd->inner), iif(wParam <> 0 andalso wParam <> BST_INDETERMINATE, TRUE, FALSE) )
                 hwnd->blockSignals -= 1
             end if
             return 0

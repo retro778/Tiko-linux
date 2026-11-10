@@ -297,6 +297,14 @@ function doFontSanityCheck() as long
     if isFontNameExist( "Dank Mono" ) then gConfig.EditorFontname = "Dank Mono": return false
     if isFontNameExist( "Hack" ) then gConfig.EditorFontname = "Hack": return false
     if isFontNameExist( "Courier New" ) then gConfig.EditorFontname = "Courier New": return false
+#ifdef __FB_LINUX__
+    ' Common Linux monospace fonts
+    if isFontNameExist( "DejaVu Sans Mono" ) then gConfig.EditorFontname = "DejaVu Sans Mono": return false
+    if isFontNameExist( "Liberation Mono" ) then gConfig.EditorFontname = "Liberation Mono": return false
+    if isFontNameExist( "Noto Sans Mono" ) then gConfig.EditorFontname = "Noto Sans Mono": return false
+    if isFontNameExist( "Ubuntu Mono" ) then gConfig.EditorFontname = "Ubuntu Mono": return false
+    gConfig.EditorFontname = "Monospace": return false
+#endif
 
     function = false
 end function

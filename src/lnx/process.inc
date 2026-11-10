@@ -542,3 +542,32 @@ private function LnxRunExecutable( byref wszExe as const wstring, byref wszParam
     end if
     return g_spawn_command_line_async( strptr(cmd), NULL ) <> 0
 end function
+
+' FreeBASIC context help (F1). Windows uses the .chm with HTML Help keyword lookup.
+' Linux: a CHM viewer when installed (kchmviewer supports index lookup), otherwise the
+' online FreeBASIC manual page of the keyword (https://www.freebasic.net/wiki/KeyPg<word>).
+private sub LnxShowFBHelp( byref wszHelpFile as const wstring, byref wszKeyword as const wstring )
+    dim as string kw = trim(WideToUtf8(@wszKeyword))
+    if left(kw, 1) = "#" then kw = mid(kw, 2)
+    dim as string q = chr(34)
+    dim as string chm = U8Path(wszHelpFile)
+    dim as boolean hasChm = len(chm) > 0 andalso g_file_test( strptr(chm), G_FILE_TEST_EXISTS ) <> 0
+    if hasChm then
+        dim as zstring ptr p = g_find_program_in_path( "kchmviewer" )
+        if p then
+            dim as string cmd = *p & iif(len(kw), " -sindex " & q & kw & q, "") & " " & q & chm & q
+            g_free( p )
+            g_spawn_command_line_async( strptr(cmd), NULL )
+            exit sub
+        end if
+        p = g_find_program_in_path( "xchm" )
+        if p then
+            dim as string cmd = *p & " " & q & chm & q
+            g_free( p )
+            g_spawn_command_line_async( strptr(cmd), NULL )
+            exit sub
+        end if
+    end if
+    dim as DWSTRING url = "https://www.freebasic.net/wiki/" & iif(len(kw), "KeyPg" & kw, "DocToc")
+    ShellExecute( NULL, "open", url.vptr, NULL, NULL, SW_SHOWNORMAL )
+end sub

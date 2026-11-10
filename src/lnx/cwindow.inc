@@ -61,12 +61,19 @@ type HDROP as any ptr
 #define ListBox_GetText(hwndCtl, index, lpszBuffer) clng(SendMessage((hwndCtl), LB_GETTEXT, cast(WPARAM, (index)), cast(LPARAM, (lpszBuffer))))
 #define ListBox_FindStringExact(hwndCtl, indexStart, lpszFind) clng(SendMessage((hwndCtl), LB_FINDSTRINGEXACT, cast(WPARAM, (indexStart)), cast(LPARAM, cast(LPCWSTR, (lpszFind)))))
 
-private function ListBox_ReplaceString( byval hListBox as HWND, byval nIndex as long, byref wszNewText as const wstring ) as long
-    dim as LPARAM pData = ListBox_GetItemData( hListBox, nIndex )
-    ListBox_DeleteString( hListBox, nIndex )
-    dim as long idx = ListBox_InsertString( hListBox, nIndex, @wszNewText )
-    ListBox_SetItemData( hListBox, idx, pData )
-    return idx
+' Same behaviour as AfxNova: delete + insert, set the item data and select the item.
+private function ListBox_ReplaceString overload ( byval hListBox as HWND, byval index as long, byval pwszNewText as const wstring ptr, _
+                                                  byval pNewData as LONG_PTR = 0 ) as long
+    dim as LRESULT lRes = SendMessage( hListBox, LB_DELETESTRING, index, 0 )
+    if lRes = LB_ERR then return lRes
+    index = SendMessage( hListBox, LB_INSERTSTRING, index, cast(LPARAM, pwszNewText) )
+    if index = LB_ERR then return index
+    SendMessage( hListBox, LB_SETITEMDATA, index, pNewData )
+    return SendMessage( hListBox, iif((hListBox->style and LBS_MULTIPLESEL), LB_SETSEL, LB_SETCURSEL), index, 0 )
+end function
+private function ListBox_ReplaceString overload ( byval hListBox as HWND, byval index as long, byref wszNewText as const wstring, _
+                                                  byval pNewData as LONG_PTR = 0 ) as long
+    return ListBox_ReplaceString( hListBox, index, @wszNewText, pNewData )
 end function
 
 ' Returns the index of the item nearest the point (client coordinates)

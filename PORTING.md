@@ -75,15 +75,27 @@ Key behaviours:
 
 ## Status
 
-Working: main window, menubar & popup menus, top tabs, explorer/panels, status bar, editor
-(Scintilla, FreeBASIC lexer, themes), Find/Replace, Environment Options, tooltips,
-keyboard accelerators, open file from command line, compile with the system fbc (F5).
+Verified working (driven with xdotool, checked by screenshots): main window, menubar and
+popup menus, context menus, top tabs, explorer, function list, bookmarks panel, status bar,
+editor (Scintilla, FreeBASIC lexer, themes), Find/Replace, Find in Files, Go to Line,
+Command Line, Environment Options (all pages), Build Configurations, Keyboard Shortcuts,
+User Tools, New Project / Project Options, project save and reopen (.tiko round trip),
+Add Files (file dialog), Tiko help viewer (RTF), About, compile (F5 / Compile menu) with
+error list, log and jump to error line, debugger (gdb: breakpoints, variables, continue),
+F1 FreeBASIC help, settings saved on exit.
+
+Linux specific behaviour:
+* F1: CHM viewer when installed (kchmviewer with keyword lookup, or xchm), otherwise the
+  online manual page https://www.freebasic.net/wiki/KeyPg<word>.
+* Console programs run in a terminal window; `-s gui` programs start directly.
+* The default User Tools (asciichart32.exe, GUIDgen32.exe) are Windows programs.
+* Desktop shortcuts may take keys before tiko sees them (XFCE: Ctrl+F1..F12 switch
+  workspaces, so Ctrl+F5 "Compile" needs the menu or a different binding).
 
 Known issues / next steps:
-1. Verify every dialog (Build Configurations, Keyboard Shortcuts, Find in Files, User Tools,
-   Project Options, Goto, Help viewer, Debugger) and compile‑error navigation.
-2. Single instance (`MultipleInstances = false`) needs IPC (unix socket / D‑Bus).
-3. FreeBASIC manual is `.chm` on Windows: use the HTML manual / external viewer on Linux.
+1. A restored session tab shows the "modified" marker although nothing changed.
+2. Program output while debugging goes to gdb's pipe (Windows gives it a console).
+3. Single instance (`MultipleInstances = false`) needs IPC (unix socket / D-Bus).
 4. Lexer: upstream's private "tiko" lexer is not published; stock Lexilla "freebasic" is used
    (`&h` hex literals style slightly differently) – consider a LexTiko.cxx.
 5. Drag & drop files (WM_DROPFILES), Wayland (currently forced to X11/XWayland).
