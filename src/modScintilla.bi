@@ -1100,6 +1100,25 @@ type uptr_t as uinteger
 type sptr_t as integer
 
 
+#ifdef __FB_LINUX__
+' Linux (LP64): Sci_PositionCR is a C long = 64 bits and the structs use natural alignment.
+type Sci_CharacterRange
+    cpMin as integer
+    cpMax as integer
+end type
+
+type Sci_TextRange
+    chrg      as Sci_CharacterRange
+    lpstrText as zstring ptr
+end type
+
+type Sci_TextToFind
+    chrg      as Sci_CharacterRange
+    lpstrText as zstring ptr
+    chrgText  as Sci_CharacterRange
+end type
+
+#else
 ' // Size = 8 bytes
 type Sci_CharacterRange field = 4
     cpMin as long   ' long cpMin
@@ -1119,6 +1138,8 @@ type Sci_TextToFind field = 4
     chrgText  as Sci_CharacterRange   ' struct Sci_CharacterRange chrgText
 end type
 
+
+#endif
 
 ' // Size = 16 bytes
 type Sci_Rectangle

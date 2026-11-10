@@ -505,7 +505,9 @@ function code_Compile( byval wID as long ) as boolean
         next
         
         ' if gCompile.OutputFilename is a relative filename then convert it to full filename.
+#ifndef __FB_LINUX__   ' Linux paths keep their "/" separators
         gCompile.OutputFilename = AfxStrReplace( gCompile.OutputFilename, "/", "\" )
+#endif
         if AfxPathIsRelative( gCompile.OutputFilename ) then 
             gCompile.OutputFilename = AfxPathCombine( gCompile.MainFolder, gCompile.OutputFilename )
         end if

@@ -919,7 +919,9 @@ function CompleteIncludeFilename( byval pDoc as clsDocument ptr, byval sFilename
             end if
         next
     end if
+#ifndef __FB_LINUX__   ' Linux paths keep their "/" separators
     wszCompleteFilename = AfxStrReplace(wszCompleteFilename, "/", "\")
+#endif
     wszCompleteFilename = AfxStrReplace(wszCompleteFilename, "\\", "\")
 
     function = wszCompleteFilename

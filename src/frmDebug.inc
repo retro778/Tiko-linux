@@ -726,7 +726,9 @@ LM( "ERROR:" )
         line_number = val( gdb_findResultValue( response, "line" ) ) - 1
         file_name = gdb_findResultValue( response, "fullname" )
         file_name = AfxStrReplace( file_name, "\\", "\" )
+#ifndef __FB_LINUX__   ' Linux paths keep their "/" separators
         file_name = AfxStrReplace( file_name, "/", "\" )
+#endif
         function_name = gdb_findResultValue( response, "func" )
         function_args = gdb_findFunctionArguments( response, "args" )
 
