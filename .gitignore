@@ -1,0 +1,13 @@
+# reference clone of upstream and downloaded third-party sources
+/upstream/
+/deps/
+# build outputs
+/tiko
+*.o
+*.a
+*.so
+tests/demo1
+tests/demo2
+*.png
+!bin/*.png
+_debug.txt
