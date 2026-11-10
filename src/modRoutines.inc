@@ -1747,6 +1747,10 @@ end function
 function IsProcessRunning( byval pwszExeFileName as wstring ptr ) as boolean
     dim wszExeFileName as wstring * MAX_PATH = AfxStrPathname("NAMEX", *pwszExeFileName)
     if ucase(wszExeFileName) = "TIKO.EXE" then return false
+#ifdef __FB_LINUX__
+    ' The Linux editor executable has no extension (compiling tiko from within tiko)
+    if ucase(wszExeFileName) = "TIKO" then return false
+#endif
     dim as dword pid = findprocessid( wszExeFileName )
     dim as HANDLE hprocess = OpenProcess(SYNCHRONIZE, FALSE, pid)
     dim as boolean bExists = iif( hprocess = 0, false, true )
