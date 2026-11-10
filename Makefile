@@ -23,7 +23,7 @@ $(LEX_LIB): $(DEPS)/lexilla/src/makefile
 	$(MAKE) -C $(DEPS)/lexilla/src
 
 tiko: $(SCI_LIB) $(LEX_LIB) src/*.bas src/*.bi src/*.inc src/lnx/*
-	$(FBC) $(FBFLAGS) src/tiko.bas -x tiko -a $(SCI_LIB) -a $(LEX_LIB) -l gmodule-2.0 -l pangoft2-1.0 -l fontconfig
+	$(FBC) $(FBFLAGS) src/tiko.bas -x tiko -a $(SCI_LIB) -a $(LEX_LIB) -l gmodule-2.0 -l pangoft2-1.0 -l fontconfig -l X11
 
 clean:
 	rm -f tiko

@@ -272,6 +272,9 @@ function WinMain( _
     if pLibLexilla then dylibfree(pLibLexilla)
     if pLibScintilla then dylibfree(pLibScintilla)
     if gpHelpLib then dylibfree(gpHelpLib)
+#ifdef __FB_LINUX__
+    LnxCloseDebugConsole()
+#endif
     
     ' Unload the font file
     if len(wszFontFile) then RemoveFontResource(wszFontFile)

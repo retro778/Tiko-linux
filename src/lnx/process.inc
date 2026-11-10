@@ -506,6 +506,68 @@ private function LnxTerminalCommand( byref sScript as const string ) as string
     return ""
 end function
 
+
+' ----------------------------------------------------------------------------
+' Bring another application's top level window to the front (by title), e.g. the terminal
+' that shows a console program. Uses the EWMH _NET_ACTIVE_WINDOW request (source = pager,
+' which window managers honour despite focus stealing prevention).
+' ----------------------------------------------------------------------------
+extern "C"
+    declare function gdk_x11_get_default_xdisplay() as any ptr
+    declare function XDefaultRootWindow( byval d as any ptr ) as culong
+    declare function XInternAtom( byval d as any ptr, byval name_ as const zstring ptr, byval only_if_exists as long ) as culong
+    declare function XGetWindowProperty( byval d as any ptr, byval w as culong, byval prop as culong, byval long_offset as clong, _
+            byval long_length as clong, byval del as long, byval req_type as culong, byval actual_type as culong ptr, _
+            byval actual_format as long ptr, byval nitems as culong ptr, byval bytes_after as culong ptr, byval prop_return as ubyte ptr ptr ) as long
+    declare function XFree( byval p as any ptr ) as long
+    declare function XSendEvent( byval d as any ptr, byval w as culong, byval propagate as long, byval mask as clong, byval ev as any ptr ) as long
+    declare function XFlush( byval d as any ptr ) as long
+end extern
+
+private function LnxXWindowTitle( byval d as any ptr, byval w as culong ) as string
+    dim as culong actualType, nItems, bytesAfter
+    dim as long actualFormat
+    dim as ubyte ptr prop
+    dim as culong aName = XInternAtom( d, "_NET_WM_NAME", 0 )
+    dim as culong aUtf8 = XInternAtom( d, "UTF8_STRING", 0 )
+    dim as string r
+    if XGetWindowProperty( d, w, aName, 0, 1024, 0, aUtf8, @actualType, @actualFormat, @nItems, @bytesAfter, @prop ) = 0 andalso prop then
+        r = *cast(zstring ptr, prop)
+        XFree( prop )
+    end if
+    return r
+end function
+
+private function LnxActivateWindowByTitle( byref sTitle as const string ) as boolean
+    dim as any ptr d = gdk_x11_get_default_xdisplay()
+    if d = 0 then return false
+    dim as culong root = XDefaultRootWindow( d )
+    dim as culong aList = XInternAtom( d, "_NET_CLIENT_LIST", 0 )
+    dim as culong actualType, nItems, bytesAfter
+    dim as long actualFormat
+    dim as ubyte ptr prop
+    if XGetWindowProperty( d, root, aList, 0, 4096, 0, 33, @actualType, @actualFormat, @nItems, @bytesAfter, @prop ) <> 0 orelse prop = 0 then return false
+    dim as culong ptr wins = cast(culong ptr, prop)
+    dim as culong found = 0
+    for i as long = nItems - 1 to 0 step -1          ' newest windows are last
+        if instr( LnxXWindowTitle(d, wins[i]), sTitle ) then found = wins[i] : exit for
+    next
+    XFree( prop )
+    if found = 0 then return false
+    ' XClientMessageEvent (64 bit layout) inside a 192 byte XEvent
+    dim as clong ev(23)
+    cast(long ptr, @ev(0))[0] = 33                   ' type = ClientMessage
+    cast(long ptr, @ev(2))[0] = 1                    ' send_event
+    ev(4) = found                                    ' window
+    ev(5) = XInternAtom( d, "_NET_ACTIVE_WINDOW", 0 )' message_type
+    cast(long ptr, @ev(6))[0] = 32                   ' format
+    ev(7) = 2                                        ' data.l[0]: source indication = pager
+    ev(8) = 0                                        ' data.l[1]: timestamp
+    XSendEvent( d, root, 0, (1 shl 20) or (1 shl 19), @ev(0) )   ' SubstructureRedirect | SubstructureNotify
+    XFlush( d )
+    return true
+end function
+
 ' Runs a compiled program. Console programs run in a terminal window (like Windows opens a
 ' console for them); bPause keeps the terminal open after the program ends.
 private function LnxRunExecutable( byref wszExe as const wstring, byref wszParams as const wstring, _
@@ -526,6 +588,7 @@ private function LnxRunExecutable( byref wszExe as const wstring, byref wszParam
     dim as long f = freefile
     if open( sScript for output as #f ) <> 0 then return false
     print #f, "#!/bin/sh"
+    print #f, "printf '\033]0;%s\007' " & q & "Tiko - " & AfxStrPathname("NAMEX", exe).utf8 & q
     print #f, "cd " & q & folder.utf8 & q
     print #f, q & exe.utf8 & q & " " & WideToUtf8(@wszParams)
     if bPause then
@@ -540,7 +603,16 @@ private function LnxRunExecutable( byref wszExe as const wstring, byref wszParam
         ' no terminal emulator: run without one
         cmd = "/bin/sh " & q & sScript & q
     end if
-    return g_spawn_command_line_async( strptr(cmd), NULL ) <> 0
+    if g_spawn_command_line_async( strptr(cmd), NULL ) = 0 then return false
+    ' bring the terminal to the front once it has appeared (like a Windows console)
+    dim as string sTitle = "Tiko - " & AfxStrPathname("NAMEX", exe).utf8
+    dim as double t0 = timer
+    do while timer - t0 < 3
+        while gtk_events_pending() : gtk_main_iteration_do( FALSE ) : wend
+        if LnxActivateWindowByTitle( sTitle ) then exit do
+        sleep 50, 1
+    loop
+    return true
 end function
 
 ' FreeBASIC context help (F1). Windows uses the .chm with HTML Help keyword lookup.
@@ -607,4 +679,58 @@ private sub LnxShowFBHelp( byref wszHelpFile as const wstring, byref wszKeyword 
     end if
     dim as DWSTRING url = "https://www.freebasic.net/wiki/" & iif(len(kw), "KeyPg" & kw, "DocToc")
     ShellExecute( NULL, "open", url.vptr, NULL, NULL, SW_SHOWNORMAL )
+end sub
+
+' ----------------------------------------------------------------------------
+' Debug console: on Windows gdb gives the debugged program its own console window.
+' On Linux a terminal window is opened, it reports its tty and the program is run on it
+' (gdb "set inferior-tty"). The terminal closes when the debug session ends.
+' ----------------------------------------------------------------------------
+dim shared as string gLnxDebugConsolePidFile
+
+private function LnxCreateDebugConsole( byref sTitle as const string = "Tiko Debug Console" ) as string
+    dim as string base_ = *g_get_tmp_dir() & "/_tiko_dbgcon_" & getpid()
+    dim as string ttyFile = base_ & ".tty", pidFile = base_ & ".pid", script = base_ & ".sh"
+    kill ttyFile : kill pidFile
+    dim as long f = freefile
+    if open( script for output as #f ) <> 0 then return ""
+    print #f, "#!/bin/sh"
+    print #f, "echo $$ > '" & pidFile & "'"
+    print #f, "printf '\033]0;" & sTitle & "\007'"
+    print #f, "tty > '" & ttyFile & ".tmp' && mv '" & ttyFile & ".tmp' '" & ttyFile & "'"
+    print #f, "trap 'exit 0' TERM HUP"
+    print #f, "while :; do sleep 1; done"
+    close #f
+    dim as string cmd = LnxTerminalCommand( script )
+    if len(cmd) = 0 then return ""
+    if g_spawn_command_line_async( strptr(cmd), NULL ) = 0 then return ""
+    ' wait (max 5 seconds) for the terminal to report its tty
+    dim as double t0 = timer
+    do while timer - t0 < 5
+        if AfxFileExists( DWSTRING(ttyFile) ) then exit do
+        while gtk_events_pending() : gtk_main_iteration_do( FALSE ) : wend
+        sleep 20, 1
+    loop
+    dim as string tty
+    if AfxFileExists( DWSTRING(ttyFile) ) then
+        f = freefile
+        if open( ttyFile for input as #f ) = 0 then line input #f, tty : close #f
+    end if
+    kill ttyFile : kill script
+    gLnxDebugConsolePidFile = pidFile
+    for k as long = 1 to 20
+        if LnxActivateWindowByTitle( sTitle ) then exit for
+        sleep 50, 1
+    next
+    if left(tty, 5) <> "/dev/" then return ""
+    return tty
+end function
+
+private sub LnxCloseDebugConsole()
+    if len(gLnxDebugConsolePidFile) = 0 then exit sub
+    dim as long f = freefile, pid
+    if open( gLnxDebugConsolePidFile for input as #f ) = 0 then input #f, pid : close #f
+    if pid > 0 then lnx_kill( pid, 15 )     ' SIGTERM: the terminal closes with its shell
+    kill gLnxDebugConsolePidFile
+    gLnxDebugConsolePidFile = ""
 end sub
