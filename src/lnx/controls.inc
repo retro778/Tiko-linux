@@ -1870,6 +1870,13 @@ private sub LnxOnSciCommand cdecl ( byval w as GtkWidget ptr, byval wParam as gi
 end sub
 
 
+declare sub LnxOnSciDropData cdecl ( byval w as GtkWidget ptr, byval ctx as GdkDragContext ptr, byval x as gint, byval y as gint, _
+                                     byval sel as GtkSelectionData ptr, byval info as guint, byval evTime as guint, byval hwnd as HWND )
+private sub LnxOnSciDropDataFwd cdecl ( byval w as GtkWidget ptr, byval ctx as GdkDragContext ptr, byval x as gint, byval y as gint, _
+                                        byval sel as GtkSelectionData ptr, byval info as guint, byval evTime as guint, byval hwnd as HWND )
+    LnxOnSciDropData( w, ctx, x, y, sel, info, evTime, hwnd )
+end sub
+
 ' ----------------------------------------------------------------------------
 ' Control creation
 ' ----------------------------------------------------------------------------
@@ -2049,6 +2056,7 @@ private function LnxCreateControl( byref wszClass as const wstring, byval hParen
             scintilla_set_id( inner, id )
             g_signal_connect( G_OBJECT(inner), "sci-notify", G_CALLBACK(@LnxOnSciNotify), hwnd )
             g_signal_connect( G_OBJECT(inner), "command", G_CALLBACK(@LnxOnSciCommand), hwnd )
+            g_signal_connect( G_OBJECT(inner), "drag-data-received", G_CALLBACK(@LnxOnSciDropDataFwd), hwnd )
     end select
 
     hwnd->inner = inner

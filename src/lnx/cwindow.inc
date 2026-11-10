@@ -1182,6 +1182,63 @@ private function DragQueryFile( byval hDrop as HDROP, byval iFile as UINT, byval
 end function
 #define DragQueryFileW DragQueryFile
 private sub DragFinish( byval hDrop as HDROP )
+    if hDrop then delete[] cast(DWSTRING ptr, hDrop)
 end sub
+
+' Converts "text/uri-list" data to an HDROP (DWSTRING array: [0] = count, [1..] = paths)
+private function LnxUriListToHDrop( byval sel as GtkSelectionData ptr ) as HDROP
+    dim as zstring ptr ptr uris = gtk_selection_data_get_uris( sel )
+    if uris = 0 then return 0
+    dim as long n = 0
+    while uris[n] : n += 1 : wend
+    dim as DWSTRING ptr files = new DWSTRING[n + 1]
+    dim as long k = 0
+    for i as long = 0 to n - 1
+        dim as zstring ptr fn = g_filename_from_uri( uris[i], NULL, NULL )
+        if fn then k += 1 : files[k] = DWSTRING(*fn) : g_free( fn )
+    next
+    files[0] = str(k)
+    g_strfreev( cast(gchar ptr ptr, uris) )
+    if k = 0 then delete[] files : return 0
+    return files
+end function
+
+private sub LnxOnDropData cdecl ( byval w as GtkWidget ptr, byval ctx as GdkDragContext ptr, byval x as gint, byval y as gint, _
+                                  byval sel as GtkSelectionData ptr, byval info as guint, byval evTime as guint, byval hwnd as HWND )
+    dim as HDROP hDrop = LnxUriListToHDrop( sel )
+    gtk_drag_finish( ctx, iif(hDrop, TRUE, FALSE), FALSE, evTime )
+    if hDrop andalso IsWindow(hwnd) then PostMessage( hwnd, WM_DROPFILES, cast(WPARAM, hDrop), 0 )
+end sub
+
+' Files dropped on a Scintilla control go to the window that accepts dropped files (Windows
+' behaviour) instead of being inserted as text by Scintilla.
+private sub LnxOnSciDropData cdecl ( byval w as GtkWidget ptr, byval ctx as GdkDragContext ptr, byval x as gint, byval y as gint, _
+                                     byval sel as GtkSelectionData ptr, byval info as guint, byval evTime as guint, byval hwnd as HWND )
+    dim as zstring ptr tn = gdk_atom_name( gtk_selection_data_get_target(sel) )
+    dim as boolean isUri = (tn <> 0) andalso (*tn = "text/uri-list")
+    if tn then g_free( tn )
+    if isUri = false then exit sub
+    dim as HWND target = hwnd
+    while target andalso (target->exstyle and WS_EX_ACCEPTFILES) = 0
+        target = target->parent
+    wend
+    if target = 0 then exit sub
+    g_signal_stop_emission_by_name( G_OBJECT(w), "drag-data-received" )
+    LnxOnDropData( w, ctx, x, y, sel, info, evTime, target )
+end sub
+
 private sub DragAcceptFiles( byval hwnd as HWND, byval fAccept as BOOL )
+    if IsWindow(hwnd) = 0 then exit sub
+    dim as GtkWidget ptr w = iif(hwnd->client, hwnd->client, hwnd->widget)
+    if fAccept then
+        if (hwnd->exstyle and WS_EX_ACCEPTFILES) then exit sub
+        hwnd->exstyle or= WS_EX_ACCEPTFILES
+        dim as GtkTargetEntry te
+        te.target = @"text/uri-list" : te.flags = 0 : te.info = 0
+        gtk_drag_dest_set( w, GTK_DEST_DEFAULT_ALL, @te, 1, GDK_ACTION_COPY )
+        g_signal_connect( G_OBJECT(w), "drag-data-received", G_CALLBACK(@LnxOnDropData), hwnd )
+    else
+        hwnd->exstyle and= not WS_EX_ACCEPTFILES
+        gtk_drag_dest_unset( w )
+    end if
 end sub
