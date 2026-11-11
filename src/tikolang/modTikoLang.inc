@@ -126,6 +126,8 @@ end function
 function TikoLang_IsTikoBuild() as boolean
     dim pDoc as clsDocument ptr = TikoLang_MainDocument()
     if pDoc = 0 then return false
+    ' tiko.toml itself builds its package
+    if lcase(AfxStrPathname("NAMEX", pDoc->DiskFilename)) = "tiko.toml" then return true
     return TikoLang_UsesTiko(pDoc->DiskFilename)
 end function
 
@@ -237,8 +239,20 @@ private function TikoLang_OutputFromLog( byref sLog as string ) as string
 end function
 
 ' Reads the --diagnostics-file into the Compiler Results list. Returns true on errors.
+private function TikoLang_ReadTextFile( byref sFile as string ) as string
+    dim as long f = freefile
+    if open(sFile for binary access read as #f) <> 0 then return ""
+    dim as string sText = space(lof(f))
+    get #f, , sText
+    close #f
+    return sText
+end function
+
+' Records in the --diagnostics-file format, one per line:
+'   kind<TAB>id<TAB>path<TAB>line<TAB>col<TAB>endline<TAB>endcol<TAB>message
+'   end<TAB>errors<TAB>warnings<TAB>exitcode
 private function TikoLang_ShowResults( _
-            byref sDiagFile as string, _
+            byref sDiagText as string, _
             byref sLog as string, _
             byval wID as long, _
             byval bShowSuccess as boolean _
@@ -249,11 +263,11 @@ private function TikoLang_ShowResults( _
 
     dim as long nErrors, nWarnings, nNotes, nExitCode = -1
     dim as boolean bEndRecord
-    dim as long f = freefile
-    if open(sDiagFile for input as #f) = 0 then
-        do until eof(f)
-            dim as string sLine
-            line input #f, sLine
+    dim as long nRecords = AfxStrParseCount(DWSTRING(sDiagText), chr(10))
+    if len(sDiagText) then
+        for nRec as long = 1 to nRecords
+            dim as string sLine = AfxStrParse(DWSTRING(sDiagText), nRec, chr(10)).utf8
+            if right(sLine, 1) = chr(13) then sLine = left(sLine, len(sLine) - 1)
             dim as DWSTRING wLine = DWSTRING(sLine, CP_UTF8)
             dim as string sKind = AfxStrParse(wLine, 1, chr(9)).utf8
             select case sKind
@@ -279,8 +293,7 @@ private function TikoLang_ShowResults( _
                     bEndRecord = true
                     nExitCode = valint(AfxStrParse(wLine, 4, chr(9)).utf8)
             end select
-        loop
-        close #f
+        next
     end if
 
     ' The compiler did not finish, or clang / the linker failed: show the last lines of the log
@@ -351,6 +364,197 @@ private function TikoLang_ShowResults( _
     return false
 end function
 
+' ----------------------------------------------------------------------------------------
+' tiko.toml packages: a file built with tiko that has a tiko.toml in its folder or above
+' (and no editor project is open) is built as that package with 'tiko build', like tkEdit
+' and the VS Code extension do. The build reports one JSON event per line; the compiler's
+' diagnostics are text lines between them:  path(line,col): kind TKOnnnn: message
+' ----------------------------------------------------------------------------------------
+
+' Folder (with trailing "/") of the tiko.toml at or above the file, or ""
+function TikoLang_FindPackage( byref wszFilename as wstring ) as string
+    if len(wszFilename) = 0 then return ""
+    dim as string sDir = WideToUtf8(@wszFilename)
+    dim as long p = instrrev(sDir, "/")
+    if p = 0 then return ""
+    sDir = left(sDir, p)
+    for i as long = 1 to 64
+        if AfxFileExists(DWSTRING(sDir & "tiko.toml", CP_UTF8)) then return sDir
+        if len(sDir) <= 1 then exit for
+        p = instrrev(sDir, "/", len(sDir) - 1)
+        if p = 0 then exit for
+        sDir = left(sDir, p)
+    next
+    return ""
+end function
+
+' The string value of "key":"..." in one JSON line
+private function TikoLang_JsonStr( byref sJson as string, byref sKey as string ) as string
+    dim as string sFind = chr(34) & sKey & chr(34) & ":" & chr(34)
+    dim as long p = instr(sJson, sFind)
+    if p = 0 then return ""
+    p += len(sFind)
+    dim as string sOut
+    do while p <= len(sJson)
+        dim as string c = mid(sJson, p, 1)
+        if c = chr(34) then exit do
+        if c = "\" then
+            p += 1
+            c = mid(sJson, p, 1)
+            if c = "n" then c = chr(10) else if c = "t" then c = chr(9)
+        end if
+        sOut &= c
+        p += 1
+    loop
+    return sOut
+end function
+
+' The number value of "key":n in one JSON line
+private function TikoLang_JsonNum( byref sJson as string, byref sKey as string ) as long
+    dim as string sFind = chr(34) & sKey & chr(34) & ":"
+    dim as long p = instr(sJson, sFind)
+    if p = 0 then return 0
+    return valint(mid(sJson, p + len(sFind)))
+end function
+
+' A compiler diagnostic line "path(line,col): kind TKOnnnn: message" as a diagnostics record
+private function TikoLang_DiagLineToRecord( byref sLine as string, byref sRoot as string ) as string
+    dim as long nParenEnd = instr(sLine, "): ")
+    if nParenEnd = 0 then return ""
+    dim as long nParenStart = instrrev(sLine, "(", nParenEnd)
+    if nParenStart <= 1 then return ""
+    dim as string sPos = mid(sLine, nParenStart + 1, nParenEnd - nParenStart - 1)
+    dim as long pComma = instr(sPos, ",")
+    if pComma = 0 then return ""
+    dim as string sRest = mid(sLine, nParenEnd + 3)
+    dim as long pSp = instr(sRest, " ")
+    if pSp = 0 then return ""
+    dim as string sKind = left(sRest, pSp - 1)
+    if (sKind <> "error") andalso (sKind <> "warning") andalso (sKind <> "note") then return ""
+    dim as long pColon = instr(pSp + 1, sRest, ": ")
+    if pColon = 0 then return ""
+    dim as string sId = mid(sRest, pSp + 1, pColon - pSp - 1)
+    dim as string sFile = left(sLine, nParenStart - 1)
+    if left(sFile, 1) <> "/" then sFile = sRoot & sFile
+    return sKind & chr(9) & sId & chr(9) & sFile & chr(9) & left(sPos, pComma - 1) & chr(9) & _
+           mid(sPos, pComma + 1) & chr(9) & chr(9) & chr(9) & mid(sRest, pColon + 2)
+end function
+
+private function TikoLang_BuildPackage( _
+            byval wID as long, _
+            byval idxBuild as long, _
+            byval pDocMain as clsDocument ptr, _
+            byref sRoot as string, _
+            byref wszCompiler as DWSTRING _
+            ) as boolean
+    dim as DWSTRING wDQ = wchr(34)
+
+    for y as long = lbound(gConfig.Tools) to ubound(gConfig.Tools)
+        if gConfig.Tools(y).Action = USERTOOL_ACTION_PRECOMPILE then frmUserTools_ExecuteUserTool(y)
+    next
+
+    gCompile.MainFilename = pDocMain->DiskFilename
+    gCompile.MainName     = AfxStrPathname("NAME", pDocMain->DiskFilename)
+    gCompile.MainFolder   = DWSTRING(sRoot, CP_UTF8)
+    gCompile.ResourceFile = ""
+    gCompile.LinkModules  = ""
+
+    ' Profile: debug for debugging and for build configurations with -g, else release
+    dim as string sOptions = " " & lcase(gConfig.Builds(idxBuild).wszOptions.utf8) & " "
+    dim as string sProfile = iif(instr(sOptions, " -g "), "debug", "release")
+    if wID = IDM_DEBUG_STARTDEBUGGING then sProfile = "debug"
+    gCompile.CompileFlags = "--profile " & sProfile
+    if instr(sOptions, " -s gui ") then gCompile.CompileFlags = gCompile.CompileFlags & " -s gui"
+
+    dim as DWSTRING wszParams = "build --message-format json --profile " & sProfile
+    if wID = IDM_REBUILDALL then wszParams = wszParams & " --no-cache"
+
+    gApp.IsCompiling = true
+    dim as HCURSOR hCurSave = GetCursor()
+    SetCursor( LoadCursor(0, IDC_WAIT) )
+    SetCompileStatusBarMessage( "#" & L(203, "Compiling") & "... " & DWSTRING(sRoot & "tiko.toml", CP_UTF8), 0 )
+
+    chdir sRoot
+    gCompile.StartTime = timer
+    dim as CompileThreadParams ctp
+    ctp.wszExe = wszCompiler
+    ctp.wszCmdLine = wDQ & wszCompiler & wDQ & " " & wszParams
+    gCompile.bCompileThreadComplete = false
+    dim as any ptr pThread = ThreadCreate( @compile_thread, @ctp )
+    do until gCompile.bCompileThreadComplete = true
+        AfxDoEvents()
+    loop
+    if pThread then ThreadWait( pThread )
+    gCompile.EndTime = timer
+    gCompile.SystemTime = AfxSystemSystemTime
+    SetCursor( hCurSave )
+    ResetScintillaCursors()
+    gApp.IsCompiling = false
+
+    gCompile.wszFullCommandLine = "cd " & DWSTRING(sRoot, CP_UTF8) & vbCrLf & wszCompiler & " " & wszParams
+    gCompile.wszFullLogFile = DWSTRING(ctp.sConsoleText, CP_UTF8)
+    gCompile.wszOutputMsg = DWSTRING(TikoLang_Version(wszCompiler)) & vbCrLf & _
+                            "Package: " & DWSTRING(sRoot & "tiko.toml", CP_UTF8) & "  (profile " & sProfile & ")" & vbCrLf
+
+    ' Read the events and diagnostics
+    dim as string sMainRel = WideToUtf8(@gCompile.MainFilename)
+    if left(sMainRel, len(sRoot)) = sRoot then sMainRel = mid(sMainRel, len(sRoot) + 1)
+    dim as string sRecords, sTargetRoots, sFirstExe, sMainExe, sAnyArtifact
+    dim as long nErrors, nWarnings, nExit
+    dim as boolean bEnded
+    dim as string sLog = ctp.sConsoleText
+    dim as long p = 1
+    do while p <= len(sLog)
+        dim as long q = instr(p, sLog, chr(10))
+        if q = 0 then q = len(sLog) + 1
+        dim as string sLine = mid(sLog, p, q - p)
+        p = q + 1
+        if right(sLine, 1) = chr(13) then sLine = left(sLine, len(sLine) - 1)
+        if left(sLine, 1) = "{" then
+            select case TikoLang_JsonStr(sLine, "event")
+                case "build-start"
+                    sTargetRoots = sLine        ' the "roots" of the target being built
+                case "artifact"
+                    dim as string sPath = TikoLang_JsonStr(sLine, "path")
+                    if left(sPath, 1) <> "/" then sPath = sRoot & sPath
+                    if len(sAnyArtifact) = 0 then sAnyArtifact = sPath
+                    if TikoLang_JsonStr(sLine, "kind") = "exe" then
+                        if len(sFirstExe) = 0 then sFirstExe = sPath
+                        if instr(sTargetRoots, chr(34) & sMainRel & chr(34)) then sMainExe = sPath
+                    end if
+                case "build-end"
+                    bEnded = true
+                    nErrors += TikoLang_JsonNum(sLine, "errors")
+                    nWarnings += TikoLang_JsonNum(sLine, "warnings")
+                    if TikoLang_JsonNum(sLine, "exit") <> 0 then nExit = TikoLang_JsonNum(sLine, "exit")
+            end select
+        else
+            dim as string sRec = TikoLang_DiagLineToRecord(sLine, sRoot)
+            if len(sRec) then sRecords &= sRec & chr(10)
+        end if
+    loop
+    if bEnded then sRecords &= "end" & chr(9) & nErrors & chr(9) & nWarnings & chr(9) & nExit & chr(10)
+
+    dim as string sOutput = iif(len(sMainExe), sMainExe, iif(len(sFirstExe), sFirstExe, sAnyArtifact))
+    gCompile.OutputFilename = DWSTRING(sOutput, CP_UTF8)
+    if len(sOutput) = 0 then gCompile.OutputFilename = DWSTRING(sRoot & "out/" & sProfile, CP_UTF8)
+
+    if TikoLang_ShowResults( sRecords, sLog, wID, true ) then return true
+
+    for y as long = lbound(gConfig.Tools) to ubound(gConfig.Tools)
+        if gConfig.Tools(y).Action = USERTOOL_ACTION_POSTCOMPILE then frmUserTools_ExecuteUserTool(y)
+    next
+    ' only an executable can be run or debugged
+    if len(sMainExe) = 0 andalso len(sFirstExe) = 0 then return true
+    if wID = IDM_DEBUG_STARTDEBUGGING then
+        frmDebug_Show( HWND_FRMMAIN, gCompile.OutputFilename, gApp.wszCommandLine )
+    end if
+    if gCompile.RunAfterCompile then
+        RunEXE( pDocMain, gCompile.OutputFilename, gApp.wszCommandLine )
+    end if
+    return true
+end function
+
 ' Compile (and run / debug) a tiko program. Called by code_Compile when the main file is
 ' tiko source. Returns what code_Compile returns.
 function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolean
@@ -385,6 +589,12 @@ function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolea
     if pDocMain = 0 then
         SetCompileStatusBarMessage( "", 0 )
         return false
+    end if
+
+    ' A file of a tiko.toml package (no editor project open): build the package
+    if (gApp.IsProjectActive = false) andalso (wID <> IDM_QUICKRUN) then
+        dim as string sRoot = TikoLang_FindPackage(pDocMain->DiskFilename)
+        if len(sRoot) then return TikoLang_BuildPackage( wID, idxBuild, pDocMain, sRoot, wszCompiler )
     end if
 
     for y as long = lbound(gConfig.Tools) to ubound(gConfig.Tools)
@@ -515,7 +725,7 @@ function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolea
     if wID = IDM_QUICKRUN then AfxDeleteFile( gCompile.MainFilename )
     gApp.IsCompiling = false
 
-    dim as boolean bFailed = TikoLang_ShowResults( sDiagFile, ctp.sConsoleText, wID, true )
+    dim as boolean bFailed = TikoLang_ShowResults( TikoLang_ReadTextFile(sDiagFile), ctp.sConsoleText, wID, true )
     kill sDiagFile
     if bFailed then return true
 

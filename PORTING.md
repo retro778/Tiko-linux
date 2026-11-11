@@ -70,8 +70,12 @@ Key behaviours:
 ## tiko language support (Linux build only, `#ifdef TIKOLANG_SUPPORT`)
 
 The editor builds FreeBASIC (`fbc`) and [tiko-lang](https://github.com/PaulSquires/tiko-lang)
-programs. The language is chosen by the main file (project main file, else the active
-document): `.tiko`, `.ti`, `.tko` are tiko, everything else FreeBASIC. All of it lives in
+programs. The compiler is chosen by the main file (project main file, else the active
+document) and the user's choice in **Environment Options > Compilers**
+(`src/tikolang/frmOptionsTikoLang.inc`, saved in `settings/tikolang.ini`): `.bas/.bi/.inc`
+with fbc (default) or tiko, `.tiko/.ti/.tko` with tiko (default) or fbc, and the tiko
+compiler's path. The editor follows the compiler: files built with tiko get the tiko
+keywords and F1 opens the tiko wiki. fbc builds a non-`.bas` main file with `-b`. All of it lives in
 `src/tikolang/modTikoLang.inc`; the hooks in upstream files are small `#ifdef TIKOLANG_SUPPORT`
 blocks (`TIKOLANG_SUPPORT` is defined in `tiko.bas` on Linux).
 
@@ -79,7 +83,7 @@ blocks (`TIKOLANG_SUPPORT` is defined in `tiko.bas` on Linux).
   the extension. A `.tiko` file is a project only when it starts with the `' PROJECT FILE`
   line the editor writes (`TikoLang_IsProjectFile`); command line, drag & drop and session
   restore check this (`frmMain.inc`, `clsConfig.inc`). File > Open always opens a document.
-* **Compiler:** `$TIKO_COMPILER`, else `tiko` on the PATH (not the editor itself, also named
+* **Compiler:** the path from the options page, else `$TIKO_COMPILER`, else `tiko` on the PATH (not the editor itself, also named
   tiko: the candidate must have `../lib` or `../pkg`), else `~/.local/tiko-lang/bin/tiko`,
   `~/tiko-lang/bin/tiko`, `/opt/tiko-lang/bin/tiko`. It needs clang (LLVM 18+).
 * **Build** (`TikoLang_Compile`, hooked at the top of `code_Compile`):
@@ -100,7 +104,16 @@ blocks (`TIKOLANG_SUPPORT` is defined in `tiko.bas` on Linux).
 * **F1** in a tiko file opens the keyword's page of the tiko wiki
   (`settings/help/tiko_wiki_index.txt`, generated from the wiki's Keyword-Index page),
   else the Keyword Index.
-* Not done: `tiko.toml` packages (`tiko build`), the tiko-lsp language server, lldb-dap.
+* **tiko.toml packages:** a file built with tiko that has a `tiko.toml` in its folder or
+  above (and no editor project open), or `tiko.toml` itself, is built as the package:
+  `tiko build --message-format json --profile debug|release` in the package root (debug
+  for debugging and for build configurations with `-g`; Rebuild All adds `--no-cache`).
+  The compiler's diagnostic lines (`path(line,col): kind TKOnnnn: message`) go to Compiler
+  Results; the program run or debugged is the `artifact` of the target whose `main` is the
+  current file, else the first executable. Quick Run still builds the single file.
+* **Command lines:** like Windows' `CreateProcess`, the layer takes the first word of the
+  command line as argv[0], so the tiko command lines start with the compiler path.
+* Not done: the tiko-lsp language server, lldb-dap.
 
 ## File format compatibility
 
