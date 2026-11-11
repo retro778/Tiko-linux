@@ -167,7 +167,8 @@ Z/Y typed in the chat reach the chat controls instead of the editor commands
   (read once through `/bin/sh`: programs started from the desktop may not have them, e.g. on
   Debian/MX the X session reads `~/.xsessionrc`, not `~/.profile`), else the key saved in
   `settings/ai.ini` (mode 600). Base URLs are settable in `ai.ini` (`AnthropicBaseUrl`, `OpenAIBaseUrl`).
-* **Transport:** libcurl (`curl.bi`) in a worker thread that only appends raw bytes to a buffer;
+* **Transport:** libcurl (`curl.bi`) in a worker thread (16 MB stack: FreeBASIC's default 16 KB
+  overflowed in OpenSSL's TLS handshake) that only appends raw bytes to a buffer;
   a 40 ms timer on the panel parses the events on the UI thread (the JSON pool in `tkjson.bi`
   is shared with the tiko-lsp client). Stop aborts the transfer through the progress callback.
 * **Panel:** transcript and input are Scintilla controls (UTF-8; the transcript is read-only

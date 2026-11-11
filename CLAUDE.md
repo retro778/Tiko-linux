@@ -134,7 +134,9 @@ keywords. String literals have no escapes unless prefixed with `!` (`"\"` is one
 trailing `_` in a name is a line continuation; `strptr("")` is NULL (use `LnxZ()` for GTK calls);
 methods named `Open/Close/Write` hide the file keywords inside the class; multi-line `#macro`s can't
 be used in single-line `if`; an array field can't be `redim`med through an indexed element
-(`redim a(i).b(n)`); mixing boolean and integer comparisons in `andalso`/`orelse` warns (fix it).
+(`redim a(i).b(n)`); mixing boolean and integer comparisons in `andalso`/`orelse` warns (fix it). `ThreadCreate` gives a thread a 16 KB
+stack unless a size is passed (OpenSSL's TLS handshake overflowed it); pass C `long` arguments to
+varargs C functions such as `curl_easy_setopt` as `cast(clong, n)`, not `clng`.
 Some GLib functions are renamed in FB headers (`g_source_remove_`) or missing (declare them in
 `extern "C"`); Scintilla structs use C `long` = 64-bit positions on Linux (`modScintilla.bi` has
 Linux variants).

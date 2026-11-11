@@ -189,19 +189,19 @@ private sub Ai_TransferThread( byval userdata as any ptr )
     if h then
         curl_easy_setopt( h, CURLOPT_URL, strptr(t->url) )
         curl_easy_setopt( h, CURLOPT_HTTPHEADER, hdrs )
-        curl_easy_setopt( h, CURLOPT_POST, clng(1) )
+        curl_easy_setopt( h, CURLOPT_POST, cast(clong, 1) )
         curl_easy_setopt( h, CURLOPT_POSTFIELDS, strptr(t->body) )
         curl_easy_setopt( h, CURLOPT_POSTFIELDSIZE_LARGE, cast(curl_off_t, len(t->body)) )
         curl_easy_setopt( h, CURLOPT_WRITEFUNCTION, @Ai_OnWrite )
         curl_easy_setopt( h, CURLOPT_WRITEDATA, t )
-        curl_easy_setopt( h, CURLOPT_NOPROGRESS, clng(0) )
+        curl_easy_setopt( h, CURLOPT_NOPROGRESS, cast(clong, 0) )
         curl_easy_setopt( h, CURLOPT_XFERINFOFUNCTION, @Ai_OnProgress )
         curl_easy_setopt( h, CURLOPT_XFERINFODATA, t )
-        curl_easy_setopt( h, CURLOPT_CONNECTTIMEOUT, clng(30) )
+        curl_easy_setopt( h, CURLOPT_CONNECTTIMEOUT, cast(clong, 30) )
         ' a stream that sends nothing for 3 minutes is dead (the APIs send keep-alive pings)
-        curl_easy_setopt( h, CURLOPT_LOW_SPEED_LIMIT, clng(1) )
-        curl_easy_setopt( h, CURLOPT_LOW_SPEED_TIME, clng(180) )
-        curl_easy_setopt( h, CURLOPT_NOSIGNAL, clng(1) )
+        curl_easy_setopt( h, CURLOPT_LOW_SPEED_LIMIT, cast(clong, 1) )
+        curl_easy_setopt( h, CURLOPT_LOW_SPEED_TIME, cast(clong, 180) )
+        curl_easy_setopt( h, CURLOPT_NOSIGNAL, cast(clong, 1) )
         dim as CURLcode rc = curl_easy_perform( h )
         dim as clong nCode = 0
         curl_easy_getinfo( h, CURLINFO_RESPONSE_CODE, @nCode )
@@ -234,7 +234,9 @@ function Ai_StartTransfer( byref sUrl as string, byref sHeaders as string, byref
     t->headers = sHeaders
     t->body = sBody
     t->mutex = MutexCreate()
-    t->thread = ThreadCreate( @Ai_TransferThread, t )
+    ' FreeBASIC threads get a 16 KB stack by default; OpenSSL's TLS handshake needs far more
+    ' (it overflowed and crashed on the first HTTPS request)
+    t->thread = ThreadCreate( @Ai_TransferThread, t, 16 * 1024 * 1024 )
     return t
 end function
 
