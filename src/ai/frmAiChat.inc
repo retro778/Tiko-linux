@@ -388,7 +388,9 @@ sub frmAiChat_Send( byref sQuestion as string, byval bIncludeFile as boolean, by
     if len(Ai_ApiKey(gAi.Provider)) = 0 then
         AiChat_Append( "No API key for " & iif(gAi.Provider = "openai", "OpenAI", "Anthropic") & ". Set " & _
             iif(gAi.Provider = "openai", "OPENAI_API_KEY", "ANTHROPIC_API_KEY") & " in the environment or enter the key in " & _
-            "Environment Options > AI Assistant." & chr(10) & chr(10), AIS_ERROR )
+            "Environment Options > AI Assistant." & chr(10), AIS_ERROR )
+        AiChat_Append( "Keys exported in ~/.bashrc are seen only when Tiko is started from a terminal; for the menu " & _
+            "and the file manager export them in ~/.profile and log in again." & chr(10) & chr(10), AIS_INFO )
         exit sub
     end if
 
