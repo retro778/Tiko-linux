@@ -23,6 +23,8 @@
 
 #ifdef __FB_LINUX__
     ' Linux port: GTK3 based platform layer replacing windows.bi and AfxNova
+    ' Also build programs in the tiko language (src/tikolang)
+    #define TIKOLANG_SUPPORT
     #include once "lnx/lnx.bi"
 #else
 #include once "windows.bi"
@@ -85,6 +87,9 @@ dim shared as DWSTRING gwszDefaultToolchain = "FreeBASIC-1.10.1-winlibs-gcc-9.3.
 #include once "clsDB2.bi"
 #include once "clsConfig.bi"
 #include once "clsApp.bi"
+#ifdef TIKOLANG_SUPPORT
+    #include once "tikolang/modTikoLang.bi"
+#endif
 
 '  Global classes
 dim shared gApp     as clsApp
@@ -156,6 +161,9 @@ dim shared gTTabCtl as clsTopTabCtl
 #include once "frmMainDebug.inc"
 #include once "frmDebug.inc"
 #include once "frmMain.inc"
+#ifdef TIKOLANG_SUPPORT
+    #include once "tikolang/modTikoLang.inc"
+#endif
 
 
 ' ========================================================================================

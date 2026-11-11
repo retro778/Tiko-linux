@@ -261,6 +261,15 @@ function frmMain_ProcessFilesArray( _
         
         select case wszExt
         case APPEXTENSION    ' project file
+#ifdef TIKOLANG_SUPPORT
+            ' .tiko is also the extension of tiko language source files
+            if TikoLang_IsProjectFile(wszArg) = false then
+                numProcessed += 1
+                dim pDoc as clsDocument ptr = OpenSelectedDocument( wszArg )
+                if pDoc then pDoc->SetProjectFileType()
+                continue for
+            end if
+#endif
             numProcessed += 1
             ' Pass the info to our generic project open function to handle everything.
             frmMain_OpenProjectSafely(HWND_FRMMAIN, wszArg) 

@@ -1724,6 +1724,10 @@ function clsDocument.ApplyProperties() as long
         ''  APPLY ALL LANGUAGE SPECIFIC SYNTAX COLORING
         wFileExt = AfxStrPathname( "EXTN", this.DiskFilename )
         wFileExt = ucase(wFileExt)
+#ifdef TIKOLANG_SUPPORT
+        ' tiko language files (.tiko .ti .tko) use the FreeBASIC lexer plus the tiko keywords
+        if TikoLang_IsTikoExtension(this.DiskFilename) then wFileExt = ".BAS"
+#endif
 
         if cbool(wFileExt = ".BAS") orelse cbool(wFileExt = ".INC") _
             orelse cbool(wFileExt = ".BI") orelse (this.IsNewFlag = true) then
@@ -1828,6 +1832,9 @@ function clsDocument.ApplyProperties() as long
             SciMsg( pSci(i), SCI_STYLESETUNDERLINE, SCE_B_STRING, ghEditor.StringsUnderline)
 
             end if
+#ifdef TIKOLANG_SUPPORT
+            TikoLang_SetupLexer( pSci(i), this.DiskFilename )
+#endif
         end if
     
         ''

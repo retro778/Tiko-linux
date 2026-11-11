@@ -173,6 +173,7 @@ struct OptionsBasic {
 	std::string foldExplicitEnd;
 	bool foldExplicitAnywhere;
 	bool foldCompact;
+	bool blockStrings;
 	OptionsBasic() {
 		fold = false;
 		foldSyntaxBased = true;
@@ -181,6 +182,7 @@ struct OptionsBasic {
 		foldExplicitEnd   = "";
 		foldExplicitAnywhere = false;
 		foldCompact = true;
+		blockStrings = false;
 	}
 };
 
@@ -230,6 +232,10 @@ struct OptionSetBasic : public OptionSet<OptionsBasic> {
 			"Set this property to 1 to enable explicit fold points anywhere, not just in line comments.");
 
 		DefineProperty("fold.compact", &OptionsBasic::foldCompact);
+
+		DefineProperty("lexer.tiko.blockstrings", &OptionsBasic::blockStrings,
+			"Set to 1 for the tiko language: a \"\"\" that ends its line opens a block string, "
+			"closed by the first line that starts with \"\"\". Styled SCE_B_DATE (unused by FreeBASIC).");
 
 		DefineWordListSets(wordListDescriptions);
 	}
@@ -326,6 +332,17 @@ Sci_Position SCI_METHOD LexerBasic::WordListSet(int n, const char *wl) {
 	return firstModification;
 }
 
+// tiko: a """ followed only by spaces up to the end of its line opens a block string
+static bool OpensBlockString(LexAccessor &styler, Sci_Position p) {
+	for (;; p++) {
+		const char c = styler.SafeGetCharAt(p, '\n');
+		if (c == '\r' || c == '\n')
+			return true;
+		if (c != ' ' && c != '\t')
+			return false;
+	}
+}
+
 void SCI_METHOD LexerBasic::Lex(Sci_PositionU startPos, Sci_Position length, int initStyle, IDocument *pAccess) {
 	LexAccessor styler(pAccess);
 
@@ -403,6 +420,18 @@ void SCI_METHOD LexerBasic::Lex(Sci_PositionU startPos, Sci_Position length, int
 				sc.ChangeState(SCE_B_ERROR);
 				sc.SetState(SCE_B_DEFAULT);
 			}
+		} else if (sc.state == SCE_B_DATE) {
+			// tiko block string: ends after the """ that starts a line (after indentation)
+			if (sc.atLineStart) {
+				Sci_Position p = sc.currentPos;
+				while (styler.SafeGetCharAt(p) == ' ' || styler.SafeGetCharAt(p) == '\t')
+					p++;
+				if (styler.SafeGetCharAt(p) == '"' && styler.SafeGetCharAt(p + 1) == '"' &&
+					styler.SafeGetCharAt(p + 2) == '"') {
+					sc.Forward(static_cast<Sci_Position>(p - sc.currentPos) + 3);
+					sc.SetState(SCE_B_DEFAULT);
+				}
+			}
 		} else if (sc.state == SCE_B_COMMENT || sc.state == SCE_B_PREPROCESSOR) {
 			if (sc.atLineEnd) {
 				sc.SetState(SCE_B_DEFAULT);
@@ -465,6 +494,9 @@ void SCI_METHOD LexerBasic::Lex(Sci_PositionU startPos, Sci_Position length, int
 					sc.SetState(SCE_B_COMMENTBLOCK);
 				}
 				sc.Forward();	// Eat the ' so it isn't used for the end of the comment
+			} else if (options.blockStrings && sc.Match("\"\"\"") && OpensBlockString(styler, sc.currentPos + 3)) {
+				sc.SetState(SCE_B_DATE);
+				sc.Forward(2);
 			} else if (sc.Match('"')) {
 				sc.SetState(SCE_B_STRING);
 			} else if (IsDigit(sc.ch)) {

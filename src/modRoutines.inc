@@ -345,6 +345,13 @@ public function ShowContextHelp( byval id as long ) as long
         dim pDocHelp as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
         dim as DWSTRING wszWord
         if pDocHelp then wszWord = pDocHelp->GetWord
+#ifdef TIKOLANG_SUPPORT
+        ' tiko language files: the tiko wiki
+        if (id = IDM_HELP_FB) andalso (pDocHelp <> 0) andalso TikoLang_IsSourceFile(pDocHelp->DiskFilename) then
+            TikoLang_ShowHelp( wszWord )
+            return 0
+        end if
+#endif
         LnxShowFBHelp( wszHelpFilename, wszWord )
         return 0
     end scope

@@ -15,3 +15,6 @@ settings/settings.ini
 settings/default.session
 settings/keybindings.ini
 /obj/
+
+# the tiko language ebook (not ours to redistribute)
+*.pdf

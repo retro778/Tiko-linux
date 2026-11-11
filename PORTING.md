@@ -67,6 +67,41 @@ Key behaviours:
 * `clsConfig.inc`, `frmOptions.inc`, `frmOptionsCompiler.inc` – toolchain `bin/fbc`, system fbc fallback.
 * `frmDebug.inc` – gdb from `bin/gdb/gdb` or PATH.
 
+## tiko language support (Linux build only, `#ifdef TIKOLANG_SUPPORT`)
+
+The editor builds FreeBASIC (`fbc`) and [tiko-lang](https://github.com/PaulSquires/tiko-lang)
+programs. The language is chosen by the main file (project main file, else the active
+document): `.tiko`, `.ti`, `.tko` are tiko, everything else FreeBASIC. All of it lives in
+`src/tikolang/modTikoLang.inc`; the hooks in upstream files are small `#ifdef TIKOLANG_SUPPORT`
+blocks (`TIKOLANG_SUPPORT` is defined in `tiko.bas` on Linux).
+
+* **.tiko is two things.** The editor's project files and the language's source files share
+  the extension. A `.tiko` file is a project only when it starts with the `' PROJECT FILE`
+  line the editor writes (`TikoLang_IsProjectFile`); command line, drag & drop and session
+  restore check this (`frmMain.inc`, `clsConfig.inc`). File > Open always opens a document.
+* **Compiler:** `$TIKO_COMPILER`, else `tiko` on the PATH (not the editor itself, also named
+  tiko: the candidate must have `../lib` or `../pkg`), else `~/.local/tiko-lang/bin/tiko`,
+  `~/tiko-lang/bin/tiko`, `/opt/tiko-lang/bin/tiko`. It needs clang (LLVM 18+).
+* **Build** (`TikoLang_Compile`, hooked at the top of `code_Compile`):
+  `tiko -v --color never --diagnostics-file <tmp> <options> main.tiko [modules]`.
+  Build configurations are shared with FreeBASIC; fbc-only options the tiko compiler
+  refuses (`-gen`, `-export`, `-nostrip`, `-b`, ...) are dropped and `-O 2` becomes `-O2`.
+  Debug builds remove `-O*` and add `-g -exx`. Project modules are passed in the same run
+  (the program is named after the first input). Errors/warnings come from the diagnostics
+  file (`kind id path line col endline endcol message`, `end errors warnings exitcode`) into
+  the Compiler Results list; clang/linker failures show the last log line. Quick Run uses
+  `_tiko_quickrun.tiko`. `-lib` needs `llvm-ar` (tiko error TKO0111 otherwise).
+* **Debugging:** gdb reads tiko's DWARF; the existing gdb/MI debugger works unchanged
+  (breakpoints, stepping, locals; `ustring` shows as text with its length).
+* **Editor:** the FreeBASIC lexer with `settings/keywords/tiko_keywords.txt` added to the
+  keywords (`int32`, `ustring`, `nullptr`, `defer`, `#import`, ...) and `"""` block strings
+  (`LexTiko.cxx` property `lexer.tiko.blockstrings`, styled as `SCE_B_DATE` = string colours).
+  File dialogs list `*.tiko;*.ti;*.tko` beside the FreeBASIC patterns (`comdlg.inc`).
+* **F1** in a tiko file opens the keyword's page of the tiko wiki
+  (`settings/help/tiko_wiki_index.txt`, generated from the wiki's Keyword-Index page),
+  else the Keyword Index.
+* Not done: `tiko.toml` packages (`tiko build`), the tiko-lsp language server, lldb-dap.
+
 ## File format compatibility
 
 * Unicode files (config, `.tiko`, sessions, `.lang`) are UTF‑16LE + BOM + CRLF (verified byte identical).

@@ -1,0 +1,1661 @@
+' F1 help for tiko language files: keyword<TAB>page of https://github.com/PaulSquires/tiko-lang/wiki
+' Generated from the wiki's Keyword-Index page.
+#assert	procedures-Assert
+abs	Abs
+abschecked	Modern-Math-AbsChecked
+absolutepath	Modern-Fs-FileInfo-AbsolutePath
+abssaturating	Modern-Math-AbsSaturating
+abstract	Abstract
+access	Access
+acos	Acos
+acosh	Modern-Math-Acosh
+add	Add
+addcalendardays	Modern-Chrono-AddCalendarDays
+addcalendarmonths	Modern-Chrono-AddCalendarMonths
+addchecked	Modern-Math-AddChecked
+adddays	Modern-Chrono-AddDays
+addmonths	Modern-Chrono-AddMonths
+addproduct	Modern-Finance-AddProduct
+addsaturating	Modern-Math-AddSaturating
+addscaled	Modern-Finance-AddScaled
+addsink	Modern-Log-AddSink
+addwrapping	Modern-Math-AddWrapping
+alias	Alias-Modifier
+alias (modifier)	Alias-Modifier
+alias (name)	Alias-Name
+allocate	Allocate
+alpha	Alpha
+alphabetical keywords list	Alphabetical-Keywords-List
+alphabetical	Alphabetical-Keywords-List
+and	And-Graphics-Put
+and (graphics put)	And-Graphics-Put
+angle	Modern-Math-Angle
+any	Any
+append	Append
+appendalltext	Modern-Fs-AppendAllText
+apportion	Modern-Finance-Apportion
+arithmetic	Arithmetic-Operators
+arithmetic operators	Arithmetic-Operators
+array	Modern-Array-Array
+array container	Category-Array
+array functions	Array-Functions
+array results	Category-Array-Results
+arrayiterator	Modern-Array-ArrayIterator
+arraylen	Arraylen
+arraysize	Arraysize
+as	As
+asc	Asc
+asin	Asin
+asinh	Modern-Math-Asinh
+asm	Asm
+assert	Assert
+assertwarn	Assertwarn
+assignment operators	Assignment-Operators
+assignment	Assignment-Operators
+at	Modern-Array-At
+atan2	Atan2
+atanh	Modern-Math-Atanh
+atn	Atn
+back	Modern-LinkedList-Back
+base	Base-Initializer
+base (initializer)	Base-Initializer
+base (member access)	Base-Member-Access
+beep	Beep
+between	Modern-String-Between
+bin	Bin
+binary	Binary
+bit	Bit
+bit manipulation	Bit-Manipulation
+bitreset	Bitreset
+bitreverse	Modern-Math-BitReverse
+bitset	Bitset
+bitwidth	Modern-Math-BitWidth
+bitwise	Bitwise-Operators-Truth-Tables
+bitwise operators truth tables	Bitwise-Operators-Truth-Tables
+bload	Bload
+boolean	Boolean
+bsave	Bsave
+byref	Byref-Function-Results
+byref (function results)	Byref-Function-Results
+byref (parameters)	Byref-Parameters
+byref (variables)	Byref-Variables
+byte	Byte
+byteswap	Modern-Math-ByteSwap
+byval	Byval
+cabs	Modern-Math-CAbs
+cacos	Modern-Math-CAcos
+cacosh	Modern-Math-CAcosh
+cacot	Modern-Math-CAcot
+cacoth	Modern-Math-CAcoth
+cacsc	Modern-Math-CAcsc
+cacsch	Modern-Math-CAcsch
+call	Call
+callocate	Callocate
+cancel	Modern-Chan-Cancel
+canonicalpath	Modern-Fs-FileInfo-CanonicalPath
+capacity	Modern-Array-Capacity
+carg	Modern-Math-CArg
+case	Case
+casec	Modern-Math-CAsec
+casech	Modern-Math-CAsech
+casin	Modern-Math-CAsin
+casinh	Modern-Math-CAsinh
+cast	Cast
+catan	Modern-Math-CAtan
+catanh	Modern-Math-CAtanh
+cbool	Cbool
+cbrt	Modern-Math-Cbrt
+cbyte	Cbyte
+cconj	Modern-Math-CConj
+ccos	Modern-Math-CCos
+ccosh	Modern-Math-CCosh
+ccot	Modern-Math-CCot
+ccoth	Modern-Math-CCoth
+ccsc	Modern-Math-CCsc
+ccsch	Modern-Math-CCsch
+cdbl	Cdbl
+cdecl	Cdecl
+ceil	Modern-Math-Ceil
+ceiling	Modern-Finance-Ceiling
+cexp	Modern-Math-CExp
+chain	Chain
+channel	Modern-Chan-Channel-Channel
+channel.capacity	Modern-Chan-Channel-Capacity
+channel.channeliterator	Modern-Chan-Channel-ChannelIterator
+channel.close	Modern-Chan-Channel-Close
+channel.count	Modern-Chan-Channel-Count
+channel.getiterator	Modern-Chan-Channel-GetIterator
+channel.isclosed	Modern-Chan-Channel-IsClosed
+channel.isnil	Modern-Chan-Channel-IsNil
+channel.receive	Modern-Chan-Channel-Receive
+channel.receivefor	Modern-Chan-Channel-ReceiveFor
+channel.recvchan	Modern-Chan-Channel-RecvChan
+channel.send	Modern-Chan-Channel-Send
+channel.sendchan	Modern-Chan-Channel-SendChan
+channel.sendfor	Modern-Chan-Channel-SendFor
+channel.tryreceive	Modern-Chan-Channel-TryReceive
+channel.trysend	Modern-Chan-Channel-TrySend
+chdir	Chdir
+choice	Modern-Math-Choice
+chr	Chr
+chrono date and time	Category-Date-and-Time-Chrono
+chrono	Category-Date-and-Time-Chrono
+cimag	Modern-Math-CImag
+cimaginaryone	Modern-Math-CImaginaryOne
+cinfinity	Modern-Math-CInfinity
+cint	Cint
+circle	Circle
+cisfinite	Modern-Math-CIsFinite
+cisinfinite	Modern-Math-CIsInfinite
+cisnan	Modern-Math-CIsNaN
+cisreal	Modern-Math-CIsReal
+ciszero	Modern-Math-CIsZero
+clamp	Modern-Math-Clamp
+class	Class
+classify	Modern-Math-Classify
+clear	Clear
+clearfpexception	Modern-Math-ClearFpException
+clearfpexceptions	Modern-Math-ClearFpExceptions
+clearsinks	Modern-Log-ClearSinks
+clipleft	Modern-String-ClipLeft
+clipright	Modern-String-ClipRight
+clng	Clng
+clngint	Clngint
+clog	Modern-Math-CLog
+clog10	Modern-Math-CLog10
+clogabs	Modern-Math-CLogAbs
+close	Close
+cls	Cls
+cnan	Modern-Math-CNaN
+cnegate	Modern-Math-CNegate
+cnorm	Modern-Math-CNorm
+cnthroot	Modern-Math-CNthRoot
+color	Color
+command	Command
+common	Common
+compiler	Compiler-Error-Messages
+compiler error messages	Compiler-Error-Messages
+compiler option: -a	Compiler-Option-a
+compiler option: -arch	Compiler-Option-Arch
+compiler option: -asm	Compiler-Option-Asm
+compiler option: -b	Compiler-Option-B
+compiler option: -buildprefix	Compiler-Option-Buildprefix
+compiler option: -c	Compiler-Option-C-2
+compiler option: -d	Compiler-Option-D
+compiler option: -dll	Compiler-Option-Dll
+compiler option: -dylib	Compiler-Option-Dylib
+compiler option: -e	Compiler-Option-E
+compiler option: -earray	Compiler-Option-Earray
+compiler option: -earraydims	Compiler-Option-Earraydims
+compiler option: -eassert	Compiler-Option-Eassert
+compiler option: -edebug	Compiler-Option-Edebug
+compiler option: -edebuginfo	Compiler-Option-Edebuginfo
+compiler option: -elocation	Compiler-Option-Elocation
+compiler option: -entry	Compiler-Option-Entry
+compiler option: -enullptr	Compiler-Option-Enullptr
+compiler option: -eunwind	Compiler-Option-Eunwind
+compiler option: -ex	Compiler-Option-Ex
+compiler option: -export	Compiler-Option-Export
+compiler option: -exx	Compiler-Option-Exx
+compiler option: -forcelang	Compiler-Option-Forcelang
+compiler option: -fpmode	Compiler-Option-Fpmode
+compiler option: -fpu	Compiler-Option-Fpu
+compiler option: -g	Compiler-Option-G
+compiler option: -gen	Compiler-Option-Gen
+compiler option: -i	Compiler-Option-I
+compiler option: -include	Compiler-Option-Include
+compiler option: -l	Compiler-Option-L
+compiler option: -lang	Compiler-Option-Lang
+compiler option: -lib	Compiler-Option-Lib
+compiler option: -m	Compiler-Option-M
+compiler option: -map	Compiler-Option-Map
+compiler option: -maxerr	Compiler-Option-Maxerr
+compiler option: -mt	Compiler-Option-Mt
+compiler option: -nocopylibs	Compiler-Option-Nocopylibs
+compiler option: -nodeflibs	Compiler-Option-Nodeflibs
+compiler option: -noerrline	Compiler-Option-Noerrline
+compiler option: -nolib	Compiler-Option-Nolib
+compiler option: -norpath	Compiler-Option-Norpath
+compiler option: -noobjinfo	Compiler-Option-Noobjinfo
+compiler option: -nostrip	Compiler-Option-Nostrip
+compiler option: -o	Compiler-Option-O-2
+compiler option: -p	Compiler-Option-P
+compiler option: -pic	Compiler-Option-Pic
+compiler option: -pp	Compiler-Option-Pp
+compiler option: -prefix	Compiler-Option-Prefix
+compiler option: -print	Compiler-Option-Print
+compiler option: -profgen	Compiler-Option-Profgen
+compiler option: -profile	Compiler-Option-Profile
+compiler option: -r	Compiler-Option-R-2
+compiler option: -rr	Compiler-Option-Rr-2
+compiler option: -s	Compiler-Option-S
+compiler option: -showincludes	Compiler-Option-Showincludes
+compiler option: -static	Compiler-Option-Static
+compiler option: -strip	Compiler-Option-Strip
+compiler option: -sysroot	Compiler-Option-Sysroot
+compiler option: -t	Compiler-Option-T
+compiler option: -target	Compiler-Option-Target
+compiler option: -v	Compiler-Option-V
+compiler option: -vec	Compiler-Option-Vec
+compiler option: -version	Compiler-Option-Version
+compiler option: -w	Compiler-Option-W
+compiler option: -wa	Compiler-Option-Wa
+compiler option: -wc	Compiler-Option-Wc
+compiler option: -wl	Compiler-Option-Wl
+compiler option: -x	Compiler-Option-X
+compiler option: -z	Compiler-Option-Z
+compiler option: @file	Compiler-Option-File
+complex	Modern-Math-Complex
+complex operators	Modern-Math-Complex-Operators
+condbroadcast	Condbroadcast
+condcreate	Condcreate
+conddestroy	Conddestroy
+condsignal	Condsignal
+condwait	Condwait
+cone	Modern-Math-COne
+conjugate	Modern-Math-Conjugate
+console functions	Console-Functions
+console	Console-Functions
+consolesink	Modern-Log-LogEvent-ConsoleSink
+const	Const
+const (member)	Const-Member
+const (qualifier)	Const-Qualifier
+constructor	Constructor
+constructor (module)	Constructor-Module
+contains	Modern-String-Contains
+context	Modern-Chan-Context
+continue	Continue
+control flow statements	Control-Flow-Statements
+control	Control-Flow-Statements
+converting	Converting-Data-Types
+converting data types	Converting-Data-Types
+copydir	Modern-Fs-CopyDir
+copyfile	Modern-Fs-CopyFile
+copyoptions.copysymlinksaslinks	Modern-Fs-CopySymlinksAsLinks
+copyoptions.overwrite	Modern-Fs-Overwrite
+copyoptions.preservepermissions	Modern-Fs-PreservePermissions
+copyoptions.preservetimestamps	Modern-Fs-PreserveTimestamps
+copysign	Modern-Math-CopySign
+correlation	Modern-Math-Correlation
+cos	Cos
+cosh	Modern-Math-Cosh
+count	Modern-Array-Count
+covariance	Modern-Math-Covariance
+cpolar	Modern-Math-CPolar
+cpow	Modern-Math-CPow
+cptr	Cptr
+cpuclock.issupported	Modern-Chrono-CpuClock-IsSupported
+cpuclock.processkerneltime	Modern-Chrono-CpuClock-ProcessKernelTime
+cpuclock.processtime	Modern-Chrono-CpuClock-ProcessTime
+cpuclock.processusertime	Modern-Chrono-CpuClock-ProcessUserTime
+cpuclock.threadtime	Modern-Chrono-CpuClock-ThreadTime
+creal	Modern-Math-CReal
+createdir	Modern-Fs-CreateDir
+createdirall	Modern-Fs-CreateDirAll
+createhardlink	Modern-Fs-CreateHardLink
+createsymlink	Modern-Fs-CreateSymlink
+createtempdir	Modern-Fs-CreateTempDir
+createtempfile	Modern-Fs-CreateTempFile
+creciprocal	Modern-Math-CReciprocal
+cross	Modern-Math-Cross
+cryptobytes	Modern-Math-CryptoBytes
+cryptoulongint	Modern-Math-CryptoULongInt
+csec	Modern-Math-CSec
+csech	Modern-Math-CSech
+cset	Modern-Math-CSet
+csetimag	Modern-Math-CSetImag
+csetreal	Modern-Math-CSetReal
+csgn	Modern-Math-CSgn
+cshort	Cshort
+csign	Csign
+csin	Modern-Math-CSin
+csinh	Modern-Math-CSinh
+csng	Csng
+csqrt	Modern-Math-CSqrt
+csrlin	Csrlin
+cswap	Modern-Math-CSwap
+ctan	Modern-Math-CTan
+ctanh	Modern-Math-CTanh
+ctostring	Modern-Math-CToString
+ctostringpolar	Modern-Math-CToStringPolar
+cubyte	Cubyte
+cuint	Cuint
+culng	Culng
+culngint	Culngint
+cunsg	Cunsg
+curdir	Curdir
+currency	Modern-Finance-Currency
+currencyfromdouble	Modern-Finance-CurrencyFromDouble
+currencyfromint	Modern-Finance-CurrencyFromInt
+currencyfromparts	Modern-Finance-CurrencyFromParts
+currencyfromraw	Modern-Finance-CurrencyFromRaw
+currencyinvalid	Modern-Finance-CurrencyInvalid
+currencyparse	Modern-Finance-CurrencyParse
+currentdir	Modern-Fs-FileInfo-CurrentDir
+currentlocaleformat	Modern-Math-CurrentLocaleFormat
+cushort	Cushort
+custom	Custom
+cva_arg	Cva-Arg
+cva_copy	Cva-Copy
+cva_end	Cva-End
+cva_list	Cva-List
+cva_start	Cva-Start
+cvd	Cvd
+cvi	Cvi
+cvl	Cvl
+cvlongint	Cvlongint
+cvs	Cvs
+cvshort	Cvshort
+czero	Modern-Math-CZero
+#define	Define
+$dynamic	Dynamic
+data	Data
+date	Date
+date and time functions	Date-and-Time-Functions
+dateadd	Dateadd
+datediff	Datediff
+datepart	Datepart
+dateserial	Dateserial
+datetime	Modern-Chrono-DateTime-DateTime
+datetime.addcalendardays	Modern-Chrono-DateTime-AddCalendarDays
+datetime.addcalendarmonths	Modern-Chrono-DateTime-AddCalendarMonths
+datetime.addcalendaryears	Modern-Chrono-DateTime-AddCalendarYears
+datetime.adddays	Modern-Chrono-DateTime-AddDays
+datetime.addhours	Modern-Chrono-DateTime-AddHours
+datetime.addmilliseconds	Modern-Chrono-DateTime-AddMilliseconds
+datetime.addminutes	Modern-Chrono-DateTime-AddMinutes
+datetime.addmonths	Modern-Chrono-DateTime-AddMonths
+datetime.addseconds	Modern-Chrono-DateTime-AddSeconds
+datetime.addticks	Modern-Chrono-DateTime-AddTicks
+datetime.addyears	Modern-Chrono-DateTime-AddYears
+datetime.assumeutc	Modern-Chrono-DateTime-AssumeUtc
+datetime.day	Modern-Chrono-DateTime-Day
+datetime.dayofweek	Modern-Chrono-DateTime-DayOfWeek
+datetime.dayofyear	Modern-Chrono-DateTime-DayOfYear
+datetime.daysinmonth	Modern-Chrono-DateTime-DaysInMonth
+datetime.daysinyear	Modern-Chrono-DateTime-DaysInYear
+datetime.endofday	Modern-Chrono-DateTime-EndOfDay
+datetime.endofmonth	Modern-Chrono-DateTime-EndOfMonth
+datetime.endofyear	Modern-Chrono-DateTime-EndOfYear
+datetime.filetime	Modern-Chrono-DateTime-FileTime
+datetime.fromdate	Modern-Chrono-DateTime-FromDate
+datetime.fromdatetime	Modern-Chrono-DateTime-FromDateTime
+datetime.fromfiletime	Modern-Chrono-DateTime-FromFileTime
+datetime.frominstant	Modern-Chrono-DateTime-FromInstant
+datetime.fromjulianday	Modern-Chrono-DateTime-FromJulianDay
+datetime.fromoledate	Modern-Chrono-DateTime-FromOleDate
+datetime.fromserial	Modern-Chrono-DateTime-FromSerial
+datetime.getdate	Modern-Chrono-DateTime-GetDate
+datetime.gettimeofday	Modern-Chrono-DateTime-GetTimeOfDay
+datetime.hasoffset	Modern-Chrono-DateTime-HasOffset
+datetime.hour	Modern-Chrono-DateTime-Hour
+datetime.isfirstdayofmonth	Modern-Chrono-DateTime-IsFirstDayOfMonth
+datetime.islastdayofmonth	Modern-Chrono-DateTime-IsLastDayOfMonth
+datetime.isleapyear	Modern-Chrono-DateTime-IsLeapYear
+datetime.isoweek	Modern-Chrono-DateTime-IsoWeek
+datetime.isoweekyear	Modern-Chrono-DateTime-IsoWeekYear
+datetime.isutc	Modern-Chrono-DateTime-IsUtc
+datetime.julianday	Modern-Chrono-DateTime-JulianDay
+datetime.juliandaynumber	Modern-Chrono-DateTime-JulianDayNumber
+datetime.microsecond	Modern-Chrono-DateTime-Microsecond
+datetime.millisecond	Modern-Chrono-DateTime-Millisecond
+datetime.minute	Modern-Chrono-DateTime-Minute
+datetime.month	Modern-Chrono-DateTime-Month
+datetime.monthname	Modern-Chrono-DateTime-MonthName
+datetime.nextweekday	Modern-Chrono-DateTime-NextWeekday
+datetime.offsetminutes	Modern-Chrono-DateTime-OffsetMinutes
+datetime.oledate	Modern-Chrono-DateTime-OleDate
+datetime.parseexact	Modern-Chrono-DateTime-ParseExact
+datetime.prevweekday	Modern-Chrono-DateTime-PrevWeekday
+datetime.quarter	Modern-Chrono-DateTime-Quarter
+datetime.second	Modern-Chrono-DateTime-Second
+datetime.serial	Modern-Chrono-DateTime-Serial
+datetime.startofday	Modern-Chrono-DateTime-StartOfDay
+datetime.startofmonth	Modern-Chrono-DateTime-StartOfMonth
+datetime.startofweek	Modern-Chrono-DateTime-StartOfWeek
+datetime.startofyear	Modern-Chrono-DateTime-StartOfYear
+datetime.tickofday	Modern-Chrono-DateTime-TickOfDay
+datetime.toinstant	Modern-Chrono-DateTime-ToInstant
+datetime.tolocal	Modern-Chrono-DateTime-ToLocal
+datetime.tolocaledatestring	Modern-Chrono-DateTime-ToLocaleDateString
+datetime.tolocalestring	Modern-Chrono-DateTime-ToLocaleString
+datetime.tolocaletimestring	Modern-Chrono-DateTime-ToLocaleTimeString
+datetime.tooffset	Modern-Chrono-DateTime-ToOffset
+datetime.tryformat	Modern-Chrono-DateTime-TryFormat
+datetime.tryparse	Modern-Chrono-DateTime-TryParse
+datetime.tryparseexact	Modern-Chrono-DateTime-TryParseExact
+datetime.weekdayname	Modern-Chrono-DateTime-WeekdayName
+datetime.weeksinyear	Modern-Chrono-DateTime-WeeksInYear
+datetime.withoffset	Modern-Chrono-DateTime-WithOffset
+datetime.year	Modern-Chrono-DateTime-Year
+datevalue	Datevalue
+day	Day
+deallocate	Deallocate
+debug	Modern-Log-Debug
+debugging	Debugging
+decimal	Modern-Finance-Decimal
+decimalapportion	Modern-Finance-DecimalApportion
+decimalcompare	Modern-Finance-DecimalCompare
+decimalfromcurrency	Modern-Finance-DecimalFromCurrency
+decimalfromdouble	Modern-Finance-DecimalFromDouble
+decimalfromint	Modern-Finance-DecimalFromInt
+decimalfromparts	Modern-Finance-DecimalFromParts
+decimalfromscaled	Modern-Finance-DecimalFromScaled
+decimalfromuint	Modern-Finance-DecimalFromUInt
+decimalinvalid	Modern-Finance-DecimalInvalid
+decimalmaxvalue	Modern-Finance-DecimalMaxValue
+decimalminusone	Modern-Finance-DecimalMinusOne
+decimalminvalue	Modern-Finance-DecimalMinValue
+decimalone	Modern-Finance-DecimalOne
+decimalparse	Modern-Finance-DecimalParse
+decimalzero	Modern-Finance-DecimalZero
+declare	Declare
+default palettes	Default-Palettes
+default	Default-Palettes
+defer	Category-Defer
+defined	Defined
+degtorad	Modern-Math-DegToRad
+deleteat	Modern-String-DeleteAt
+destructor	Destructor
+destructor (module)	Destructor-Module
+determinant	Modern-Math-Determinant
+dim	Dim
+dir	Dir
+direntry.depth	Modern-Fs-DirEntry-Depth
+direntry.info	Modern-Fs-DirEntry-Info
+direntry.isdirectory	Modern-Fs-DirEntry-IsDirectory
+direntry.isfile	Modern-Fs-DirEntry-IsFile
+direntry.isother	Modern-Fs-DirEntry-IsOther
+direntry.issymlink	Modern-Fs-DirEntry-IsSymlink
+direntry.name	Modern-Fs-DirEntry-Name
+direntry.path	Modern-Fs-DirEntry-Path
+diriterator	Modern-Fs-DirEntry-DirIterator
+diriterator.isvalid	Modern-Fs-DirEntry-IsValid
+diriterator.movenext	Modern-Fs-DirEntry-MoveNext
+diriterator.value	Modern-Fs-DirEntry-Value
+diskspace.availablebytes	Modern-Fs-DiskSpace-AvailableBytes
+diskspace.freebytes	Modern-Fs-DiskSpace-FreeBytes
+diskspace.totalbytes	Modern-Fs-DiskSpace-TotalBytes
+distance	Modern-Math-Distance
+distancesquared	Modern-Math-DistanceSquared
+divchecked	Modern-Math-DivChecked
+divmod	Modern-Math-DivMod
+do	Do
+do...loop	Do-Loop
+done	Modern-Chan-Done
+dos keyboard scancodes	Dos-Keyboard-Scancodes
+dos	Dos-Keyboard-Scancodes
+dot	Modern-Math-Dot
+double	Double
+draw	Draw
+draw string	Draw-String
+dylibfree	Dylibfree
+dylibload	Dylibload
+dylibsymbol	Dylibsymbol
+#else	procedures-Else
+#elseif	procedures-Elseif
+#elseifdef	Elseifdef
+#elseifndef	Elseifndef
+#endif	Endif
+#error	procedures-Error
+else	Else
+elseif	Elseif
+emit	Modern-Log-Emit
+enabled	Modern-Log-Enabled
+encoding	Encoding
+end (block)	End-Block
+end	End-Block
+end (statement)	End-Statement
+end if	End-If
+endswith	Modern-String-EndsWith
+enum	Enum
+environ	Environ
+eof	Eof
+equals	Modern-String-Equals
+erase	Erase
+erfn	Erfn
+erl	Erl
+ermn	Ermn
+err	Err
+error	Error
+error handling	Error-Handling
+error handling functions	Error-Handling-Functions
+escape	Modern-String-Escape
+escape sequences	Escape-Sequences
+eucliddiv	Modern-Math-EuclidDiv
+euclidmod	Modern-Math-EuclidMod
+event (message data from screenevent)	Event-Message-Data-From-Screenevent
+event	Event-Message-Data-From-Screenevent
+exceptwith	Modern-Set-ExceptWith
+exec	Exec
+exepath	Exepath
+exists	Modern-Fs-Exists
+exit	Exit
+exp	Exp
+exp2	Modern-Math-Exp2
+expired	Modern-SharedPtr-Expired
+expm1	Modern-Math-Expm1
+export	Export
+extends	Extends
+extends wstring	Extends-Wstring
+extends zstring	Extends-Zstring
+extern	Extern
+extern...end extern	Extern-End-Extern
+extern...end	Extern-End-Extern
+extract	Modern-String-Extract
+extractchars	Modern-String-ExtractChars
+fail	Modern-Result-Fail
+failure	Modern-Result-Failure
+false	False
+fatal	Modern-Log-Fatal
+fb_memcopy	Fb-Memcopy
+fb_memcopyclear	Fb-Memcopyclear
+fb_memmove	Fb-Memmove
+fbarray (array descriptor structure and access)	Fbarray-Array-Descriptor-Structure-and-Access
+fbarray	Fbarray-Array-Descriptor-Structure-and-Access
+field	Field
+file	File-I-O-Functions
+file i/o functions	File-I-O-Functions
+fileattr	Fileattr
+filecopy	Filecopy
+filedatetime	Filedatetime
+fileexists	Fileexists
+fileflush	Fileflush
+fileinfo.accessedutc	Modern-Fs-FileInfo-AccessedUtc
+fileinfo.createdutc	Modern-Fs-FileInfo-CreatedUtc
+fileinfo.exists	Modern-Fs-FileInfo-Exists
+fileinfo.hasaccessed	Modern-Fs-FileInfo-HasAccessed
+fileinfo.hascreated	Modern-Fs-FileInfo-HasCreated
+fileinfo.isdirectory	Modern-Fs-FileInfo-IsDirectory
+fileinfo.isfile	Modern-Fs-FileInfo-IsFile
+fileinfo.ishidden	Modern-Fs-FileInfo-IsHidden
+fileinfo.isother	Modern-Fs-FileInfo-IsOther
+fileinfo.isreadonly	Modern-Fs-FileInfo-IsReadOnly
+fileinfo.issymlink	Modern-Fs-FileInfo-IsSymlink
+fileinfo.modifiedutc	Modern-Fs-FileInfo-ModifiedUtc
+fileinfo.nativeattributes	Modern-Fs-FileInfo-NativeAttributes
+fileinfo.size	Modern-Fs-FileInfo-Size
+filelen	Filelen
+filelock.acquire	Modern-Fs-FileLock-Acquire
+filelock.isheld	Modern-Fs-FileLock-IsHeld
+filelock.release	Modern-Fs-FileLock-Release
+fileseteof	Fileseteof
+filesystem	Category-Filesystem
+filesystem library	Category-Filesystem
+filewatcher.iswatching	Modern-Fs-FileWatcher-IsWatching
+filewatcher.poll	Modern-Fs-FileWatcher-Poll
+filewatcher.start	Modern-Fs-FileWatcher-Start
+filewatcher.stop	Modern-Fs-FileWatcher-Stop
+find	Modern-String-Find
+fix	Fix
+fixed-width types	Category-Fixed-Width-Types
+fixed-width	Category-Fixed-Width-Types
+flip	Flip
+float32	Category-Fixed-Width-Types
+float64	Category-Fixed-Width-Types
+floor	Modern-Math-Floor
+floordiv	Modern-Math-FloorDiv
+floormod	Modern-Math-FloorMod
+flush	Modern-Log-Flush
+fma	Modern-Math-Fma
+for	For
+for each	Category-For-Each
+for...next	For-Next
+foreach	Modern-Array-ForEach
+#cinclude	modern-Cinclude
+#cinclude tutorial	modern-Cinclude-tutorial
+c	Category-C-Header-Import
+c header import	Category-C-Header-Import
+#foreignlib	modern-Foreignlib
+#foreignlib tutorial	modern-Foreignlib-tutorial
+foreign library linking	Category-Foreign-Library-Linking
+foreign	Category-Foreign-Library-Linking
+format	Format
+frac	Frac
+fre	Fre
+freefile	Freefile
+frexp	Modern-Math-Frexp
+front	Modern-LinkedList-Front
+fschange.kind	Modern-Fs-FsChange-Kind
+fschange.path	Modern-Fs-FsChange-Path
+fserror.code	Modern-Fs-FsError-Code
+fserror.message	Modern-Fs-FsError-Message
+fserror.operation	Modern-Fs-FsError-Operation
+fserror.oscode	Modern-Fs-FsError-OsCode
+fserror.path	Modern-Fs-FsError-Path
+fserror.path2	Modern-Fs-FsError-Path2
+function	procedures-Function
+function (member)	Function-Member
+function pointer	Function-Pointer
+functional	Functional-Keyword-List
+functional keyword list	Functional-Keyword-List
+gcd	Modern-Math-GCD
+generics	Category-Generics
+get	Modern-SharedPtr-Get
+get (file i/o)	Get-File-I-O
+get (graphics)	Get-Graphics
+getdiskspace	Modern-Fs-GetDiskSpace
+getiterator	Modern-ForEach-GetIterator
+getjoystick	Getjoystick
+getkey	Getkey
+getmouse	Getmouse
+getposixmode	Modern-Fs-GetPosixMode
+getroundingmode	Modern-Math-GetRoundingMode
+getvolumeinfo	Modern-Fs-GetVolumeInfo
+getvolumes	Modern-Fs-GetVolumes
+getwin32attributes	Modern-Fs-GetWin32Attributes
+gfxlib - freebasic graphics library overview	Gfxlib-Freebasic-Graphics-Library-Overview
+gfxlib	Gfxlib-Freebasic-Graphics-Library-Overview
+glob	Modern-Fs-Glob
+globroot	Modern-Fs-GlobRoot
+goroutinecount	Modern-Chan-GoroutineCount
+goroutines and channels	Category-Goroutines-and-Channels
+goroutines	Category-Goroutines-and-Channels
+goroutines tutorial	Modern-Goroutines-Tutorial
+gosub	Gosub
+goto	Goto
+graphics keyword list	Graphics-Keyword-List
+graphics	Graphics-Keyword-List
+hasvalue	Modern-Optional-HasValue
+hex	Hex
+hibyte	Hibyte
+hiword	Hiword
+hour	Hour
+hypot	Modern-Math-Hypot
+#if	If
+#ifdef	Ifdef
+#ifndef	Ifndef
+#inclib	Inclib
+#include	procedures-Include
+if...then	If-Then
+iif	Iif
+imageconvertrow	Imageconvertrow
+imagecreate	Imagecreate
+imagedestroy	Imagedestroy
+imageinfo	Imageinfo
+implements	Implements
+import	Import
+indexing	Indexing-Operators
+indexing operators	Indexing-Operators
+indexof	Modern-Array-IndexOf
+infinity	Modern-Math-Infinity
+infinityf	Modern-Math-InfinityF
+info	Modern-Log-Info
+inherits	Inherits
+inkey	Inkey
+inp	Inp
+input	procedures-Input
+input #	Input
+input (file mode)	Input-File-Mode
+input()	Input-2
+insert	Modern-Array-Insert
+insertat	Modern-String-InsertAt
+instant.add	Modern-Chrono-Instant-Add
+instant.compareto	Modern-Chrono-Instant-CompareTo
+instant.fromticks	Modern-Chrono-Instant-FromTicks
+instant.fromunixmicroseconds	Modern-Chrono-Instant-FromUnixMicroseconds
+instant.fromunixmilliseconds	Modern-Chrono-Instant-FromUnixMilliseconds
+instant.fromunixseconds	Modern-Chrono-Instant-FromUnixSeconds
+instant.instant	Modern-Chrono-Instant-Instant
+instant.invalid	Modern-Chrono-Instant-Invalid
+instant.isvalid	Modern-Chrono-Instant-IsValid
+instant.maxvalue	Modern-Chrono-Instant-MaxValue
+instant.minvalue	Modern-Chrono-Instant-MinValue
+instant.parseiso	Modern-Chrono-Instant-ParseIso
+instant.subtract	Modern-Chrono-Instant-Subtract
+instant.ticks	Modern-Chrono-Instant-Ticks
+instant.toisostring	Modern-Chrono-Instant-ToIsoString
+instant.tostring	Modern-Chrono-Instant-ToString
+instant.tryparseiso	Modern-Chrono-Instant-TryParseIso
+instant.unixmicroseconds	Modern-Chrono-Instant-UnixMicroseconds
+instant.unixmilliseconds	Modern-Chrono-Instant-UnixMilliseconds
+instant.unixseconds	Modern-Chrono-Instant-UnixSeconds
+instr	Instr
+instrchars	Modern-String-InstrChars
+instrrev	Instrrev
+int	Int
+int16	Category-Fixed-Width-Types
+int32	Category-Fixed-Width-Types
+int64	Category-Fixed-Width-Types
+int8	Category-Fixed-Width-Types
+integer	Integer
+interface	Interface
+intersectwith	Modern-Set-IntersectWith
+intrinsic	Intrinsic-Defines
+intrinsic defines	Intrinsic-Defines
+ipow	Modern-Math-IPow
+ipowchecked	Modern-Math-IPowChecked
+is	Is
+isblank	Modern-String-IsBlank
+iscancelled	Modern-Chan-IsCancelled
+isdate	Isdate
+isdir	Modern-Fs-IsDir
+isempty	Modern-Array-IsEmpty
+isfile	Modern-Fs-IsFile
+isfinite	Modern-Math-IsFinite
+isinfinite	Modern-Math-IsInfinite
+islink	Modern-Fs-IsLink
+isnan	Modern-Math-IsNaN
+isnegative	Modern-Math-IsNegative
+isnormal	Modern-Math-IsNormal
+isnull	Modern-SharedPtr-IsNull
+isnumeric	Modern-String-IsNumeric
+isok	Modern-Result-IsOk
+ispow2	Modern-Math-IsPow2
+isqrt	Modern-Math-ISqrt
+isredirected	Isredirected
+issorted	Modern-Array-IsSorted
+issortedby	Modern-Sorting-IsSortedBy
+issubnormal	Modern-Math-IsSubnormal
+isvalid	Modern-ForEach-IsValid
+items	Modern-Set-Items
+iterating	Iterating-Operators
+iterating operators	Iterating-Operators
+iterator	Category-Iterators
+iterator protocol	Category-Iterators
+join	Modern-String-Join
+keys	Modern-Map-Keys
+kill	Kill
+#lang	procedures-Lang
+#libpath	Libpath
+#line	procedures-Line
+lambdas	Category-Lambdas
+lbound	Lbound
+lcase	Lcase
+lcm	Modern-Math-LCM
+leadingzeros	Modern-Math-LeadingZeros
+left	Left
+len	Len
+length	Modern-Math-Length
+lengthsquared	Modern-Math-LengthSquared
+lerp	Modern-Math-Lerp
+let	Let
+levelfromname	Modern-Log-LevelFromName
+levelname	Modern-Log-LevelName
+levelnameshort	Modern-Log-LevelNameShort
+leveltosyslog	Modern-Log-LevelToSyslog
+lib	Lib
+line (graphics)	Line-Graphics
+line	Line-Graphics
+line input	procedures-Line-Input
+line input #	Line-Input
+linkcount	Modern-Fs-LinkCount
+linkedlist	Category-LinkedList
+linkedlistiterator	Modern-LinkedList-LinkedListIterator
+linkednode	Modern-LinkedList-LinkedNode
+listdir	Modern-Fs-ListDir
+literals	Literals
+llvm	Category-LLVM-Backend
+llvm backend	Category-LLVM-Backend
+lobyte	Lobyte
+loc	Loc
+local	Local
+localdate.adddays	Modern-Chrono-LocalDate-AddDays
+localdate.addmonths	Modern-Chrono-LocalDate-AddMonths
+localdate.addyears	Modern-Chrono-LocalDate-AddYears
+localdate.compareto	Modern-Chrono-LocalDate-CompareTo
+localdate.day	Modern-Chrono-LocalDate-Day
+localdate.daynumber	Modern-Chrono-LocalDate-DayNumber
+localdate.dayofweek	Modern-Chrono-LocalDate-DayOfWeek
+localdate.dayofyear	Modern-Chrono-LocalDate-DayOfYear
+localdate.endofmonth	Modern-Chrono-LocalDate-EndOfMonth
+localdate.fromdaynumber	Modern-Chrono-LocalDate-FromDayNumber
+localdate.invalid	Modern-Chrono-LocalDate-Invalid
+localdate.isfirstdayofmonth	Modern-Chrono-LocalDate-IsFirstDayOfMonth
+localdate.islastdayofmonth	Modern-Chrono-LocalDate-IsLastDayOfMonth
+localdate.isoweek	Modern-Chrono-LocalDate-IsoWeek
+localdate.isoweekyear	Modern-Chrono-LocalDate-IsoWeekYear
+localdate.isvalid	Modern-Chrono-LocalDate-IsValid
+localdate.localdate	Modern-Chrono-LocalDate-LocalDate
+localdate.maxvalue	Modern-Chrono-LocalDate-MaxValue
+localdate.minvalue	Modern-Chrono-LocalDate-MinValue
+localdate.month	Modern-Chrono-LocalDate-Month
+localdate.parseiso	Modern-Chrono-LocalDate-ParseIso
+localdate.quarter	Modern-Chrono-LocalDate-Quarter
+localdate.startofmonth	Modern-Chrono-LocalDate-StartOfMonth
+localdate.toisostring	Modern-Chrono-LocalDate-ToIsoString
+localdate.tostring	Modern-Chrono-LocalDate-ToString
+localdate.tryparseiso	Modern-Chrono-LocalDate-TryParseIso
+localdate.year	Modern-Chrono-LocalDate-Year
+localtime.compareto	Modern-Chrono-LocalTime-CompareTo
+localtime.fromticks	Modern-Chrono-LocalTime-FromTicks
+localtime.hour	Modern-Chrono-LocalTime-Hour
+localtime.invalid	Modern-Chrono-LocalTime-Invalid
+localtime.isvalid	Modern-Chrono-LocalTime-IsValid
+localtime.localtime	Modern-Chrono-LocalTime-LocalTime
+localtime.maxvalue	Modern-Chrono-LocalTime-MaxValue
+localtime.microsecond	Modern-Chrono-LocalTime-Microsecond
+localtime.midnight	Modern-Chrono-LocalTime-Midnight
+localtime.millisecond	Modern-Chrono-LocalTime-Millisecond
+localtime.minute	Modern-Chrono-LocalTime-Minute
+localtime.noon	Modern-Chrono-LocalTime-Noon
+localtime.parseiso	Modern-Chrono-LocalTime-ParseIso
+localtime.second	Modern-Chrono-LocalTime-Second
+localtime.ticks	Modern-Chrono-LocalTime-Ticks
+localtime.toisostring	Modern-Chrono-LocalTime-ToIsoString
+localtime.tostring	Modern-Chrono-LocalTime-ToString
+localtime.tryparseiso	Modern-Chrono-LocalTime-TryParseIso
+locate	Locate
+lock	Lock
+lof	Lof
+log	Log
+log10	Modern-Math-Log10
+log1p	Modern-Math-Log1p
+log2	Modern-Math-Log2
+logb	Modern-Math-LogB
+logevent.addbool	Modern-Log-LogEvent-AddBool
+logevent.adderror	Modern-Log-LogEvent-AddError
+logevent.addfloat	Modern-Log-LogEvent-AddFloat
+logevent.addint	Modern-Log-LogEvent-AddInt
+logevent.addptr	Modern-Log-LogEvent-AddPtr
+logevent.addspan	Modern-Log-LogEvent-AddSpan
+logevent.addtext	Modern-Log-LogEvent-AddText
+logevent.addtime	Modern-Log-LogEvent-AddTime
+logevent.adduint	Modern-Log-LogEvent-AddUInt
+logevent.addvalue	Modern-Log-LogEvent-AddValue
+logevent.msg	Modern-Log-LogEvent-Msg
+logevent.send	Modern-Log-LogEvent-Send
+logevent.site	Modern-Log-LogEvent-Site
+logging	Category-Logging
+logical	Logical-Operators
+logical operators	Logical-Operators
+long	Long
+longint	Longint
+loop	Loop
+loword	Loword
+lpos	Lpos
+lprint	Lprint
+lset	Lset
+lstat	Modern-Fs-LStat
+ltrim	Ltrim
+#macro...#endmacro	Macro-Endmacro
+makeshared	Modern-SharedPtr-MakeShared
+makesharedfrom	Modern-SharedPtr-MakeSharedFrom
+map	Category-Map
+mapiterator	Modern-Map-MapIterator
+mappairiter	Modern-Map-MapPairIter
+mappairview	Modern-Map-MapPairView
+matchpattern	Modern-Fs-MatchPattern
+math library	Category-Math-Library
+math	Category-Math-Library
+mathematical	Mathematical-Functions
+mathematical functions	Mathematical-Functions
+max	Modern-Math-Max
+maxof	Modern-Math-MaxOf
+maxvalue	Modern-Math-MaxValue
+mcase	Modern-String-MCase
+mean	Modern-Math-Mean
+median	Modern-Math-Median
+memory	Memory-Functions
+memory functions	Memory-Functions
+memory operators	Memory-Operators
+memorymappedfile.close	Modern-Fs-MemoryMappedFile-Close
+memorymappedfile.data	Modern-Fs-MemoryMappedFile-Data
+memorymappedfile.flush	Modern-Fs-MemoryMappedFile-Flush
+memorymappedfile.isopen	Modern-Fs-MemoryMappedFile-IsOpen
+memorymappedfile.open	Modern-Fs-MemoryMappedFile-Open
+memorymappedfile.size	Modern-Fs-MemoryMappedFile-Size
+merge	Modern-Math-Merge
+mid	Mid-Function
+mid (function)	Mid-Function
+mid (statement)	Mid-Statement
+min	Modern-Math-Min
+minlevel	Modern-Log-MinLevel
+minof	Modern-Math-MinOf
+minsubnormaldouble	Modern-Math-MinSubnormalDouble
+minsubnormalsingle	Modern-Math-MinSubnormalSingle
+minute	Minute
+minvalue	Modern-Math-MinValue
+miscellaneous	Miscellaneous-Keywords
+miscellaneous keywords	Miscellaneous-Keywords
+mkd	Mkd
+mkdir	Mkdir
+mki	Mki
+mkl	Mkl
+mklongint	Mklongint
+mks	Mks
+mkshort	Mkshort
+modf	Modern-Math-Modf
+modularizing	Modularizing
+moneycompose	Modern-String-MoneyCompose
+moneyformat	Modern-String-MoneyFormat
+moneylayoutfromicurrency	Modern-String-MoneyLayoutFromICurrency
+moneylayoutfrominegcurr	Modern-String-MoneyLayoutFromINegCurr
+moneylocaleisvalid	Modern-String-MoneyLocaleIsValid
+moneylocalename	Modern-String-MoneyLocaleName
+moneyrefreshlocale	Modern-String-MoneyRefreshLocale
+moneysetlocale	Modern-String-MoneySetLocale
+month	Month
+monthname	Monthname
+movefile	Modern-Fs-MoveFile
+movenext	Modern-ForEach-MoveNext
+mul	Modern-Math-Mul
+mulchecked	Modern-Math-MulChecked
+mulsaturating	Modern-Math-MulSaturating
+multikey	Multikey
+mulwrapping	Modern-Math-MulWrapping
+mutexcreate	Mutexcreate
+mutexdestroy	Mutexdestroy
+mutexlock	Mutexlock
+mutexunlock	Mutexunlock
+naivesum	Modern-Math-NaiveSum
+naked	Naked
+name	Name
+namespace	Namespace
+nan	Modern-Math-NaN
+nanf	Modern-Math-NaNF
+negchecked	Modern-Math-NegChecked
+neginfinity	Modern-Math-NegInfinity
+neginfinityf	Modern-Math-NegInfinityF
+negsaturating	Modern-Math-NegSaturating
+negwrapping	Modern-Math-NegWrapping
+next	Next
+nextafter	Modern-Math-NextAfter
+nextboolean	Modern-Math-NextBoolean
+nextbooleanp	Modern-Math-NextBooleanP
+nextdouble	Modern-Math-NextDouble
+nextdoublerange	Modern-Math-NextDoubleRange
+nextexponential	Modern-Math-NextExponential
+nextint	Modern-Math-NextInt
+nextnormal	Modern-Math-NextNormal
+nextnormalp	Modern-Math-NextNormalP
+nextpoisson	Modern-Math-NextPoisson
+nextpow2	Modern-Math-NextPow2
+nextsingle	Modern-Math-NextSingle
+nextulong	Modern-Math-NextULong
+nextulongint	Modern-Math-NextULongInt
+none	Modern-Optional-None
+normalize	Modern-Math-Normalize
+now	Now
+nullptr	Category-Nullptr
+object	Object
+oct	Oct
+offsetof	Offsetof
+ok	Modern-Result-Ok
+on error	On-Error
+on	On-Error
+on...gosub	On-Gosub
+on...goto	On-Goto
+open	Open
+open com	Open-Com
+open cons	Open-Cons
+open err	Open-Err
+open lpt	Open-Lpt
+open pipe	Open-Pipe
+open scrn	Open-Scrn
+operating system functions	Operating-System-Functions
+operating	Operating-System-Functions
+operator	Operator
+operator ! (escaped string literal)	Operator-Escaped-String-Literal
+operator # (preprocessor stringize)	Operator-Preprocessor-Stringize
+operator ## (preprocessor concatenate)	Operator-Preprocessor-Concatenate
+operator $ (non-escaped string literal)	Operator-Non-Escaped-String-Literal
+operator & (string concatenation with conversion)	Operator-String-Concatenation-with-Conversion
+operator &= (concatenate and assign)	Operator-Concatenate-and-Assign
+operator () (array index)	Operator-Array-Index
+operator * (multiply)	Operator-Multiply
+operator * (value of)	Operator-Value-of
+operator *= (multiply and assign)	Operator-Multiply-and-Assign
+operator + (addition)	Operator-Addition
+operator + (string concatenation)	Operator-String-Concatenation
+operator += (add and assign)	Operator-Add-and-Assign
+operator - (negate)	Operator-Negate
+operator - (subtract)	Operator-Subtract
+operator -= (subtract and assign)	Operator-Subtract-and-Assign
+operator -> (pointer to member access)	Operator-Pointer-to-Member-Access
+operator . (member access)	Operator-Member-Access
+operator / (divide)	Operator-Divide
+operator /= (divide and assign)	Operator-Divide-and-Assign
+operator < (less than)	Operator-Less-Than
+operator <= (less than or equal)	Operator-Less-Than-or-Equal
+operator <> (not equal)	Operator-Not-Equal
+operator = (equal)	Operator-Equal
+operator > (greater than)	Operator-Greater-Than
+operator >= (greater than or equal)	Operator-Greater-Than-or-Equal
+operator @ (address of)	Operator-Address-of
+operator \ (integer divide)	Operator-Integer-Divide
+operator \= (integer divide and assign)	Operator-Integer-Divide-and-Assign
+operator ^ (exponentiate)	Operator-Exponentiate
+operator ^= (exponentiate and assign)	Operator-Exponentiate-and-Assign
+operator and (conjunction)	Operator-and-Conjunction
+operator and= (conjunction and assign)	Operator-and-Conjunction-and-Assign
+operator andalso (short circuit conjunction)	Operator-Andalso-Short-Circuit-Conjunction
+operator cast	Operator-Cast
+operator delete overload	Operator-Delete-Overload
+operator delete statement	Operator-Delete-Statement
+operator eqv (equivalence)	Operator-Eqv-Equivalence
+operator eqv= (equivalence and assign)	Operator-Eqv-Equivalence-and-Assign
+operator for (iteration)	Operator-for-Iteration
+operator imp (implication)	Operator-Imp-Implication
+operator imp= (implication and assign)	Operator-Imp-Implication-and-Assign
+operator is (run-time type information)	Operator-Is-Run-Time-Type-Information
+operator let (assign)	Operator-Let-Assign
+operator let() (assignment)	Operator-Let-Assignment
+operator list	Operator-List
+operator mod (modulus)	Operator-Mod-Modulus
+operator mod= (modulus and assign)	Operator-Mod-Modulus-and-Assign
+operator new expression	Operator-New-Expression
+operator new overload	Operator-New-Overload
+operator next (iteration)	Operator-Next-Iteration
+operator not (complement)	Operator-Not-Complement
+operator or (inclusive disjunction)	Operator-or-Inclusive-Disjunction
+operator or= (inclusive disjunction and assign)	Operator-or-Inclusive-Disjunction-and-Assign
+operator orelse (short circuit inclusive disjunction)	Operator-Orelse-Short-Circuit-Inclusive-Disjunction
+operator placement new	Operator-Placement-New
+operator precedence	Operator-Precedence
+operator procptr (procedure pointer and vtable index)	Operator-Procptr-Procedure-Pointer-and-Vtable-Index
+operator shl (shift left)	Operator-Shl-Shift-Left
+operator shl= (shift left and assign)	Operator-Shl-Shift-Left-and-Assign
+operator shr (shift right)	Operator-Shr-Shift-Right
+operator shr= (shift right and assign)	Operator-Shr-Shift-Right-and-Assign
+operator step (iteration)	Operator-Step-Iteration
+operator strptr (string pointer)	Operator-Strptr-String-Pointer
+operator varptr (variable pointer)	Operator-Varptr-Variable-Pointer
+operator xor (exclusive disjunction)	Operator-Xor-Exclusive-Disjunction
+operator xor= (exclusive disjunction and assign)	Operator-Xor-Exclusive-Disjunction-and-Assign
+operators	Operators
+option	Option-Dynamic
+option dynamic	Option-Dynamic
+option static	Option-Static
+option()	Option
+optional	Category-Optional
+or (graphics put)	Or-Graphics-Put
+or	Or-Graphics-Put
+orderedmap	Modern-OrderedMap-OrderedMap
+orderedmap and orderedset	Category-OrderedMap
+orderedmap.add	Modern-OrderedMap-Add
+orderedmap.blackheight	Modern-OrderedMap-BlackHeight
+orderedmap.clear	Modern-OrderedMap-Clear
+orderedmap.contains	Modern-OrderedMap-Contains
+orderedmap.count	Modern-OrderedMap-Count
+orderedmap.getiterator	Modern-OrderedMap-GetIterator
+orderedmap.isempty	Modern-OrderedMap-IsEmpty
+orderedmap.keys	Modern-OrderedMap-Keys
+orderedmap.pairs	Modern-OrderedMap-Pairs
+orderedmap.put	Modern-OrderedMap-Put
+orderedmap.remove	Modern-OrderedMap-Remove
+orderedmap.tryceiling	Modern-OrderedMap-TryCeiling
+orderedmap.tryfirst	Modern-OrderedMap-TryFirst
+orderedmap.tryfloor	Modern-OrderedMap-TryFloor
+orderedmap.tryget	Modern-OrderedMap-TryGet
+orderedmap.trylast	Modern-OrderedMap-TryLast
+orderedmap.values	Modern-OrderedMap-Values
+orderedmapiterator	Modern-OrderedMap-OrderedMapIterator
+orderedmappairiter	Modern-OrderedMap-OrderedMapPairIter
+orderedmappairview	Modern-OrderedMap-OrderedMapPairView
+orderedset	Modern-OrderedSet-OrderedSet
+orderedset.add	Modern-OrderedSet-Add
+orderedset.blackheight	Modern-OrderedSet-BlackHeight
+orderedset.clear	Modern-OrderedSet-Clear
+orderedset.contains	Modern-OrderedSet-Contains
+orderedset.count	Modern-OrderedSet-Count
+orderedset.exceptwith	Modern-OrderedSet-ExceptWith
+orderedset.getiterator	Modern-OrderedSet-GetIterator
+orderedset.intersectwith	Modern-OrderedSet-IntersectWith
+orderedset.isempty	Modern-OrderedSet-IsEmpty
+orderedset.items	Modern-OrderedSet-Items
+orderedset.remove	Modern-OrderedSet-Remove
+orderedset.tryceiling	Modern-OrderedSet-TryCeiling
+orderedset.tryfirst	Modern-OrderedSet-TryFirst
+orderedset.tryfloor	Modern-OrderedSet-TryFloor
+orderedset.trylast	Modern-OrderedSet-TryLast
+orderedset.unionwith	Modern-OrderedSet-UnionWith
+orderedsetiterator	Modern-OrderedSet-OrderedSetIterator
+out	Out
+output	Output
+overload	Overload
+override	Override
+#pragma	Pragma
+#pragma reserve	Pragma-Reserve
+#print	freebasic-Print
+(print | ?) #	procedures-Print
+(print	procedures-Print
+(print | ?) using	Print-Using
+padcenter	Modern-String-PadCenter
+padleft	Modern-String-PadLeft
+padright	Modern-String-PadRight
+paint	Paint
+pairs	Modern-Map-Pairs
+palette	Palette
+parity	Modern-Math-Parity
+partial	Partial
+pascal	Pascal
+pathchangeextension	Modern-Fs-PathChangeExtension
+pathequals	Modern-Fs-PathEquals
+pathextension	Modern-Fs-PathExtension
+pathfilename	Modern-Fs-PathFileName
+pathhasextension	Modern-Fs-PathHasExtension
+pathisabsolute	Modern-Fs-PathIsAbsolute
+pathiscasesensitive	Modern-Fs-PathIsCaseSensitive
+pathisroot	Modern-Fs-PathIsRoot
+pathjoin	Modern-Fs-PathJoin
+pathnextcomponent	Modern-Fs-PathNextComponent
+pathnormalize	Modern-Fs-PathNormalize
+pathparent	Modern-Fs-PathParent
+pathrelativeto	Modern-Fs-PathRelativeTo
+pathroot	Modern-Fs-PathRoot
+pathrootlen	Modern-Fs-PathRootLen
+pathseparator	Modern-Fs-PathSeparator
+pathsplit	Modern-Fs-PathSplit
+pathstartswith	Modern-Fs-PathStartsWith
+pathstem	Modern-Fs-PathStem
+pathtonative	Modern-Fs-PathToNative
+patternisrecursive	Modern-Fs-PatternIsRecursive
+patternwildcardat	Modern-Fs-PatternWildcardAt
+pcopy	Pcopy
+peek	Peek
+percentile	Modern-Math-Percentile
+pmap	Pmap
+point	Point
+pointcoord	Pointcoord
+pointer	Pointer-Operators
+pointer operators	Pointer-Operators
+pointer | ptr	Pointer-Ptr
+poke	Poke
+pop	Modern-Array-Pop
+popback	Modern-LinkedList-PopBack
+popcount	Modern-Math-PopCount
+popfront	Modern-LinkedList-PopFront
+pos	Pos
+pow	Modern-Math-Pow
+preprocessor	Preprocessor
+preprocessor operators	Preprocessor-Operators
+preserve	Preserve
+preset	Preset
+print	Print
+print | ?	Print
+private	Private
+private:	Private-Access-Control
+private: (access control)	Private-Access-Control
+procedures	Procedures
+programmer's	Programmer-S-Guide
+programmer's guide	Programmer-S-Guide
+property	Property
+protected:	Protected-Access-Control
+protected: (access control)	Protected-Access-Control
+pset (graphics put)	Pset-Graphics-Put
+pset	Pset-Graphics-Put
+pset (statement)	Pset-Statement
+public	Public
+public:	Public-Access-Control
+public: (access control)	Public-Access-Control
+push	Modern-Array-Push
+pushback	Modern-LinkedList-PushBack
+pushfront	Modern-LinkedList-PushFront
+put	Modern-Map-Put
+put (file i/o)	Put-File-I-O
+put (graphics)	Put-Graphics
+radtodeg	Modern-Math-RadToDeg
+raisefpexception	Modern-Math-RaiseFpException
+random	Random
+randomize	Randomize
+range	Modern-Math-Range
+raw	Modern-Finance-Raw
+read	Read
+read (file access)	Read-File-Access
+read write (file access)	Read-Write-File-Access
+readallbytes	Modern-Fs-ReadAllBytes
+readalllines	Modern-Fs-ReadAllLines
+readalltext	Modern-Fs-ReadAllText
+readdir	Modern-Fs-ReadDir
+readlink	Modern-Fs-ReadLink
+reallocate	Reallocate
+redim	Redim
+ref	Modern-SharedPtr-Ref
+reflect	Modern-Math-Reflect
+relational operators	Relational-Operators
+relational	Relational-Operators
+rem	Rem
+remain	Modern-String-Remain
+remainchars	Modern-String-RemainChars
+remove	Modern-String-Remove
+removebetween	Modern-String-RemoveBetween
+removechars	Modern-String-RemoveChars
+removedir	Modern-Fs-RemoveDir
+removedirall	Modern-Fs-RemoveDirAll
+removefile	Modern-Fs-RemoveFile
+removesink	Modern-Log-RemoveSink
+removeswap	Modern-Array-RemoveSwap
+repeat	Modern-String-Repeat
+replace	Modern-String-Replace
+replacechars	Modern-String-ReplaceChars
+replacefile	Modern-Fs-ReplaceFile
+reserve	Modern-Array-Reserve
+reset	Reset
+restore	Restore
+result	Category-Result
+retainchars	Modern-String-RetainChars
+return (from gosub)	Return-From-Gosub
+return	Return-From-Gosub
+return (from procedure)	Return-From-Procedure
+reverse	Modern-String-Reverse
+rgb	Rgb
+rgba	Rgba
+right	Right
+rmdir	Rmdir
+rnd	Rnd
+rngfromentropy	Modern-Math-RngFromEntropy
+rngseeded	Modern-Math-RngSeeded
+rotate	Modern-Math-Rotate
+round	Modern-Math-Round
+roundhalfeven	Modern-Math-RoundHalfEven
+roundmode	Modern-Finance-RoundMode
+rset	Rset
+rtrim	Rtrim
+run	Run
+$static	Static
+sadd	Sadd
+scaleb	Modern-Math-ScaleB
+scope...end scope	Scope-End-Scope
+scope...end	Scope-End-Scope
+screen (console)	Screen-Console
+screen	Screen-Console
+screen (graphics)	Screen-Graphics
+screen functions	Screen-Functions
+screencontrol	Screencontrol
+screencopy	Screencopy
+screenevent	Screenevent
+screenglproc	Screenglproc
+screeninfo	Screeninfo
+screenlist	Screenlist
+screenlock	Screenlock
+screenptr	Screenptr
+screenres	Screenres
+screenset	Screenset
+screensync	Screensync
+screenunlock	Screenunlock
+second	Second
+seek	Seek-Function
+seek (function)	Seek-Function
+seek (statement)	Seek-Statement
+select case	procedures-Select-Case
+select	procedures-Select-Case
+set	Category-Set
+setcurrentdir	Modern-Fs-FileInfo-SetCurrentDir
+setdate	Setdate
+setenviron	Setenviron
+sethidden	Modern-Fs-SetHidden
+setiterator	Modern-Set-SetIterator
+setmouse	Setmouse
+setposixmode	Modern-Fs-SetPosixMode
+setreadonly	Modern-Fs-SetReadOnly
+setroundingmode	Modern-Math-SetRoundingMode
+settime	Settime
+settimes	Modern-Fs-SetTimes
+setwin32attributes	Modern-Fs-SetWin32Attributes
+sgn	Sgn
+shared	Shared
+shared libraries - dos	Shared-Libraries-Dos
+sharedptr	Modern-SharedPtr-SharedPtr
+sharedptr and weakptr	Category-Smart-Pointers
+shell	Shell
+short	Short
+short circuit operators	Short-Circuit-Operators
+shrink	Modern-String-Shrink
+shuffle	Modern-Math-Shuffle
+sign	Modern-Math-Sign
+sin	Sin
+single	Single
+sinh	Modern-Math-Sinh
+sink.close	Modern-Log-LogEvent-Close
+sink.droppedcount	Modern-Log-LogEvent-DroppedCount
+sink.flush	Modern-Log-LogEvent-Flush
+sink.write	Modern-Log-LogEvent-Write
+sinkcount	Modern-Log-SinkCount
+sizeof	Sizeof
+sleep	Sleep
+slerp	Modern-Math-Slerp
+some	Modern-Optional-Some
+sort	Modern-Array-Sort
+sortby	Modern-Array-SortBy
+sorting	Category-Sorting
+sortlist	Modern-LinkedList-SortList
+sortlistby	Modern-LinkedList-SortListBy
+space	Space
+spanof	Modern-String-SpanOf
+spawn	Modern-Chan-Spawn
+spc	Spc
+spcast	Modern-SharedPtr-SpCast
+split	Modern-String-Split
+splitchars	Modern-String-SplitChars
+splitcsv	Modern-String-SplitCsv
+splitcsvrow	Modern-String-SplitCsvRow
+splitslices	Modern-String-SplitSlices
+sqr	Sqr
+stablesort	Modern-Array-StableSort
+stablesortby	Modern-Array-StableSortBy
+standard	Standard-Data-Type-Limits
+standard data type limits	Standard-Data-Type-Limits
+standard data types	Standard-Data-Types
+startswith	Modern-String-StartsWith
+stat	Modern-Fs-Stat
+static	procedures-Static
+static (member)	Static-Member
+stdcall	Stdcall
+stddev	Modern-Math-StdDev
+stddevpopulation	Modern-Math-StdDevPopulation
+step	Step
+stick	Stick
+stop	Stop
+stopwatch.elapsed	Modern-Chrono-Stopwatch-Elapsed
+stopwatch.elapsedmilliseconds	Modern-Chrono-Stopwatch-ElapsedMilliseconds
+stopwatch.elapsedticks	Modern-Chrono-Stopwatch-ElapsedTicks
+stopwatch.frequency	Modern-Chrono-Stopwatch-Frequency
+stopwatch.gettimestamp	Modern-Chrono-Stopwatch-GetTimestamp
+stopwatch.ishighresolution	Modern-Chrono-Stopwatch-IsHighResolution
+stopwatch.isrunning	Modern-Chrono-Stopwatch-IsRunning
+stopwatch.reset	Modern-Chrono-Stopwatch-Reset
+stopwatch.restart	Modern-Chrono-Stopwatch-Restart
+stopwatch.start	Modern-Chrono-Stopwatch-Start
+stopwatch.startnew	Modern-Chrono-Stopwatch-StartNew
+stopwatch.stop_	Modern-Chrono-Stopwatch-Stop
+stopwatch.stopwatch	Modern-Chrono-Stopwatch-Stopwatch
+str	Str
+strig	Strig
+string	String
+string (function)	String-Function
+string functions	String-Functions
+string library	Category-String-Library
+string operators	String-Operators
+sub	Sub
+sub (member)	Sub-Member
+sub pointer	Sub-Pointer
+subchecked	Modern-Math-SubChecked
+subsaturating	Modern-Math-SubSaturating
+subwrapping	Modern-Math-SubWrapping
+sum	Modern-Math-Sum
+swap	Swap
+system	System
+tab	Tab
+tally	Modern-String-Tally
+tallychars	Modern-String-TallyChars
+tan	Tan
+tanh	Modern-Math-Tanh
+tempdir	Modern-Fs-TempDir
+testfpexception	Modern-Math-TestFpException
+textrenderer.render	Modern-Log-LogEvent-Render
+then	Then
+this	This
+threadcall	Threadcall
+threadcreate	Threadcreate
+threaddetach	Threaddetach
+threading	Threading-Support-Functions
+threading support functions	Threading-Support-Functions
+threadself	Threadself
+threadwait	Threadwait
+time	Time
+timer	Timer
+timeserial	Timeserial
+timespan.add	Modern-Chrono-TimeSpan-Add
+timespan.compareto	Modern-Chrono-TimeSpan-CompareTo
+timespan.days	Modern-Chrono-TimeSpan-Days
+timespan.divide	Modern-Chrono-TimeSpan-Divide
+timespan.divideby	Modern-Chrono-TimeSpan-DivideBy
+timespan.duration	Modern-Chrono-TimeSpan-Duration
+timespan.fromdays	Modern-Chrono-TimeSpan-FromDays
+timespan.fromhours	Modern-Chrono-TimeSpan-FromHours
+timespan.frommicroseconds	Modern-Chrono-TimeSpan-FromMicroseconds
+timespan.frommilliseconds	Modern-Chrono-TimeSpan-FromMilliseconds
+timespan.fromminutes	Modern-Chrono-TimeSpan-FromMinutes
+timespan.fromseconds	Modern-Chrono-TimeSpan-FromSeconds
+timespan.fromticks	Modern-Chrono-TimeSpan-FromTicks
+timespan.hours	Modern-Chrono-TimeSpan-Hours
+timespan.invalid	Modern-Chrono-TimeSpan-Invalid
+timespan.isnegative	Modern-Chrono-TimeSpan-IsNegative
+timespan.isvalid	Modern-Chrono-TimeSpan-IsValid
+timespan.iszero	Modern-Chrono-TimeSpan-IsZero
+timespan.maxvalue	Modern-Chrono-TimeSpan-MaxValue
+timespan.microseconds	Modern-Chrono-TimeSpan-Microseconds
+timespan.milliseconds	Modern-Chrono-TimeSpan-Milliseconds
+timespan.minutes	Modern-Chrono-TimeSpan-Minutes
+timespan.minvalue	Modern-Chrono-TimeSpan-MinValue
+timespan.multiply	Modern-Chrono-TimeSpan-Multiply
+timespan.negate	Modern-Chrono-TimeSpan-Negate
+timespan.parseiso	Modern-Chrono-TimeSpan-ParseIso
+timespan.seconds	Modern-Chrono-TimeSpan-Seconds
+timespan.subtract	Modern-Chrono-TimeSpan-Subtract
+timespan.ticks	Modern-Chrono-TimeSpan-Ticks
+timespan.timespan	Modern-Chrono-TimeSpan-TimeSpan
+timespan.toisostring	Modern-Chrono-TimeSpan-ToIsoString
+timespan.tostring	Modern-Chrono-TimeSpan-ToString
+timespan.totaldays	Modern-Chrono-TimeSpan-TotalDays
+timespan.totalhours	Modern-Chrono-TimeSpan-TotalHours
+timespan.totalmicroseconds	Modern-Chrono-TimeSpan-TotalMicroseconds
+timespan.totalmilliseconds	Modern-Chrono-TimeSpan-TotalMilliseconds
+timespan.totalminutes	Modern-Chrono-TimeSpan-TotalMinutes
+timespan.totalseconds	Modern-Chrono-TimeSpan-TotalSeconds
+timespan.tryparseiso	Modern-Chrono-TimeSpan-TryParseIso
+timespan.zero	Modern-Chrono-TimeSpan-Zero
+timevalue	Timevalue
+timezoneinfo.daylightname	Modern-Chrono-TimeZoneInfo-DaylightName
+timezoneinfo.isdaylightsavingtime	Modern-Chrono-TimeZoneInfo-IsDaylightSavingTime
+timezoneinfo.localoffset	Modern-Chrono-TimeZoneInfo-LocalOffset
+timezoneinfo.localoffsetat	Modern-Chrono-TimeZoneInfo-LocalOffsetAt
+timezoneinfo.standardname	Modern-Chrono-TimeZoneInfo-StandardName
+timezoneinfo.supportsdaylightsavingtime	Modern-Chrono-TimeZoneInfo-SupportsDaylightSavingTime
+to	To
+todouble	Modern-Finance-ToDouble
+tomatrix	Modern-Math-ToMatrix
+tostring	Modern-Math-ToString
+total	Modern-Finance-Total
+trace	Modern-Log-Trace
+trailingzeros	Modern-Math-TrailingZeros
+trans	Trans
+transformpoint	Modern-Math-TransformPoint
+transformvector	Modern-Math-TransformVector
+transpose	Modern-Math-Transpose
+trim	Trim
+trimend	Modern-String-TrimEnd
+trimspace	Modern-String-TrimSpace
+trimstart	Modern-String-TrimStart
+true	True
+truncate	Modern-Math-Truncate
+trycast	TryCast
+tryget	Modern-Map-TryGet
+tryinverse	Modern-Math-TryInverse
+tryparsedouble	Modern-Math-TryParseDouble
+tryparselong	Modern-Math-TryParseLong
+tryparselongint	Modern-Math-TryParseLongInt
+tryparsesingle	Modern-Math-TryParseSingle
+tryparseulong	Modern-Math-TryParseULong
+tryparseulongint	Modern-Math-TryParseULongInt
+tuples	Category-Tuples
+type	Type-Alias
+type (alias)	Type-Alias
+type (temporary)	Type-Temporary
+type (udt)	Type-Udt
+type or class operators	Type-or-Class-Operators
+typeof	Typeof
+#undef	Undef
+ubound	Ubound
+ubyte	Ubyte
+ucase	Ucase
+uint16	Category-Fixed-Width-Types
+uint32	Category-Fixed-Width-Types
+uint64	Category-Fixed-Width-Types
+uint8	Category-Fixed-Width-Types
+uinteger	Uinteger
+ulong	Ulong
+ulongint	Ulongint
+ulp	Modern-Math-Ulp
+unescape	Modern-String-Unescape
+union	Union
+unionwith	Modern-Set-UnionWith
+unlock	Unlock
+unsigned	Unsigned
+until	Until
+unwrap	Modern-String-Unwrap
+usecount	Modern-SharedPtr-UseCount
+user	user-defined-types-User-Defined-Types
+user defined types	user-defined-types-User-Defined-Types
+user input (runtime library)	User-Input-Runtime-Library
+user input functions (graphics library)	User-Input-Functions-Graphics-Library
+ushort	Ushort
+using (namespaces)	Using-Namespaces
+using	Using-Namespaces
+ustring	Category-UString
+va_arg	Va-Arg
+va_first	Va-First
+va_next	Va-Next
+val	Val
+valint	Valint
+vallng	Vallng
+value	Modern-ForEach-Value
+valueor	Modern-Optional-ValueOr
+values	Modern-Map-Values
+valuint	Valuint
+valulng	Valulng
+var	Var
+variable	Variable-Declarations
+variable declarations	Variable-Declarations
+variance	Modern-Math-Variance
+variancepopulation	Modern-Math-VariancePopulation
+verifyset	Modern-String-VerifySet
+view (graphics)	View-Graphics
+view	View-Graphics
+view print	View-Print
+virtual	Virtual
+volumeinfo.filesystem	Modern-Fs-VolumeInfo-FileSystem
+volumeinfo.iscasesensitive	Modern-Fs-VolumeInfo-IsCaseSensitive
+volumeinfo.isreadonly	Modern-Fs-VolumeInfo-IsReadOnly
+volumeinfo.maxcomponentlen	Modern-Fs-VolumeInfo-MaxComponentLen
+volumeinfo.name	Modern-Fs-VolumeInfo-Name
+volumeinfo.rootpath	Modern-Fs-VolumeInfo-RootPath
+volumeinfo.supportslinks	Modern-Fs-VolumeInfo-SupportsLinks
+wait	Wait
+waitfor	Modern-Chan-WaitFor
+walkdir	Modern-Fs-WalkDir
+walkiterator	Modern-Fs-DirEntry-WalkIterator
+walkoptions.followsymlinks	Modern-Fs-DirEntry-FollowSymlinks
+walkoptions.includehidden	Modern-Fs-DirEntry-IncludeHidden
+walkoptions.maxdepth	Modern-Fs-DirEntry-MaxDepth
+walkoptions.stoponerror	Modern-Fs-DirEntry-StopOnError
+walkoptions.yielddirectories	Modern-Fs-DirEntry-YieldDirectories
+wallclock.now	Modern-Chrono-WallClock-Now
+wallclock.resolution	Modern-Chrono-WallClock-Resolution
+wallclock.timeofday	Modern-Chrono-WallClock-TimeOfDay
+wallclock.today	Modern-Chrono-WallClock-Today
+wallclock.utcnow	Modern-Chrono-WallClock-UtcNow
+warn	Modern-Log-Warn
+wbin	Wbin
+wchr	Wchr
+weakptr	Modern-SharedPtr-WeakPtr
+weekday	Weekday
+weekdayname	Weekdayname
+wend (or 'end while')	Wend-or-End-While
+wend	Wend-or-End-While
+whex	Whex
+while	While
+while...wend (or 'while...end while')	While-Wend-or-While-End-While
+while...wend	While-Wend-or-While-End-While
+width	Width
+window	Window
+windowtitle	Windowtitle
+winput()	Winput
+with	With
+withcancel	Modern-Chan-WithCancel
+withfield	Modern-Log-WithField
+withname	Modern-Log-WithName
+withtimeout	Modern-Chan-WithTimeout
+woct	Woct
+workercount	Modern-Chan-WorkerCount
+wrap	Modern-String-Wrap
+write	Write
+write #	procedures-Write
+write (file access)	Write-File-Access
+writeallbytes	Modern-Fs-WriteAllBytes
+writealltext	Modern-Fs-WriteAllText
+writeatomic	Modern-Fs-WriteAtomic
+wspace	Wspace
+wstr	Wstr
+wstring	Wstring
+wstring (function)	Wstring-Function
+xor	Xor-Graphics-Put
+xor (graphics put)	Xor-Graphics-Put
+year	Year
+zstring	Zstring
+... (ellipsis)	Ellipsis
+...	Ellipsis
+2d drawing functions	2d-Drawing-Functions
+2d	2d-Drawing-Functions
+__date__	procedures-Date
+__date_iso__	Date-Iso
+__fastcall	Fastcall
+__fb_64bit__	Fb-64bit
+__fb_android__	Fb-Android
+__fb_arg_count__	Fb-Arg-Count
+__fb_arg_extract__	Fb-Arg-Extract
+__fb_arg_leftof__	Fb-Arg-Leftof
+__fb_arg_listexpand__	Fb-Arg-Listexpand
+__fb_arg_rightof__	Fb-Arg-Rightof
+__fb_argc__	Fb-Argc
+__fb_argv__	Fb-Argv
+__fb_arm__	Fb-Arm
+__fb_asm__	Fb-Asm
+__fb_backend__	Fb-Backend
+__fb_bigendian__	Fb-Bigendian
+__fb_build_date__	Fb-Build-Date
+__fb_build_date_iso__	Fb-Build-Date-Iso
+__fb_build_fork_id__	Fb-Build-Fork-Id
+__fb_build_sha1__	Fb-Build-Sha1
+__fb_cygwin__	Fb-Cygwin
+__fb_darwin__	Fb-Darwin
+__fb_dos__	Fb-Dos
+__fb_err__	Fb-Err
+__fb_eval__	Fb-Eval
+__fb_fpmode__	Fb-Fpmode
+__fb_fpu__	Fb-Fpu
+__fb_freebsd__	Fb-Freebsd
+__fb_gcc__	Fb-Gcc
+__fb_gui__	Fb-Gui
+__fb_iif__	Fb-Iif
+__fb_join__	Fb-Join
+__fb_js__	Fb-Js
+__fb_lang__	Fb-Lang
+__fb_linux__	Fb-Linux
+__fb_main__	Fb-Main
+__fb_min_version__	Fb-Min-Version
+__tiko_compiler__	Category-Tiko-Compiler-Define
+__fb_mt__	Fb-Mt
+__fb_netbsd__	Fb-Netbsd
+__fb_openbsd__	Fb-Openbsd
+__fb_optimize__	Fb-Optimize
+__fb_option_byval__	Fb-Option-Byval
+__fb_option_dynamic__	Fb-Option-Dynamic
+__fb_option_escape__	Fb-Option-Escape
+__fb_option_explicit__	Fb-Option-Explicit
+__fb_option_gosub__	Fb-Option-Gosub
+__fb_option_private__	Fb-Option-Private
+__fb_option_profile__	Fb-Option-Profile
+__fb_out_dll__	Fb-Out-Dll
+__fb_out_exe__	Fb-Out-Exe
+__fb_out_lib__	Fb-Out-Lib
+__fb_out_obj__	Fb-Out-Obj
+__fb_pcos__	Fb-Pcos
+__fb_ppc__	Fb-Ppc
+__fb_profile__	Fb-Profile
+__fb_query_symbol__	Fb-Query-Symbol
+__fb_quote__	Fb-Quote
+__fb_signature__	Fb-Signature
+__fb_sse__	Fb-Sse
+__fb_uniqueid__	Fb-Uniqueid
+__fb_uniqueid_pop__	Fb-Uniqueid-Pop
+__fb_uniqueid_push__	Fb-Uniqueid-Push
+__fb_unix__	Fb-Unix
+__fb_unquote__	Fb-Unquote
+__fb_vectorize__	Fb-Vectorize
+__fb_ver_major__	Fb-Ver-Major
+__fb_ver_minor__	Fb-Ver-Minor
+__fb_ver_patch__	Fb-Ver-Patch
+__fb_version__	Fb-Version
+__fb_win32__	Fb-Win32
+__fb_x86__	Fb-X86
+__fb_xbox__	Fb-Xbox
+__file__	File
+__file_nq__	File-Nq
+__function__	Function
+__function_nq__	Function-Nq
+__line__	Line
+__path__	Path
+__thiscall	Thiscall
+__time__	procedures-Time

@@ -1126,6 +1126,9 @@ function clsConfig.LoadSessionFile( byref wszSessionFile as wstring ) as boolean
     ' If the previously saved session file was actually a project file
     ' then open the project.
     if lcase(AfxGetFileExt(wszSessionFile)) = APPEXTENSION then
+#ifdef TIKOLANG_SUPPORT
+        if TikoLang_IsProjectFile(wszSessionFile) = false then return false
+#endif
         if AfxFileExists(wszSessionFile) then 
             frmMain_OpenProjectSafely( HWND_FRMMAIN, wszSessionFile ) 
             return true

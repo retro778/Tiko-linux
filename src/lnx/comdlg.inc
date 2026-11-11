@@ -180,6 +180,14 @@ private function LnxFD_SetFileTypes( byval this_ as IFileDialog ptr, byval cFile
     for i as long = 0 to cFileTypes - 1
         if rg[i].pszName then this_->filterNames(i) = *rg[i].pszName
         if rg[i].pszSpec then this_->filterSpecs(i) = *rg[i].pszSpec
+#ifdef TIKOLANG_SUPPORT
+        ' tiko language files beside the FreeBASIC ones
+        select case this_->filterSpecs(i).utf8
+            case "*.bas;*.bi;*.inc;*.rc": this_->filterSpecs(i) = "*.bas;*.bi;*.inc;*.rc;*.tiko;*.ti;*.tko"
+            case "*.bas;*.inc":           this_->filterSpecs(i) = "*.bas;*.inc;*.tiko;*.tko"
+            case "*.bi":                  this_->filterSpecs(i) = "*.bi;*.ti"
+        end select
+#endif
     next
     return S_OK
 end function

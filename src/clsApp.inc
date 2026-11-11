@@ -295,6 +295,9 @@ function clsApp.ProjectSetFileType( _
             case ".BAS":  wszFileType = FILETYPE_NORMAL
             case ".RC":   wszFileType = FILETYPE_RESOURCE
             case ".BI":   wszFileType = FILETYPE_HEADER
+#ifdef TIKOLANG_SUPPORT
+            case ".TI":   wszFileType = FILETYPE_HEADER     ' tiko language header
+#endif
             case ".INC":  wszFileType = FILETYPE_NORMAL
             case else:    wszFileType = FILETYPE_NORMAL
             end select   

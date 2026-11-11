@@ -78,6 +78,10 @@ function code_Compile( byval wID as long ) as boolean
     ' Get the array index for the current selected build (project or document)
     idxBuild = frmBuildConfig_getActiveBuildIndex()
     if idxBuild = -1 then idxBuild = 0
+#ifdef TIKOLANG_SUPPORT
+    ' A tiko language main file is built by the tiko compiler
+    if TikoLang_IsTikoBuild() then return TikoLang_Compile( wID, idxBuild )
+#endif
     
     ' Perform some pre-compile checks to see if we should continue.
     gConfig.FBWINCompiler32 = ProcessFromCurdriveApp(gConfig.FBWINCompiler32)
