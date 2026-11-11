@@ -914,9 +914,13 @@ private sub LnxOnIsActive cdecl ( byval w as GtkWidget ptr, byval pspec as any p
 end sub
 
 private sub LnxConnectInputSignals( byval hwnd as HWND, byval w as GtkWidget ptr, byval bNative as boolean )
-    gtk_widget_add_events( w, GDK_BUTTON_PRESS_MASK or GDK_BUTTON_RELEASE_MASK or GDK_POINTER_MOTION_MASK or _
-                              GDK_LEAVE_NOTIFY_MASK or GDK_ENTER_NOTIFY_MASK or GDK_SCROLL_MASK or GDK_SMOOTH_SCROLL_MASK or _
-                              GDK_FOCUS_CHANGE_MASK or GDK_KEY_PRESS_MASK or GDK_KEY_RELEASE_MASK )
+    dim as long nMask = GDK_BUTTON_PRESS_MASK or GDK_BUTTON_RELEASE_MASK or GDK_POINTER_MOTION_MASK or _
+                        GDK_LEAVE_NOTIFY_MASK or GDK_ENTER_NOTIFY_MASK or GDK_SCROLL_MASK or _
+                        GDK_FOCUS_CHANGE_MASK or GDK_KEY_PRESS_MASK or GDK_KEY_RELEASE_MASK
+    ' Scintilla (GTK) ignores smooth scroll events on X11: with GDK_SMOOTH_SCROLL_MASK it would get
+    ' only those and the mouse wheel would not scroll the editor. Without it GTK sends wheel steps.
+    if (bNative = false) orelse (hwnd->kind <> LK_SCINTILLA) then nMask or= GDK_SMOOTH_SCROLL_MASK
+    gtk_widget_add_events( w, nMask )
     g_signal_connect( G_OBJECT(w), "button-press-event", G_CALLBACK(@LnxOnButtonPress), hwnd )
     g_signal_connect( G_OBJECT(w), "button-release-event", G_CALLBACK(@LnxOnButtonRelease), hwnd )
     g_signal_connect( G_OBJECT(w), "motion-notify-event", G_CALLBACK(@LnxOnMotion), hwnd )

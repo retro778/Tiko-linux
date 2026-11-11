@@ -136,6 +136,12 @@ blocks (`TIKOLANG_SUPPORT` is defined in `tiko.bas` on Linux).
 * **Debug console** (both debuggers): restored in `frmDebug.inc` (it had been lost from the
   commits): the program runs on a "Tiko Debug Console" terminal (`set inferior-tty`).
 
+Mouse wheel in the editor: Scintilla's GTK code ignores smooth scroll events on X11, and GTK sends
+only those to a widget that selects `GDK_SMOOTH_SCROLL_MASK` when the mouse has XInput 2 scroll
+valuators (most real mice). `LnxConnectInputSignals` therefore leaves that mask off for Scintilla
+(the X server then sends wheel steps). Xvfb's XTEST pointer has no such valuators, so this cannot
+be reproduced there.
+
 Platform layer fix found while testing: `LnxLbInsert` sorted every `CBS_DROPDOWNLIST` combo box
 (its `&h3` contains `LBS_SORT` = `&h2`), so e.g. the keyword case combo showed the wrong entry.
 
