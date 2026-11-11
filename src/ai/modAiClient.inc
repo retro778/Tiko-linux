@@ -97,13 +97,39 @@ sub Ai_SaveSettings()
     ai_chmod( strptr(sFile), &o600 )     ' it can hold API keys: readable by the user only
 end sub
 
+' Keys exported in ~/.profile. Programs started from the desktop do not always get them: on
+' Debian/MX the X session reads ~/.xsessionrc, not ~/.profile. Read once, the way a login shell does.
+dim shared as string gAiProfileKey(1)        ' 0 Anthropic, 1 OpenAI
+dim shared as boolean gAiProfileRead
+
+private sub Ai_ReadProfileKeys()
+    if gAiProfileRead then exit sub
+    gAiProfileRead = true
+    dim as string sCmd = "timeout 5 /bin/sh -c '. ""$HOME/.profile"" >/dev/null 2>&1 </dev/null; " & _
+                         "printf ""%s\n%s\n"" ""$ANTHROPIC_API_KEY"" ""$OPENAI_API_KEY""' 2>/dev/null"
+    dim as long f = freefile
+    if open pipe(sCmd for input as #f) <> 0 then exit sub
+    if eof(f) = 0 then line input #f, gAiProfileKey(0)
+    if eof(f) = 0 then line input #f, gAiProfileKey(1)
+    close #f
+    gAiProfileKey(0) = trim(gAiProfileKey(0)) : gAiProfileKey(1) = trim(gAiProfileKey(1))
+end sub
+
+' The key from the environment or ~/.profile (not the one saved in Tiko's settings)
+private function Ai_SystemKey( byref sProvider as string ) as string
+    dim as string sEnv = environ(iif(sProvider = "openai", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"))
+    if len(sEnv) then return sEnv
+    Ai_ReadProfileKeys()
+    return gAiProfileKey(iif(sProvider = "openai", 1, 0))
+end function
+
 function Ai_KeyFromEnvironment( byref sProvider as string ) as boolean
-    return len(environ(iif(sProvider = "openai", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"))) > 0
+    return len(Ai_SystemKey(sProvider)) > 0
 end function
 
 function Ai_ApiKey( byref sProvider as string ) as string
-    dim as string sEnv = environ(iif(sProvider = "openai", "OPENAI_API_KEY", "ANTHROPIC_API_KEY"))
-    if len(sEnv) then return sEnv
+    dim as string sKey = Ai_SystemKey(sProvider)
+    if len(sKey) then return sKey
     return iif(sProvider = "openai", gAi.OpenAIKey, gAi.AnthropicKey)
 end function
 

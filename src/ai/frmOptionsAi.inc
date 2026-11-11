@@ -22,7 +22,7 @@ end function
 private function frmOptionsAi_KeyLabel( byref sProvider as string ) as DWSTRING
     dim as string sEnv = iif(sProvider = "openai", "OPENAI_API_KEY", "ANTHROPIC_API_KEY")
     if Ai_KeyFromEnvironment(sProvider) then
-        return DWSTRING("API key (" & sEnv & " is set in the environment and is used):")
+        return DWSTRING("API key (" & sEnv & " found and used):")
     end if
     return DWSTRING("API key (or set " & sEnv & " in the environment):")
 end function

@@ -163,8 +163,10 @@ Z/Y typed in the chat reach the chat controls instead of the editor commands
   default model `claude-opus-5-5`, Claude 5.x models opt into server-side refusal fallbacks with
   `fallbacks: "default"`, top-level `cache_control`) or OpenAI Chat Completions
   (`POST /chat/completions`, default model `gpt-5`). Both streamed (server-sent events).
-  Keys: `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`, else the key saved in `settings/ai.ini`
-  (mode 600). Base URLs are settable in `ai.ini` (`AnthropicBaseUrl`, `OpenAIBaseUrl`).
+  Keys: `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` from the environment, else from `~/.profile`
+  (read once through `/bin/sh`: programs started from the desktop may not have them, e.g. on
+  Debian/MX the X session reads `~/.xsessionrc`, not `~/.profile`), else the key saved in
+  `settings/ai.ini` (mode 600). Base URLs are settable in `ai.ini` (`AnthropicBaseUrl`, `OpenAIBaseUrl`).
 * **Transport:** libcurl (`curl.bi`) in a worker thread that only appends raw bytes to a buffer;
   a 40 ms timer on the panel parses the events on the UI thread (the JSON pool in `tkjson.bi`
   is shared with the tiko-lsp client). Stop aborts the transfer through the progress callback.
