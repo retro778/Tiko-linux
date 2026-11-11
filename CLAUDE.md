@@ -17,6 +17,7 @@ tiko language support, verified features, known issues) — keep it updated when
 make            # first run downloads+builds Scintilla 5.5.3 / Lexilla 5.4.1 into deps/, then builds ./tiko and bin/tiko-lldb-mi
 make clean      # removes ./tiko, bin/tiko-lldb-mi and obj/LexTiko.o (not deps/)
 ./tiko [file.bas | file.tiko | project.tiko]
+./install.sh         # per-user menu entry + ~/.local/bin/tiko-editor link to this folder (--uninstall)
 LNX_TRACE=1 ./tiko   # prints top-level window SetWindowPos/ShowWindow and child allocations
 ```
 
@@ -137,5 +138,5 @@ Linux variants).
 `upstream/toolchains/*/inc/AfxNova` used as API reference) and `deps/` are not tracked.
 Remote: private GitHub repo `retro778/Tiko-linux` (renamed from kito-lnx; use `gh ... -R retro778/Tiko-linux`).
 Releases are tags `v1.3.2-linux.N` with a tarball `tiko-<tag>-x86_64.tar.gz` (+ `.sha256`) of
-`tiko-linux/`: stripped `tiko` and `bin/tiko-lldb-mi` plus `git ls-files bin settings LICENSE README.md PORTING.md`
+`tiko-linux/`: stripped `tiko` and `bin/tiko-lldb-mi` plus `git ls-files bin settings LICENSE README.md PORTING.md install.sh`
 (copy with `-z`/`xargs -0`: `settings/languages/español.lang`), never the per-user settings files.

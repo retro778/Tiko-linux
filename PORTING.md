@@ -142,6 +142,11 @@ valuators (most real mice). `LnxConnectInputSignals` therefore leaves that mask 
 (the X server then sends wheel steps). Xvfb's XTEST pointer has no such valuators, so this cannot
 be reproduced there.
 
+Command line: `AfxCommand` returns an argument that names an existing file relative to the
+current folder as a full path (upstream would put the editor's folder in front of a bare name,
+since Windows' Explorer passes full paths). `install.sh` registers the folder as the
+`tiko-editor` command and a desktop menu entry.
+
 Platform layer fix found while testing: `LnxLbInsert` sorted every `CBS_DROPDOWNLIST` combo box
 (its `&h3` contains `LBS_SORT` = `&h2`), so e.g. the keyword case combo showed the wrong entry.
 

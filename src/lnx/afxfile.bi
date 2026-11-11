@@ -341,9 +341,21 @@ end function
 ' Command line
 ' ----------------------------------------------------------------------------
 ' nIndex = -1 returns the full command line; 0 the program; 1.. the arguments.
+' An argument naming an existing file relative to the current folder (tiko-editor demo.bas
+' typed in a terminal) is returned as a full path: upstream code would put the editor's own
+' folder in front of a name without a path, as Windows' Explorer always passes full paths.
 private function AfxCommand( byval nIndex as long = -1 ) as DWSTRING
     if nIndex = -1 then return DWSTRING( command(-1) )
-    return DWSTRING( command(nIndex) )
+    dim as string sArg = command(nIndex)
+    if (nIndex >= 1) andalso (len(sArg) > 0) andalso (left(sArg, 1) <> "/") andalso (left(sArg, 1) <> "-") then
+        dim as string sRel = sArg
+        do while left(sRel, 2) = "./"
+            sRel = mid(sRel, 3)
+        loop
+        dim as string sFull = curdir() & "/" & sRel
+        if AfxFileExists( DWSTRING(sFull) ) then return DWSTRING( sFull )
+    end if
+    return DWSTRING( sArg )
 end function
 
 ' Creates a unique temporary file (like GetTempFileName) and returns its name.
