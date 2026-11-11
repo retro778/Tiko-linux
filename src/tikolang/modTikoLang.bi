@@ -29,3 +29,12 @@ declare sub TikoLang_SaveSettings()
 dim shared as HWND HWND_FRMOPTIONSTIKOLANG
 declare function frmOptionsTikoLang_Show( byval hWndParent as HWND ) as LRESULT
 declare sub frmOptionsTikoLang_Save()
+
+' tiko-lsp client (modTikoLsp.inc)
+declare sub TikoLsp_SetupWindow( byval pSci as any ptr )
+declare sub TikoLsp_DocModified( byval pDoc as clsDocument ptr )
+declare sub TikoLsp_DocClosing( byval pDoc as clsDocument ptr )
+declare sub TikoLsp_OnDwell( byval hEdit as HWND, byval nPos as long, byval bStart as boolean )
+declare function TikoLsp_GotoDefinition( byval pDoc as clsDocument ptr ) as boolean
+declare function TikoLang_FindPackage( byref wszFilename as wstring ) as string
+declare function TikoLang_UseLldb() as boolean

@@ -93,6 +93,9 @@ function clsApp.RemoveDocument( byval pDoc as clsDocument ptr ) as long
         ' If this doc was associated with LastPosition then set to null
         ' because the pointer will no longer be valid.
         if gLastPosition.pDoc = pDoc then gLastPosition.pDoc = 0
+#ifdef TIKOLANG_SUPPORT
+        TikoLsp_DocClosing( pDoc )
+#endif
         delete(pDoc)
     end if   
 

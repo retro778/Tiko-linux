@@ -115,7 +115,26 @@ blocks (`TIKOLANG_SUPPORT` is defined in `tiko.bas` on Linux).
   current file, else the first executable. Quick Run still builds the single file.
 * **Command lines:** like Windows' `CreateProcess`, the layer takes the first word of the
   command line as argv[0], so the tiko command lines start with the compiler path.
-* Not done: the tiko-lsp language server, lldb-dap.
+* **Language server** (`src/tikolang/modTikoLsp.inc`, option "Check tiko code as you type"):
+  `tiko-lsp --stdio` (beside the compiler, else PATH) starts when a file built with tiko is
+  open and stops when the last one closes. JSON-RPC over pipes, read by a GLib watch on the
+  main loop. A 300 ms timer opens/closes documents; edits (hook in `SCN_MODIFIED`) are sent
+  as full text 0.4 s after the last change. `publishDiagnostics` -> squiggles (indicators
+  20 error / 21 warning); `SCN_DWELLSTART` shows the message of an underlined problem, else
+  `textDocument/hover` as a calltip; F12 (`OnCommand_SearchGotoDefinition` hook) asks
+  `textDocument/definition` and falls back to the editor's own search. Positions are UTF-16
+  columns (`SCI_COUNTCODEUNITS` / `SCI_POSITIONRELATIVECODEUNITS`). JSON: `tkjson.bi`.
+* **lldb** (option "Debugger: lldb"): the debugger window is written for gdb/MI, so
+  `bin/tiko-lldb-mi` (`src/tikolang/tiko-lldb-mi.bas`, built by `make`) answers the MI
+  subset `frmDebug.inc` uses by driving `lldb-dap` (DAP): breakpoints (`setBreakpoints`,
+  `setFunctionBreakpoints`, functions from lldb's `breakpoint list`), run/continue/step/
+  next/finish, `-stack-list-variables` (values written like gdb's: records `{a = 1}`,
+  strings `0x.. 'text'#10'..'`, references `@0x..: {...}`), exits and signals. The program
+  runs on the debug console through DAP `runInTerminal`. lldb-dap: `$TIKO_LLDB_DAP`, else
+  `lldb-dap`, else the newest `lldb-dap-NN` on the PATH. Each MI answer is written as its
+  own burst 150 ms apart because `gdb_receive` drops what follows a message.
+* **Debug console** (both debuggers): restored in `frmDebug.inc` (it had been lost from the
+  commits): the program runs on a "Tiko Debug Console" terminal (`set inferior-tty`).
 
 Platform layer fix found while testing: `LnxLbInsert` sorted every `CBS_DROPDOWNLIST` combo box
 (its `&h3` contains `LBS_SORT` = `&h2`), so e.g. the keyword case combo showed the wrong entry.

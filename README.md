@@ -10,6 +10,8 @@ first so Scintilla, Lexilla and `obj/LexTiko.o` exist).
 
 The editor also builds programs in the [tiko programming language](https://github.com/PaulSquires/tiko-lang)
 (`.tiko`, `.ti`, `.tko` files) with the `tiko` compiler, next to FreeBASIC with `fbc`.
-The compiler needs clang (LLVM 18+); the debugger uses gdb for both languages.
+The compiler needs clang (LLVM 18+). Tiko files are checked as you type with `tiko-lsp`
+(errors, hover, F12), and programs can be debugged with gdb or lldb (`lldb-dap`), chosen
+in Environment Options > Compilers.
 
 See [PORTING.md](PORTING.md) for the architecture, upstream changes and current status.

@@ -16,6 +16,9 @@
 #define IDC_FRMOPTIONSTIKOLANG_CMDPATH      1107
 #define IDC_FRMOPTIONSTIKOLANG_LBLFOUND     1108
 #define IDC_FRMOPTIONSTIKOLANG_LBLNOTE      1109
+#define IDC_FRMOPTIONSTIKOLANG_CHKLSP       1110
+#define IDC_FRMOPTIONSTIKOLANG_LBLDEBUGGER  1111
+#define IDC_FRMOPTIONSTIKOLANG_COMBODEBUGGER 1112
 
 ' Shows which tiko compiler a build would use
 private sub frmOptionsTikoLang_UpdateFound( byval hwnd as HWND )
@@ -110,6 +113,17 @@ function frmOptionsTikoLang_Show( byval hWndParent as HWND ) as LRESULT
         "compiles tiko files that use no tiko-only features (#import, generics, ustring, ...).", _
         0, 196, 400, 64, WS_CHILD or WS_VISIBLE or SS_LEFT, WS_EX_LEFT or WS_EX_LTRREADING)
 
+    pWindow->AddControl("CHECKBOX", , IDC_FRMOPTIONSTIKOLANG_CHKLSP, _
+        "Check tiko code as you type (tiko-lsp: errors, hover, F12)", 0, 266, 400, 20, _
+        WS_CHILD or WS_VISIBLE or WS_TABSTOP or BS_TEXT or BS_NOTIFY or BS_AUTOCHECKBOX or BS_LEFT or BS_VCENTER, _
+        WS_EX_LEFT or WS_EX_LTRREADING)
+
+    pWindow->AddControl("LABEL", , IDC_FRMOPTIONSTIKOLANG_LBLDEBUGGER, "Debugger:", 0, 296, 70, 16, _
+        WS_CHILD or WS_VISIBLE or SS_LEFT or SS_NOTIFY, WS_EX_LEFT or WS_EX_LTRREADING)
+    pWindow->AddControl("COMBOBOX", , IDC_FRMOPTIONSTIKOLANG_COMBODEBUGGER, "", 72, 293, 178, 20, _
+        WS_CHILD or WS_VISIBLE or WS_VSCROLL or WS_TABSTOP or CBS_DROPDOWNLIST, _
+        WS_EX_CLIENTEDGE or WS_EX_LEFT or WS_EX_LTRREADING or WS_EX_RIGHTSCROLLBAR)
+
     dim as HWND hwnd = HWND_FRMOPTIONSTIKOLANG
     dim as wstring * 32 wszFbc = "FreeBASIC (fbc)", wszTiko = "tiko"
     dim as HWND hCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_COMBOBAS)
@@ -121,6 +135,12 @@ function frmOptionsTikoLang_Show( byval hWndParent as HWND ) as LRESULT
     ComboBox_AddString( hCombo, @wszFbc )       ' 1
     ComboBox_SetCurSel( hCombo, iif(gTikoLang.TikoWithFbc, 1, 0) )
     AfxSetWindowText( GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_TXTPATH), DWSTRING(gTikoLang.CompilerPath, CP_UTF8) )
+    Button_SetCheck( GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_CHKLSP), gTikoLang.LanguageServer )
+    dim as wstring * 32 wszGdb = "gdb", wszLldb = "lldb (lldb-dap)"
+    hCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_COMBODEBUGGER)
+    ComboBox_AddString( hCombo, @wszGdb )       ' 0
+    ComboBox_AddString( hCombo, @wszLldb )      ' 1
+    ComboBox_SetCurSel( hCombo, iif(gTikoLang.DebugWithLldb, 1, 0) )
     frmOptionsTikoLang_UpdateFound( hwnd )
 
     function = 0
@@ -134,5 +154,7 @@ sub frmOptionsTikoLang_Save()
     gTikoLang.TikoWithFbc = (ComboBox_GetCurSel( GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_COMBOTIKO) ) = 1)
     dim as DWSTRING wszPath = AfxGetWindowText( GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_TXTPATH) )
     gTikoLang.CompilerPath = trim(wszPath.utf8)
+    gTikoLang.LanguageServer = (Button_GetCheck( GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_CHKLSP) ) <> 0)
+    gTikoLang.DebugWithLldb = (ComboBox_GetCurSel( GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_COMBODEBUGGER) ) = 1)
     TikoLang_SaveSettings()
 end sub

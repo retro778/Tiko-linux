@@ -60,6 +60,12 @@ end function
 function OnCommand_SearchGotoDefinition( byval pDoc as clsDocument ptr ) as LRESULT
 
     If pDoc = 0 Then Exit Function
+#ifdef TIKOLANG_SUPPORT
+    ' tiko files: the language server knows the declarations (falls back to the code below)
+    if IsCurrentLineIncludeFilename() = false then
+        if TikoLsp_GotoDefinition( pDoc ) then return 0
+    end if
+#endif
     
     dim pData as DB2_DATA ptr
     dim as DWSTRING wszFilename

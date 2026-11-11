@@ -384,6 +384,12 @@ function Scintilla_OnNotify( _
             return true
             
         
+#ifdef TIKOLANG_SUPPORT
+        case SCN_DWELLSTART, SCN_DWELLEND
+            ' tiko-lsp: message of an underlined problem, or what the name under the mouse is
+            TikoLsp_OnDwell( cast(HWND, pNSC->hdr.hwndFrom), pNSC->position, (pNSC->hdr.code = SCN_DWELLSTART) )
+#endif
+
         case SCN_MODIFYATTEMPTRO
             ' Attempting to modify a read-only document.
             MessageBeep(MB_ICONWARNING)
@@ -409,6 +415,9 @@ function Scintilla_OnNotify( _
                 ' as it is loading and is not yet the active document ptr.
                 pDoc = gApp.GetDocumentPtrByWindow( pNSC->hdr.hwndFrom )
                 if pDoc then 
+#ifdef TIKOLANG_SUPPORT
+                    TikoLsp_DocModified( pDoc )     ' tiko-lsp: send the new text
+#endif
 
                     frmMain_SetStatusbar
                             

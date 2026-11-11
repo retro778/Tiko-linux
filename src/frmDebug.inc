@@ -110,6 +110,11 @@ function gdb_init( byval executable as string = "", byval cmdparams as string = 
     ' Use the bundled gdb when present, otherwise the system gdb.
     dim as DWSTRING wszGDBexe = AfxGetExePathName & "bin/gdb/gdb"
     if AfxFileExists(wszGDBexe) = false then wszGDBexe = "gdb"
+#ifdef TIKOLANG_SUPPORT
+    ' Debugger "lldb" (Environment Options > Compilers): tiko-lldb-mi answers the same
+    ' gdb/MI commands by driving lldb-dap
+    if TikoLang_UseLldb() then wszGDBexe = AfxGetExePathName & "bin/tiko-lldb-mi"
+#endif
 #else
     dim as DWSTRING wszGDBexe = AfxGetExePathName & "\bin\gdb\gdb.exe"
 #endif
@@ -264,6 +269,9 @@ end sub
 
 ' Close GDB session
 sub gdb_close()
+#ifdef __FB_LINUX__
+    LnxCloseDebugConsole()      ' the program's terminal
+#endif
     if gdb_session.initialized then
         gdb_session.KillMessageThread = true
 
@@ -1305,6 +1313,14 @@ function frmDebug_Show( byval hWndParent as HWND, byval executable as string, by
         frmDebug_SetInitialBreakpoints( gdb_session )
         gdb_send("set confirm off" )
         gdb_send("set language pascal" )
+#ifdef __FB_LINUX__
+        ' The program gets a terminal of its own for its input and output, like the
+        ' console Windows gives it (gdb would otherwise mix it into its MI output)
+        scope
+            dim as string sTty = LnxCreateDebugConsole()
+            if len(sTty) then gdb_send( "set inferior-tty " & sTty )
+        end scope
+#endif
         
         gdb_session.hThreadMutex = MutexCreate()
         gdb_session.hThreadMessages = ThreadCreate( @gdb_threadListener, @gdb_session )

@@ -24,6 +24,8 @@ type TIKOLANG_SETTINGS
     BasWithTiko   as boolean      ' compile .bas/.bi/.inc (and other files) with tiko instead of fbc
     TikoWithFbc   as boolean      ' compile .tiko/.ti/.tko with fbc instead of tiko
     CompilerPath  as string       ' tiko compiler; empty = find it (TikoLang_FindCompiler)
+    LanguageServer as boolean     ' check tiko code as you type with tiko-lsp (modTikoLsp.inc)
+    DebugWithLldb  as boolean     ' debug with lldb (bin/tiko-lldb-mi + lldb-dap) instead of gdb
 end type
 dim shared gTikoLang as TIKOLANG_SETTINGS
 
@@ -81,6 +83,7 @@ end function
 sub TikoLang_LoadSettings()
     if gTikoLang.Loaded then exit sub
     gTikoLang.Loaded = true
+    gTikoLang.LanguageServer = true
     dim as long f = freefile
     if open(TikoLang_SettingsFile() for input as #f) <> 0 then exit sub
     do until eof(f)
@@ -94,6 +97,8 @@ sub TikoLang_LoadSettings()
             case "bascompiler":  gTikoLang.BasWithTiko = (lcase(sValue) = "tiko")
             case "tikocompiler": gTikoLang.TikoWithFbc = (lcase(sValue) = "fbc")
             case "tikocompilerpath": gTikoLang.CompilerPath = sValue
+            case "languageserver": gTikoLang.LanguageServer = (sValue <> "0")
+            case "debugger": gTikoLang.DebugWithLldb = (lcase(sValue) = "lldb")
         end select
     loop
     close #f
@@ -106,6 +111,8 @@ sub TikoLang_SaveSettings()
     print #f, "BasCompiler=" & iif(gTikoLang.BasWithTiko, "tiko", "fbc")
     print #f, "TikoCompiler=" & iif(gTikoLang.TikoWithFbc, "fbc", "tiko")
     print #f, "TikoCompilerPath=" & gTikoLang.CompilerPath
+    print #f, "LanguageServer=" & iif(gTikoLang.LanguageServer, "1", "0")
+    print #f, "Debugger=" & iif(gTikoLang.DebugWithLldb, "lldb", "gdb")
     close #f
 end sub
 
@@ -115,6 +122,13 @@ function TikoLang_UsesTiko( byref wszFilename as wstring ) as boolean
     if TikoLang_IsSourceFile(wszFilename) then return (gTikoLang.TikoWithFbc = false)
     if lcase(AfxStrPathname("EXTN", wszFilename)) = ".rc" then return false
     return gTikoLang.BasWithTiko
+end function
+
+' The debugger window uses bin/tiko-lldb-mi (lldb) instead of gdb
+function TikoLang_UseLldb() as boolean
+    TikoLang_LoadSettings()
+    if gTikoLang.DebugWithLldb = false then return false
+    return AfxFileExists(DWSTRING(TikoLang_ExeDir() & "bin/tiko-lldb-mi", CP_UTF8)) <> 0
 end function
 
 ' The document that a compile would build: the project's main file or the active document
@@ -776,6 +790,7 @@ sub TikoLang_SetupLexer( byval hSci as any ptr, byref wszFilename as wstring )
     SciMsg( hSci, SCI_STYLESETBOLD, SCE_B_DATE, SciMsg(hSci, SCI_STYLEGETBOLD, SCE_B_STRING, 0) )
     SciMsg( hSci, SCI_STYLESETITALIC, SCE_B_DATE, SciMsg(hSci, SCI_STYLEGETITALIC, SCE_B_STRING, 0) )
     SciMsg( hSci, SCI_COLOURISE, 0, -1 )
+    TikoLsp_SetupWindow( hSci )     ' errors as you type, hover, F12
 end sub
 
 ' F1 in a tiko file: the keyword's page of the tiko wiki (settings/help/tiko_wiki_index.txt)
@@ -805,3 +820,4 @@ function TikoLang_ShowHelp( byref wszWord as wstring ) as boolean
 end function
 
 #include once "frmOptionsTikoLang.inc"
+#include once "modTikoLsp.inc"

@@ -19,3 +19,4 @@ settings/keybindings.ini
 # the tiko language ebook (not ours to redistribute)
 *.pdf
 settings/tikolang.ini
+bin/tiko-lldb-mi

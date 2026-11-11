@@ -5,7 +5,7 @@ SCI_LIB   = $(DEPS)/scintilla/bin/scintilla.a
 LEX_LIB   = $(DEPS)/lexilla/bin/liblexilla.a
 FBFLAGS  ?= -w all -gen gcc -O 2
 
-all: tiko
+all: tiko bin/tiko-lldb-mi
 
 SCI_VER   = 553
 LEX_VER   = 541
@@ -31,7 +31,11 @@ $(LEXTIKO_OBJ): src/lexer/LexTiko.cxx $(LEX_LIB)
 tiko: $(SCI_LIB) $(LEX_LIB) $(LEXTIKO_OBJ) src/*.bas src/*.bi src/*.inc src/lnx/* src/tikolang/*
 	$(FBC) $(FBFLAGS) src/tiko.bas -x tiko -a $(LEXTIKO_OBJ) -a $(SCI_LIB) -a $(LEX_LIB) -l gmodule-2.0 -l pangoft2-1.0 -l fontconfig -l X11
 
+# gdb/MI front end for lldb-dap: the debugger window uses it when "lldb" is chosen
+bin/tiko-lldb-mi: src/tikolang/tiko-lldb-mi.bas src/tikolang/tkjson.bi
+	$(FBC) -w all src/tikolang/tiko-lldb-mi.bas -x bin/tiko-lldb-mi
+
 clean:
-	rm -f tiko $(LEXTIKO_OBJ)
+	rm -f tiko bin/tiko-lldb-mi $(LEXTIKO_OBJ)
 
 .PHONY: all clean
