@@ -21,3 +21,11 @@ declare function TikoLang_FindCompiler() as DWSTRING
 declare function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolean
 declare sub TikoLang_SetupLexer( byval hSci as any ptr, byref wszFilename as wstring )
 declare function TikoLang_ShowHelp( byref wszWord as wstring ) as boolean
+declare function TikoLang_UsesTiko( byref wszFilename as wstring ) as boolean
+declare sub TikoLang_LoadSettings()
+declare sub TikoLang_SaveSettings()
+
+' "Compilers" page of Environment Options (frmOptionsTikoLang.inc)
+dim shared as HWND HWND_FRMOPTIONSTIKOLANG
+declare function frmOptionsTikoLang_Show( byval hWndParent as HWND ) as LRESULT
+declare sub frmOptionsTikoLang_Save()

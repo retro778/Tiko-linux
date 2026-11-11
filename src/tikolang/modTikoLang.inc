@@ -18,6 +18,15 @@ end extern
 dim shared as string gTikoLangKeywords
 dim shared as boolean gTikoLangKeywordsLoaded
 
+' User settings (settings/tikolang.ini, written by the "Compilers" options page)
+type TIKOLANG_SETTINGS
+    Loaded        as boolean
+    BasWithTiko   as boolean      ' compile .bas/.bi/.inc (and other files) with tiko instead of fbc
+    TikoWithFbc   as boolean      ' compile .tiko/.ti/.tko with fbc instead of tiko
+    CompilerPath  as string       ' tiko compiler; empty = find it (TikoLang_FindCompiler)
+end type
+dim shared gTikoLang as TIKOLANG_SETTINGS
+
 ' folder of the editor executable, with a trailing "/"
 private function TikoLang_ExeDir() as string
     dim as DWSTRING w = AfxGetExePathName
@@ -65,6 +74,49 @@ function TikoLang_IsSourceFile( byref wszFilename as wstring ) as boolean
     return true
 end function
 
+private function TikoLang_SettingsFile() as string
+    return TikoLang_ExeDir() & "settings/tikolang.ini"
+end function
+
+sub TikoLang_LoadSettings()
+    if gTikoLang.Loaded then exit sub
+    gTikoLang.Loaded = true
+    dim as long f = freefile
+    if open(TikoLang_SettingsFile() for input as #f) <> 0 then exit sub
+    do until eof(f)
+        dim as string sLine
+        line input #f, sLine
+        sLine = trim(sLine, any !" \t\r")
+        dim as long p = instr(sLine, "=")
+        if (p = 0) orelse (left(sLine, 1) = "'") orelse (left(sLine, 1) = "[") then continue do
+        dim as string sKey = lcase(trim(left(sLine, p - 1))), sValue = trim(mid(sLine, p + 1))
+        select case sKey
+            case "bascompiler":  gTikoLang.BasWithTiko = (lcase(sValue) = "tiko")
+            case "tikocompiler": gTikoLang.TikoWithFbc = (lcase(sValue) = "fbc")
+            case "tikocompilerpath": gTikoLang.CompilerPath = sValue
+        end select
+    loop
+    close #f
+end sub
+
+sub TikoLang_SaveSettings()
+    dim as long f = freefile
+    if open(TikoLang_SettingsFile() for output as #f) <> 0 then exit sub
+    print #f, "' Which compiler builds which files (Options > Environment Options > Compilers)"
+    print #f, "BasCompiler=" & iif(gTikoLang.BasWithTiko, "tiko", "fbc")
+    print #f, "TikoCompiler=" & iif(gTikoLang.TikoWithFbc, "fbc", "tiko")
+    print #f, "TikoCompilerPath=" & gTikoLang.CompilerPath
+    close #f
+end sub
+
+' true when the file is built (and edited) as tiko: by its extension and the user's choice
+function TikoLang_UsesTiko( byref wszFilename as wstring ) as boolean
+    TikoLang_LoadSettings()
+    if TikoLang_IsSourceFile(wszFilename) then return (gTikoLang.TikoWithFbc = false)
+    if lcase(AfxStrPathname("EXTN", wszFilename)) = ".rc" then return false
+    return gTikoLang.BasWithTiko
+end function
+
 ' The document that a compile would build: the project's main file or the active document
 private function TikoLang_MainDocument() as clsDocument ptr
     if gApp.IsProjectActive then return gApp.GetMainDocumentPtr()
@@ -74,12 +126,19 @@ end function
 function TikoLang_IsTikoBuild() as boolean
     dim pDoc as clsDocument ptr = TikoLang_MainDocument()
     if pDoc = 0 then return false
-    return TikoLang_IsSourceFile(pDoc->DiskFilename)
+    return TikoLang_UsesTiko(pDoc->DiskFilename)
 end function
 
 ' The tiko compiler: $TIKO_COMPILER, else "tiko" on the PATH (skipping this editor, which is
 ' also called tiko), else the usual install folders.
 function TikoLang_FindCompiler() as DWSTRING
+    TikoLang_LoadSettings()
+    if len(gTikoLang.CompilerPath) then
+        ' the path chosen in the options (a missing file is reported by the compile)
+        dim as string sChosen = gTikoLang.CompilerPath
+        if left(sChosen, 2) = "~/" then sChosen = environ("HOME") & mid(sChosen, 2)
+        return DWSTRING(sChosen, CP_UTF8)
+    end if
     dim as string sEnv = environ("TIKO_COMPILER")
     if (len(sEnv) > 0) andalso (AfxFileExists(DWSTRING(sEnv)) <> 0) then return DWSTRING(sEnv)
 
@@ -161,7 +220,7 @@ private function TikoLang_Version( byref wszCompiler as DWSTRING ) as string
     static as string sCachedFor, sCached
     if sCachedFor = wszCompiler.utf8 then return sCached
     dim as string sText
-    RedirConsoleToFile( wszCompiler, "--version", sText )
+    RedirConsoleToFile( wszCompiler, chr(34) & wszCompiler & chr(34) & " --version", sText )
     sCachedFor = wszCompiler.utf8
     sCached = trim(AfxStrParse(DWSTRING(sText), 1, vbCrLf).utf8)
     if len(sCached) = 0 then sCached = "tiko"
@@ -298,12 +357,19 @@ function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolea
     dim as DWSTRING wDQ = wchr(34)
 
     dim as DWSTRING wszCompiler = TikoLang_FindCompiler()
+    if (len(wszCompiler) > 0) andalso (AfxFileExists(wszCompiler) = 0) then
+        SetCompileStatusBarMessage( "", 0 )
+        MessageBox( HWND_FRMMAIN, L(202,"Invalid defined compiler path.") & vbcrlf & "Path: " & wszCompiler & _
+            vbcrlf & vbcrlf & "(Environment Options > Compilers)", L(201,"Error"), _
+            MB_OK or MB_ICONINFORMATION or MB_DEFBUTTON1 )
+        return false
+    end if
     if len(wszCompiler) = 0 then
         SetCompileStatusBarMessage( "", 0 )
         MessageBox( HWND_FRMMAIN, _
             "The tiko compiler was not found." & vbcrlf & vbcrlf & _
-            "Put the tiko-lang/bin folder on the PATH, or set the TIKO_COMPILER" & vbcrlf & _
-            "environment variable to the compiler (for example ~/tiko-lang/bin/tiko).", _
+            "Choose it in Environment Options > Compilers, put the tiko-lang/bin" & vbcrlf & _
+            "folder on the PATH, or set the TIKO_COMPILER environment variable.", _
             L(201,"Error"), MB_OK or MB_ICONINFORMATION or MB_DEFBUTTON1 )
         return false
     end if
@@ -397,7 +463,7 @@ function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolea
     if gApp.IsProjectActive then
         dim pDoc as clsDocument ptr = gApp.pDocList
         do until pDoc = 0
-            if (pDoc->ProjectFileType = FILETYPE_MODULE) andalso TikoLang_IsTikoExtension(pDoc->DiskFilename) then
+            if pDoc->ProjectFileType = FILETYPE_MODULE then
                 wszInputs = wszInputs & " " & wDQ & pDoc->DiskFilename & wDQ
             end if
             pDoc = pDoc->pDocNext
@@ -421,7 +487,8 @@ function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolea
 
     dim as CompileThreadParams ctp
     ctp.wszExe = wszCompiler
-    ctp.wszCmdLine = wszParams
+    ' the first word is the program name (argv[0]), as with Windows' CreateProcess
+    ctp.wszCmdLine = wDQ & wszCompiler & wDQ & " " & wszParams
     ctp.sConsoleText = ""
     gCompile.bCompileThreadComplete = false
     dim as any ptr pThread = ThreadCreate( @compile_thread, @ctp )
@@ -470,7 +537,9 @@ end function
 ' Called for every editor window when its language properties are applied: tiko files
 ' get the tiko keywords (on top of FreeBASIC's) and """ block strings.
 sub TikoLang_SetupLexer( byval hSci as any ptr, byref wszFilename as wstring )
+    ' the tiko language: tiko files, and FreeBASIC files that the user builds with tiko
     dim as boolean bTiko = TikoLang_IsSourceFile(wszFilename)
+    if (len(wszFilename) > 0) andalso TikoLang_UsesTiko(wszFilename) then bTiko = true
     dim as string sProp = "lexer.tiko.blockstrings", sValue = iif(bTiko, "1", "0")
     SciMsg( hSci, SCI_SETPROPERTY, cast(WPARAM, strptr(sProp)), cast(LPARAM, strptr(sValue)) )
     if bTiko = false then exit sub
@@ -524,3 +593,5 @@ function TikoLang_ShowHelp( byref wszWord as wstring ) as boolean
     ShellExecute( NULL, "open", url.vptr, NULL, NULL, SW_SHOWNORMAL )
     return true
 end function
+
+#include once "frmOptionsTikoLang.inc"

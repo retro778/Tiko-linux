@@ -108,6 +108,9 @@ function frmOptions_SaveEditorOptions() as long
     
     
     ' COMPILER OPTIONS
+#ifdef TIKOLANG_SUPPORT
+    frmOptionsTikoLang_Save()     ' which compiler builds which files
+#endif
     hwnd = HWND_FRMOPTIONSCOMPILER
     
     ' Get the selected toolchain and then build the paths to the compilers
@@ -284,6 +287,11 @@ function frmOptions_OnNotify( _
                     case 8
                         AfxSetWindowText( hLabel, " " & L(439,"Extra Keywords") )
                         hForm = HWND_FRMOPTIONSKEYWORDSEXTRA
+#ifdef TIKOLANG_SUPPORT
+                    case 9
+                        AfxSetWindowText( hLabel, " Compilers" )
+                        hForm = HWND_FRMOPTIONSTIKOLANG
+#endif
                 end select
                     
                 ' Save the most recently opened tree branch 
@@ -422,12 +430,19 @@ function frmOptions_Show( byval hWndParent as HWND ) as LRESULT
     gConfig.LoadConfigFile()
 
     ' Configure the TreeView
+#ifdef TIKOLANG_SUPPORT
+    dim hItems(9) as HTREEITEM     ' 9 = "Compilers" (fbc / tiko)
+#else
     dim hItems(8) as HTREEITEM 
+#endif
     hItems(0) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(226,"General Options"),      0)
     hItems(1) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(110,"Code Editor"),          1)
     hItems(2) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(107,"Advanced Code Editor"), 2)
     hItems(3) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(111,"Colors and Fonts"),     3)
     hItems(4) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(112,"Compiler Setup"),       4)
+#ifdef TIKOLANG_SUPPORT
+    hItems(9) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, "Compilers",                   9)
+#endif
     hItems(5) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(129,"Localization"),         5)
     hItems(6) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"),   6)
     hItems(7) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(435,"Windows API Keywords"), 7)
@@ -443,6 +458,9 @@ function frmOptions_Show( byval hWndParent as HWND ) as LRESULT
     frmOptionsKeywords_Show( pWindow->hWindow )
     frmOptionsKeywordsWinApi_Show( pWindow->hWindow )
     frmOptionsKeywordsExtra_Show( pWindow->hWindow )
+#ifdef TIKOLANG_SUPPORT
+    frmOptionsTikoLang_Show( pWindow->hWindow )
+#endif
 
     ' Select the most previously open tree branch or first item "Code Editor" by default.
     TreeView_SelectItem( hWndTreeview, hItems(OptionsDialogLastOpened) )
@@ -465,6 +483,10 @@ function frmOptions_Show( byval hWndParent as HWND ) as LRESULT
     pWindow = AfxCWindowPtr(HWND_FRMOPTIONSKEYWORDS):  if pWindow then delete(pWindow)
     pWindow = AfxCWindowPtr(HWND_FRMOPTIONSKEYWORDSWINAPI):  if pWindow then delete(pWindow)
     pWindow = AfxCWindowPtr(HWND_FRMOPTIONSKEYWORDSEXTRA):   if pWindow then delete(pWindow)
+#ifdef TIKOLANG_SUPPORT
+    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSTIKOLANG):   if pWindow then delete(pWindow)
+    HWND_FRMOPTIONSTIKOLANG = 0
+#endif
 
 end function
 

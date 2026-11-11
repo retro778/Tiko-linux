@@ -79,7 +79,8 @@ function code_Compile( byval wID as long ) as boolean
     idxBuild = frmBuildConfig_getActiveBuildIndex()
     if idxBuild = -1 then idxBuild = 0
 #ifdef TIKOLANG_SUPPORT
-    ' A tiko language main file is built by the tiko compiler
+    ' Built by the tiko compiler: tiko files, or any file the user chose to build with tiko
+    ' (Environment Options > Compilers)
     if TikoLang_IsTikoBuild() then return TikoLang_Compile( wID, idxBuild )
 #endif
     
@@ -408,6 +409,13 @@ function code_Compile( byval wID as long ) as boolean
     'dim as DWSTRING wszMfile = AfxStrPathName("NAME", gCompile.MainFilename) 
     'wszParams = "-m " + wszMfile + " " + wDQ + gCompile.MainFilename + wDQ 
     wszParams = "-m " + wDQ + gCompile.MainFilename + wDQ 
+#ifdef TIKOLANG_SUPPORT
+    ' fbc only takes .bas files as sources unless -b names them (a .tiko file built with fbc).
+    ' The "-m" in front is argv[0] of the command line and is not seen by fbc.
+    if lcase(AfxStrPathname("EXTN", gCompile.MainFilename)) <> ".bas" then
+        wszParams = "-m -b " + wDQ + gCompile.MainFilename + wDQ
+    end if
+#endif
 
 
     if len(gCompile.LinkModules) then
