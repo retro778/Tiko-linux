@@ -111,6 +111,9 @@ function frmOptions_SaveEditorOptions() as long
 #ifdef TIKOLANG_SUPPORT
     frmOptionsTikoLang_Save()     ' which compiler builds which files
 #endif
+#ifdef AI_ASSISTANT
+    frmOptionsAi_Save()           ' AI provider, models, keys
+#endif
     hwnd = HWND_FRMOPTIONSCOMPILER
     
     ' Get the selected toolchain and then build the paths to the compilers
@@ -292,6 +295,11 @@ function frmOptions_OnNotify( _
                         AfxSetWindowText( hLabel, " Compilers" )
                         hForm = HWND_FRMOPTIONSTIKOLANG
 #endif
+#ifdef AI_ASSISTANT
+                    case 10
+                        AfxSetWindowText( hLabel, " AI Assistant" )
+                        hForm = HWND_FRMOPTIONSAI
+#endif
                 end select
                     
                 ' Save the most recently opened tree branch 
@@ -431,7 +439,7 @@ function frmOptions_Show( byval hWndParent as HWND ) as LRESULT
 
     ' Configure the TreeView
 #ifdef TIKOLANG_SUPPORT
-    dim hItems(9) as HTREEITEM     ' 9 = "Compilers" (fbc / tiko)
+    dim hItems(10) as HTREEITEM    ' 9 = "Compilers" (fbc / tiko), 10 = "AI Assistant"
 #else
     dim hItems(8) as HTREEITEM 
 #endif
@@ -442,6 +450,9 @@ function frmOptions_Show( byval hWndParent as HWND ) as LRESULT
     hItems(4) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(112,"Compiler Setup"),       4)
 #ifdef TIKOLANG_SUPPORT
     hItems(9) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, "Compilers",                   9)
+#endif
+#ifdef AI_ASSISTANT
+    hItems(10) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, "AI Assistant",               10)
 #endif
     hItems(5) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(129,"Localization"),         5)
     hItems(6) = TreeView_AppendItem (hwndTreeview, TVI_ROOT, L(177,"FreeBASIC Keywords"),   6)
@@ -460,6 +471,9 @@ function frmOptions_Show( byval hWndParent as HWND ) as LRESULT
     frmOptionsKeywordsExtra_Show( pWindow->hWindow )
 #ifdef TIKOLANG_SUPPORT
     frmOptionsTikoLang_Show( pWindow->hWindow )
+#endif
+#ifdef AI_ASSISTANT
+    frmOptionsAi_Show( pWindow->hWindow )
 #endif
 
     ' Select the most previously open tree branch or first item "Code Editor" by default.
@@ -486,6 +500,10 @@ function frmOptions_Show( byval hWndParent as HWND ) as LRESULT
 #ifdef TIKOLANG_SUPPORT
     pWindow = AfxCWindowPtr(HWND_FRMOPTIONSTIKOLANG):   if pWindow then delete(pWindow)
     HWND_FRMOPTIONSTIKOLANG = 0
+#endif
+#ifdef AI_ASSISTANT
+    pWindow = AfxCWindowPtr(HWND_FRMOPTIONSAI):   if pWindow then delete(pWindow)
+    HWND_FRMOPTIONSAI = 0
 #endif
 
 end function

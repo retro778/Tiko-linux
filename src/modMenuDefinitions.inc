@@ -130,6 +130,10 @@ Function getMenuText( byval idMenu as long ) As DWSTRING
         case IDM_FUNCTIONLIST: wszText = L(221,"View Function List")
         case IDM_BOOKMARKSLIST: wszText = L(443,"View Bookmarks List")
         case IDM_VIEWOUTPUT: wszText = L(251,"View Output Window")
+#ifdef AI_ASSISTANT
+        case IDM_VIEWAICHAT: wszText = "View AI Assistant"
+        case IDM_AIEXPLAINERRORS: wszText = "Explain Compile Errors (AI)"
+#endif
         case IDM_EXPLORERPOSITION:
             wszText = L(87,"Move Explorer Window") & " " & _
             iif(gConfig.ExplorerPositionRight, L(88, "Left"), L(89, "Right"))
@@ -337,6 +341,10 @@ function buildTopMenuDefinitions() as long
     setTopMenuItem( IDC_MENUBAR_VIEW, IDM_VIEWOUTPUT, 0, false, false )
     setTopMenuItem( IDC_MENUBAR_VIEW, IDM_FUNCTIONLIST, 0, false, false )
     setTopMenuItem( IDC_MENUBAR_VIEW, IDM_BOOKMARKSLIST, 0, false, false )
+#ifdef AI_ASSISTANT
+    setTopMenuItem( IDC_MENUBAR_VIEW, IDM_VIEWAICHAT, 0, false, false )
+    setTopMenuItem( IDC_MENUBAR_VIEW, IDM_AIEXPLAINERRORS, 0, false, false )
+#endif
     setTopMenuItem( IDC_MENUBAR_VIEW, 0, 0, false, true )
     setTopMenuItem( IDC_MENUBAR_VIEW, IDM_ZOOMIN, 0, false, false )
     setTopMenuItem( IDC_MENUBAR_VIEW, IDM_ZOOMOUT, 0, false, false )

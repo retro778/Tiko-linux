@@ -18,4 +18,8 @@ The compiler needs clang (LLVM 18+). Tiko files are checked as you type with `ti
 (errors, hover, F12), and programs can be debugged with gdb or lldb (`lldb-dap`), chosen
 in Environment Options > Compilers.
 
+An AI assistant panel (View > View AI Assistant, Ctrl+Shift+A) chats with Claude (Anthropic API)
+or OpenAI about the current file, explains compile errors and inserts suggested code. It uses
+`ANTHROPIC_API_KEY` / `OPENAI_API_KEY` or a key entered in Environment Options > AI Assistant.
+
 See [PORTING.md](PORTING.md) for the architecture, upstream changes and current status.

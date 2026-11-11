@@ -25,6 +25,8 @@
     ' Linux port: GTK3 based platform layer replacing windows.bi and AfxNova
     ' Also build programs in the tiko language (src/tikolang)
     #define TIKOLANG_SUPPORT
+    ' AI assistant chat panel (src/ai)
+    #define AI_ASSISTANT
     #include once "lnx/lnx.bi"
 #else
 #include once "windows.bi"
@@ -89,6 +91,9 @@ dim shared as DWSTRING gwszDefaultToolchain = "FreeBASIC-1.10.1-winlibs-gcc-9.3.
 #include once "clsApp.bi"
 #ifdef TIKOLANG_SUPPORT
     #include once "tikolang/modTikoLang.bi"
+#endif
+#ifdef AI_ASSISTANT
+    #include once "ai/modAi.bi"
 #endif
 
 '  Global classes
@@ -163,6 +168,11 @@ dim shared gTTabCtl as clsTopTabCtl
 #include once "frmMain.inc"
 #ifdef TIKOLANG_SUPPORT
     #include once "tikolang/modTikoLang.inc"
+#endif
+#ifdef AI_ASSISTANT
+    #include once "ai/modAiClient.inc"
+    #include once "ai/frmAiChat.inc"
+    #include once "ai/frmOptionsAi.inc"
 #endif
 
 

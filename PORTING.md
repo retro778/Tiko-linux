@@ -150,6 +150,37 @@ since Windows' Explorer passes full paths). `install.sh` registers the folder as
 Platform layer fix found while testing: `LnxLbInsert` sorted every `CBS_DROPDOWNLIST` combo box
 (its `&h3` contains `LBS_SORT` = `&h2`), so e.g. the keyword case combo showed the wrong entry.
 
+## AI assistant (Linux build only, `#ifdef AI_ASSISTANT`)
+
+A chat panel docked on the right of the main window (View > View AI Assistant, Ctrl+Shift+A),
+in `src/ai/`. Hooks: `frmMain_PositionWindows` takes the panel's width off the right of the
+client area (`frmAiChat_Layout`), `frmMain_Show` creates it, the message loop lets Ctrl+A/C/V/X/
+Z/Y typed in the chat reach the chat controls instead of the editor commands
+(`frmAiChat_PreTranslate`), plus menu/command/key binding entries (`IDM_VIEWAICHAT`,
+`IDM_AIEXPLAINERRORS`) and the "AI Assistant" options page.
+
+* **Providers:** Anthropic Messages API (`POST /v1/messages`, `anthropic-version: 2026-10-21`,
+  default model `claude-opus-5-5`, Claude 5.x models opt into server-side refusal fallbacks with
+  `fallbacks: "default"`, top-level `cache_control`) or OpenAI Chat Completions
+  (`POST /chat/completions`, default model `gpt-5`). Both streamed (server-sent events).
+  Keys: `ANTHROPIC_API_KEY` / `OPENAI_API_KEY`, else the key saved in `settings/ai.ini`
+  (mode 600). Base URLs are settable in `ai.ini` (`AnthropicBaseUrl`, `OpenAIBaseUrl`).
+* **Transport:** libcurl (`curl.bi`) in a worker thread that only appends raw bytes to a buffer;
+  a 40 ms timer on the panel parses the events on the UI thread (the JSON pool in `tkjson.bi`
+  is shared with the tiko-lsp client). Stop aborts the transfer through the progress callback.
+* **Panel:** transcript and input are Scintilla controls (UTF-8; the transcript is read-only
+  and styled by hand). A finished answer is re-rendered without markdown; each code block gets
+  "Insert at cursor / Replace selection / Copy" hotspots (`SCN_HOTSPOTCLICK`), applied to the
+  active document as one undo step, in its code page and line endings.
+* **Context:** with "Include current file" the question carries the active file, the cursor line
+  and the selection; the system prompt describes FreeBASIC and tiko, and each question says
+  which language the file is (follows the Compilers choice). "Explain errors" sends the last
+  compiler output (`gCompile.wszFullLogFile`) and the file. Files over 500 KB are not sent
+  (the panel says so). A failed request is taken out of the history and the question is put
+  back in the input.
+* Platform fix found here: a button whose label changes at run time got no size for the new
+  label (GTK's queued relayout is not applied to our children); `LnxEditSetText` re-allocates it.
+
 ## File format compatibility
 
 * Unicode files (config, `.tiko`, sessions, `.lang`) are UTF‑16LE + BOM + CRLF (verified byte identical).

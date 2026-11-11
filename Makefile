@@ -28,7 +28,7 @@ $(LEXTIKO_OBJ): src/lexer/LexTiko.cxx $(LEX_LIB)
 	mkdir -p obj
 	g++ -c -O2 -std=c++17 -fPIC -I $(DEPS)/lexilla/include -I $(DEPS)/lexilla/lexlib -I $(DEPS)/scintilla/include $< -o $@
 
-tiko: $(SCI_LIB) $(LEX_LIB) $(LEXTIKO_OBJ) src/*.bas src/*.bi src/*.inc src/lnx/* src/tikolang/*
+tiko: $(SCI_LIB) $(LEX_LIB) $(LEXTIKO_OBJ) src/*.bas src/*.bi src/*.inc src/lnx/* src/tikolang/* src/ai/*
 	$(FBC) $(FBFLAGS) src/tiko.bas -x tiko -a $(LEXTIKO_OBJ) -a $(SCI_LIB) -a $(LEX_LIB) -l gmodule-2.0 -l pangoft2-1.0 -l fontconfig -l X11
 
 # gdb/MI front end for lldb-dap: the debugger window uses it when "lldb" is chosen

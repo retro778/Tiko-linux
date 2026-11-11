@@ -20,3 +20,4 @@ settings/keybindings.ini
 *.pdf
 settings/tikolang.ini
 bin/tiko-lldb-mi
+settings/ai.ini

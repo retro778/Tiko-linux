@@ -1336,6 +1336,9 @@ private sub LnxEditSetText( byval hwnd as HWND, byref wszText as const wstring )
                 if hwnd->kind = LK_BUTTON then gtk_label_set_xalign( GTK_LABEL(lbl), iif((hwnd->style and BS_LEFT) andalso (hwnd->style and BS_CENTER) <> BS_CENTER, 0.0, 0.5) )
                 if hFontDefault() then gtk_widget_override_font( lbl, iif(hwnd->hFont, hwnd->hFont->pfd, hFontDefault()->pfd) )
             end if
+            ' the new label needs a size: GTK's queued relayout is not applied to our children
+            ' (their geometry is set by LnxAllocateChild), so allocate again now
+            LnxAllocateChild( hwnd )
         case LK_GROUPBOX
             gtk_frame_set_label( GTK_FRAME(hwnd->inner), iif(len(s), LnxZ(s), NULL) )
         case LK_LABEL

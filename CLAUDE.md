@@ -114,6 +114,13 @@ extension and the language's source extension: a `.tiko` file is a project only 
   message of a burst, so the adapter spaces its answers 150 ms apart and writes nothing unparsed.
   Test it without the GUI by piping MI commands (`break "file":N`, `-exec-run`, ...) to it.
 
+**AI assistant (`src/ai/`, `#ifdef AI_ASSISTANT`)**: chat panel docked right (`frmAiChat.inc`, laid out by a
+hook in `frmMain_PositionWindows`), libcurl streaming client for the Anthropic Messages API / OpenAI
+Chat Completions in a worker thread that only buffers bytes (`modAiClient.inc`; parsing happens on the UI
+thread because `tkjson.bi` uses one global node pool), options page `frmOptionsAi.inc`, settings
+`settings/ai.ini` (gitignored, mode 600). Test it against a local mock server by setting
+`AnthropicBaseUrl` / `OpenAIBaseUrl` in `ai.ini` — real API calls cost the user money.
+
 **Lexer**: `src/lexer/LexTiko.cxx` (derived from Lexilla LexBasic, registered as "tiko" like the
 unpublished Windows lexer) is created via `TikoCreateLexer()`. Property `lexer.tiko.blockstrings`
 enables tiko `"""` block strings (styled `SCE_B_DATE`).

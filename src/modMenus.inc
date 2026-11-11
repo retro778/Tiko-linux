@@ -167,6 +167,11 @@ function frmMain_ViewTopMenuStates() as long
     CheckMarkTopMenuItem( IDM_VIEWSIDEPANEL, iif( IsWindowVisible(HWND_FRMPANEL), true, false ))
     CheckMarkTopMenuItem( IDM_VIEWEXPLORER, iif( IsWindowVisible(HWND_FRMEXPLORER), true, false ))
     CheckMarkTopMenuItem( IDM_VIEWOUTPUT, iif( IsWindowVisible(HWND_FRMOUTPUT), true, false ))
+#ifdef AI_ASSISTANT
+    EnableTopMenuItem( IDM_VIEWAICHAT, true )
+    EnableTopMenuItem( IDM_AIEXPLAINERRORS, true )
+    CheckMarkTopMenuItem( IDM_VIEWAICHAT, frmAiChat_IsVisible() )
+#endif
     CheckMarkTopMenuItem( IDM_FUNCTIONLIST, iif( IsWindowVisible(HWND_FRMFUNCTIONS), true, false ))
     CheckMarkTopMenuItem( IDM_BOOKMARKSLIST, iif( IsWindowVisible(HWND_FRMBOOKMARKS), true, false ))
 

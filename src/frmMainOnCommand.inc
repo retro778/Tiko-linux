@@ -296,6 +296,10 @@ function frmMain_OnCommand( _
         case IDM_BOOKMARKSLIST:      OnCommand_ViewBookmarksList():
         case IDM_VIEWTODO:           OnCommand_ViewToDo():
         case IDM_VIEWNOTES:          OnCommand_ViewNotes():
+#ifdef AI_ASSISTANT
+        case IDM_VIEWAICHAT:         frmAiChat_Toggle()
+        case IDM_AIEXPLAINERRORS:    frmAiChat_ExplainErrors()
+#endif
         case IDM_RESTOREMAIN:        OnCommand_ViewRestoreMain():
         case IDM_EXPLORERPOSITION:   OnCommand_ViewExplorerPosition()
             

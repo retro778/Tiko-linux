@@ -756,6 +756,10 @@ function frmMain_PositionWindows() as LRESULT
     SetWindowPos( HWND_FRMMAIN_STATUSBAR, 0, _
                     0, rc.bottom - nHeightStatusBar, rc.right - rc.left, nHeightStatusBar, _
                     SWP_NOZORDER or SWP_SHOWWINDOW ) 
+#ifdef AI_ASSISTANT
+    ' AI assistant panel docked at the right: everything else lays out in what is left
+    rc.right -= frmAiChat_Layout( rc, rc.top + nHeightMenuBar, rc.bottom - nHeightStatusBar )
+#endif
     
     nLeft = rc.Left 
     nTop = rc.top + nHeightMenuBar
@@ -1576,6 +1580,9 @@ function frmMain_Show( byval hWndParent as HWND ) as LRESULT
     ' Create the various child windows
     frmPanel_Show( HWND_FRMMAIN )
     frmOutput_Show( HWND_FRMMAIN )
+#ifdef AI_ASSISTANT
+    frmAiChat_Show( HWND_FRMMAIN )
+#endif
     frmEditorHScroll_Show( HWND_FRMMAIN )
     frmEditorVScroll_Show( HWND_FRMMAIN )
 
@@ -1626,6 +1633,10 @@ function frmMain_Show( byval hWndParent as HWND ) as LRESULT
     ' Message loop
     do while GetMessage(@uMsg, null, 0, 0)
         if uMsg.message = WM_QUIT then exit do
+#ifdef AI_ASSISTANT
+        ' editing keys typed in the AI chat go to it, not to the editor's commands
+        if frmAiChat_PreTranslate(uMsg) then continue do
+#endif
 
         if handleMouseShowScrollBar(uMsg) then continue do
         if handleMouseTopMenu(uMsg) then continue do

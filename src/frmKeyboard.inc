@@ -161,6 +161,10 @@ function frmKeyboard_CreateDefaultKeyBindings() as long
     frmKeyBoard_AddKeyBinding( "View", IDM_VIEWSIDEPANEL, "IDM_VIEWSIDEPANEL", "View Side Panel", "Ctrl+B", "", false )
     frmKeyBoard_AddKeyBinding( "View", IDM_VIEWEXPLORER, "IDM_VIEWEXPLORER", "View Explorer window", "Ctrl+F4", "", false )
     frmKeyBoard_AddKeyBinding( "View", IDM_VIEWOUTPUT, "IDM_VIEWOUTPUT", "View Output window", "Ctrl+F9", "", false )
+#ifdef AI_ASSISTANT
+    frmKeyBoard_AddKeyBinding( "View", IDM_VIEWAICHAT, "IDM_VIEWAICHAT", "View AI Assistant panel", "Ctrl+Shift+A", "", false )
+    frmKeyBoard_AddKeyBinding( "View", IDM_AIEXPLAINERRORS, "IDM_AIEXPLAINERRORS", "Explain compile errors (AI)", "", "", false )
+#endif
     frmKeyBoard_AddKeyBinding( "View", IDM_FUNCTIONLIST, "IDM_FUNCTIONLIST", "View function List", "F4", "", false )
     frmKeyBoard_AddKeyBinding( "View", IDM_BOOKMARKSLIST, "IDM_BOOKMARKSLIST", "View Bookmarks List", "Shift+F4", "", false )
     frmKeyBoard_AddKeyBinding( "View", IDM_ZOOMIN, "IDM_ZOOMIN", "Zoom In", "Ctrl+Plus", "", false )     ' VK_OEM_PLUS
