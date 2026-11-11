@@ -95,8 +95,10 @@ blocks (`TIKOLANG_SUPPORT` is defined in `tiko.bas` on Linux).
   file (`kind id path line col endline endcol message`, `end errors warnings exitcode`) into
   the Compiler Results list; clang/linker failures show the last log line. Quick Run uses
   `_tiko_quickrun.tiko`. `-lib` needs `llvm-ar` (tiko error TKO0111 otherwise).
-* **Debugging:** gdb reads tiko's DWARF; the existing gdb/MI debugger works unchanged
-  (breakpoints, stepping, locals; `ustring` shows as text with its length).
+* **Debugging:** gdb reads tiko's DWARF; the existing gdb/MI debugger works (breakpoints,
+  stepping, locals; `ustring` shows as text with its length), also in packages (debug
+  profile). `frmDebug.inc` (`#ifdef __FB_LINUX__`) shows byref values without gdb's
+  `@0x...:` prefix and empty strings (`data = 0x0`) as `""`, for both languages.
 * **Editor:** the FreeBASIC lexer with `settings/keywords/tiko_keywords.txt` added to the
   keywords (`int32`, `ustring`, `nullptr`, `defer`, `#import`, ...) and `"""` block strings
   (`LexTiko.cxx` property `lexer.tiko.blockstrings`, styled as `SCE_B_DATE` = string colours).
@@ -114,6 +116,9 @@ blocks (`TIKOLANG_SUPPORT` is defined in `tiko.bas` on Linux).
 * **Command lines:** like Windows' `CreateProcess`, the layer takes the first word of the
   command line as argv[0], so the tiko command lines start with the compiler path.
 * Not done: the tiko-lsp language server, lldb-dap.
+
+Platform layer fix found while testing: `LnxLbInsert` sorted every `CBS_DROPDOWNLIST` combo box
+(its `&h3` contains `LBS_SORT` = `&h2`), so e.g. the keyword case combo showed the wrong entry.
 
 ## File format compatibility
 

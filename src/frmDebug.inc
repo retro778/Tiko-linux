@@ -511,6 +511,17 @@ function gdb_getVariableDisplayValue( byval varValue as string ) as string
     st = AfxStrReplace( st, "'#9'", "(TAB)" )
     st = AfxStrReplace( st, "\" & chr(34), chr(34) )
     varValue = st
+#ifdef __FB_LINUX__
+    ' A reference (byref parameter) is shown by gdb as "@0x7ffd...: value"; show the value
+    if left(varValue, 3) = "@0x" then
+        dim as long nRef = instr(varValue, ": ")
+        if nRef then
+            varValue = mid(varValue, nRef + 2)
+            if (left(varValue, 1) = "{") andalso (right(varValue, 1) = "}") then varValue = mid(varValue, 2, len(varValue) - 2)
+            varDisplayString = varValue
+        end if
+    end if
+#endif
 
     ' If dealing with a string then try to extract out the string
     if left(ucase(varValue), 7) = "DATA = " then
@@ -524,6 +535,12 @@ function gdb_getVariableDisplayValue( byval varValue as string ) as string
             if nLen = 0 then nLen = len(wszExtractString)
             varDisplayString = chr(34) & wszExtractString & chr(34) & "  (len = " & str(nLen) & ")"
         end if    
+#ifdef __FB_LINUX__
+        ' An empty string has no buffer: data = 0x0
+        if (len(wszExtractString) = 0) andalso (left(lcase(varValue), 11) = "data = 0x0,") then
+            varDisplayString = chr(34) & chr(34) & "  (len = 0)"
+        end if
+#endif
     end if
     
     ' Try converting a Hex number to Decimal

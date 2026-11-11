@@ -802,8 +802,8 @@ end sub
 
 private function LnxLbInsert( byval hwnd as HWND, byval idx as long, byval pText as const wstring ptr ) as long
     if idx < 0 orelse idx > hwnd->lbCount then idx = hwnd->lbCount
-    ' LBS_SORT
-    if (hwnd->style and LBS_SORT) andalso pText then
+    ' LBS_SORT (list boxes only: the bit is part of CBS_DROPDOWNLIST; combo boxes sort by CBS_SORT themselves)
+    if (hwnd->kind <> LK_COMBOBOX) andalso ((hwnd->style and LBS_SORT) <> 0) andalso (pText <> 0) then
         idx = hwnd->lbCount
         for i as long = 0 to hwnd->lbCount - 1
             if lcase(hwnd->lbItems(i).text) > lcase(*pText) then idx = i : exit for

@@ -111,13 +111,14 @@ function frmOptionsTikoLang_Show( byval hWndParent as HWND ) as LRESULT
         0, 196, 400, 64, WS_CHILD or WS_VISIBLE or SS_LEFT, WS_EX_LEFT or WS_EX_LTRREADING)
 
     dim as HWND hwnd = HWND_FRMOPTIONSTIKOLANG
+    dim as wstring * 32 wszFbc = "FreeBASIC (fbc)", wszTiko = "tiko"
     dim as HWND hCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_COMBOBAS)
-    ComboBox_AddString( hCombo, @wstr("FreeBASIC (fbc)") )
-    ComboBox_AddString( hCombo, @wstr("tiko") )
+    ComboBox_AddString( hCombo, @wszFbc )       ' 0
+    ComboBox_AddString( hCombo, @wszTiko )      ' 1
     ComboBox_SetCurSel( hCombo, iif(gTikoLang.BasWithTiko, 1, 0) )
     hCombo = GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_COMBOTIKO)
-    ComboBox_AddString( hCombo, @wstr("tiko") )
-    ComboBox_AddString( hCombo, @wstr("FreeBASIC (fbc)") )
+    ComboBox_AddString( hCombo, @wszTiko )      ' 0
+    ComboBox_AddString( hCombo, @wszFbc )       ' 1
     ComboBox_SetCurSel( hCombo, iif(gTikoLang.TikoWithFbc, 1, 0) )
     AfxSetWindowText( GetDlgItem(hwnd, IDC_FRMOPTIONSTIKOLANG_TXTPATH), DWSTRING(gTikoLang.CompilerPath, CP_UTF8) )
     frmOptionsTikoLang_UpdateFound( hwnd )
