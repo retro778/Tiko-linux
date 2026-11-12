@@ -26,12 +26,8 @@
     #define SCI_SETMOUSEDWELLTIME           2264
 #endif
 
-extern "C"
-    declare function tklsp_write alias "write"( byval fd as long, byval buf as const any ptr, byval n as uinteger ) as integer
-    declare function tklsp_read alias "read"( byval fd as long, byval buf as any ptr, byval n as uinteger ) as integer
-    declare function tklsp_close alias "close"( byval fd as long ) as long
-    declare function tklsp_kill alias "kill"( byval pid as long, byval sig as long ) as long
-end extern
+#include once "tkplat.bi"
+#include once "tkproc.bi"
 
 #include once "tkjson.bi"
 
@@ -39,12 +35,18 @@ end extern
 ' file:// URIs
 ' ----------------------------------------------------------------------------------------
 private function TikoLsp_PathToUri( byref sPath as string ) as string
+    ' Windows: C:\dir\file -> file:///C:/dir/file
+    dim as string sIn2 = sPath
+    for i as long = 0 to len(sIn2) - 1
+        if sIn2[i] = asc("\") then sIn2[i] = asc("/")
+    next
     dim as string sOut = "file://"
-    for i as long = 1 to len(sPath)
-        dim as long c = sPath[i - 1]
+    if mid(sIn2, 2, 1) = ":" then sOut &= "/"
+    for i as long = 1 to len(sIn2)
+        dim as long c = sIn2[i - 1]
         select case c
             case asc("A") to asc("Z"), asc("a") to asc("z"), asc("0") to asc("9"), _
-                 asc("-"), asc("."), asc("_"), asc("~"), asc("/")
+                 asc("-"), asc("."), asc("_"), asc("~"), asc("/"), asc(":")
                 sOut &= chr(c)
             case else
                 sOut &= "%" & hex(c, 2)
@@ -67,7 +69,24 @@ private function TikoLsp_UriToPath( byref sUri as string ) as string
             i += 1
         end if
     loop
+#ifndef __FB_LINUX__
+    ' /C:/dir/file -> C:\dir\file
+    if (left(sOut, 1) = "/") andalso (mid(sOut, 3, 1) = ":") then sOut = mid(sOut, 2)
+    for k as long = 0 to len(sOut) - 1
+        if sOut[k] = asc("/") then sOut[k] = asc("\")
+    next
+#endif
     return sOut
+end function
+
+' Two URIs of the same file compare equal through this (servers spell drive letters and
+' escapes differently on Windows)
+private function TikoLsp_UriKey( byref sUri as string ) as string
+#ifdef __FB_LINUX__
+    return TikoLsp_UriToPath(sUri)
+#else
+    return lcase(TikoLsp_UriToPath(sUri))
+#endif
 end function
 
 ' ----------------------------------------------------------------------------------------
@@ -93,11 +112,9 @@ type TKLSP_DOC
 end type
 
 type TKLSP_STATE
-    timerId     as guint
-    pid         as GPid
-    fdIn        as long          ' server stdin (we write)
-    fdOut       as long          ' server stdout (we read)
-    watchId     as guint
+    timerOn     as boolean
+    ticks       as long
+    proc        as TKPROC        ' the tiko-lsp process
     running     as boolean
     initialized as boolean
     failures    as long
@@ -139,16 +156,7 @@ declare sub TikoLsp_Stop()
 ' ----------------------------------------------------------------------------------------
 private sub TikoLsp_WriteRaw( byref sMsg as string )
     if gTkLsp.running = false then exit sub
-    dim as string sFrame = "Content-Length: " & len(sMsg) & chr(13, 10, 13, 10) & sMsg
-    dim as long nDone = 0
-    do while nDone < len(sFrame)
-        dim as integer n = tklsp_write( gTkLsp.fdIn, strptr(sFrame) + nDone, len(sFrame) - nDone )
-        if n <= 0 then
-            TikoLsp_Stop()
-            exit sub
-        end if
-        nDone += n
-    loop
+    if TkProc_Write( gTkLsp.proc, "Content-Length: " & len(sMsg) & chr(13, 10, 13, 10) & sMsg ) = false then TikoLsp_Stop()
 end sub
 
 private sub TikoLsp_Send( byref sMsg as string )
@@ -178,7 +186,7 @@ end function
 
 private function TikoLsp_FindUri( byref sUri as string ) as long
     for i as long = 0 to ubound(gTkLspDocs)
-        if (gTkLspDocs(i).pDoc <> 0) andalso (gTkLspDocs(i).uri = sUri) then return i
+        if (gTkLspDocs(i).pDoc <> 0) andalso (TikoLsp_UriKey(gTkLspDocs(i).uri) = TikoLsp_UriKey(sUri)) then return i
     next
     return -1
 end function
@@ -418,17 +426,19 @@ private sub TikoLsp_Dispatch( byref sJson as string )
     end if
 end sub
 
-private function TikoLsp_OnReadable cdecl ( byval ch as GIOChannel ptr, byval cond as GIOCondition, byval user as gpointer ) as gboolean
-    dim as string sChunk = space(65536)
-    dim as integer n = tklsp_read( gTkLsp.fdOut, strptr(sChunk), len(sChunk) )
-    if n <= 0 then
-        ' the server ended
-        gTkLsp.watchId = 0
-        TikoLsp_Stop()
-        gTkLsp.failures += 1
-        return false
-    end if
-    gTkLsp.buffer &= left(sChunk, n)
+' Reads what the server wrote and dispatches the complete messages (called from the timer)
+private sub TikoLsp_Pump()
+    if gTkLsp.running = false then exit sub
+    do
+        dim as long n = TkProc_Read( gTkLsp.proc, gTkLsp.buffer )
+        if n < 0 then
+            ' the server ended
+            TikoLsp_Stop()
+            gTkLsp.failures += 1
+            exit sub
+        end if
+        if n = 0 then exit do
+    loop
     do
         dim as long h = instr(gTkLsp.buffer, chr(13, 10, 13, 10))
         if h = 0 then exit do
@@ -442,27 +452,29 @@ private function TikoLsp_OnReadable cdecl ( byval ch as GIOChannel ptr, byval co
         TikoLsp_Dispatch( sBody )
         if gTkLsp.running = false then exit do
     loop
-    return true
-end function
+end sub
 
 ' ----------------------------------------------------------------------------------------
 ' Server process
 ' ----------------------------------------------------------------------------------------
 private function TikoLsp_ServerPath() as string
+    ' beside the compiler (Linux: bin/tiko-lsp, Windows: tiko-lsp.exe)
     dim as DWSTRING wszCompiler = TikoLang_FindCompiler()
     if len(wszCompiler) then
-        dim as string s = wszCompiler.utf8
-        dim as long p = instrrev(s, "/")
-        if p then
-            dim as string sLsp = left(s, p) & "tiko-lsp"
-            if AfxFileExists(DWSTRING(sLsp, CP_UTF8)) then return sLsp
-        end if
+        dim as string sLsp = TkDirOf(wszCompiler.utf8) & "tiko-lsp" & TK_EXE
+        if TkFileExists(sLsp) then return sLsp
     end if
-    dim as zstring ptr z = g_find_program_in_path( "tiko-lsp" )
-    if z = 0 then return ""
-    dim as string s = *z
-    g_free( z )
-    return s
+    ' on the PATH
+    dim as string sPath = environ("PATH")
+    dim as long p = 1
+    do while p <= len(sPath)
+        dim as long q = instr(p, sPath, TK_PATHLIST_SEP)
+        if q = 0 then q = len(sPath) + 1
+        dim as string sDir = rtrim(trim(mid(sPath, p, q - p), chr(34)), any "/\")
+        p = q + 1
+        if (len(sDir) > 0) andalso TkFileExists(sDir & TK_SEP & "tiko-lsp" & TK_EXE) then return sDir & TK_SEP & "tiko-lsp" & TK_EXE
+    loop
+    return ""
 end function
 
 private function TikoLsp_Start( byref sRootDir as string ) as boolean
@@ -470,34 +482,22 @@ private function TikoLsp_Start( byref sRootDir as string ) as boolean
     if gTkLsp.failures >= 3 then return false        ' it keeps crashing: give up for this session
     dim as string sServer = TikoLsp_ServerPath()
     if len(sServer) = 0 then gTkLsp.failures = 3 : return false
-
-    dim as string sArg1 = "--stdio"
-    dim as zstring ptr argv(2) = { strptr(sServer), strptr(sArg1), NULL }
-    dim as gint fdIn, fdOut
-    ' G_SPAWN_STDERR_TO_DEV_NULL
-    if g_spawn_async_with_pipes( NULL, @argv(0), NULL, cast(GSpawnFlags, 16), NULL, NULL, _
-                                  @gTkLsp.pid, @fdIn, @fdOut, NULL, NULL ) = 0 then
+    if TkProc_Start( gTkLsp.proc, sServer, "--stdio" ) = false then
         gTkLsp.failures += 1
         return false
     end if
-    gTkLsp.fdIn = fdIn
-    gTkLsp.fdOut = fdOut
     gTkLsp.running = true
     gTkLsp.initialized = false
     gTkLsp.buffer = ""
     gTkLsp.pending = ""
-    dim as GIOChannel ptr ch = g_io_channel_unix_new( fdOut )
-    gTkLsp.watchId = g_io_add_watch( ch, cast(GIOCondition, G_IO_IN or G_IO_HUP or G_IO_ERR), _
-                                     cast(GIOFunc, @TikoLsp_OnReadable), NULL )
-    g_io_channel_unref( ch )
 
     gTkLsp.nextId += 1
     gTkLsp.initId = gTkLsp.nextId
-    dim as string sRoot = rtrim(sRootDir, "/")
+    dim as string sRoot = rtrim(sRootDir, any "/\")
     TikoLsp_WriteRaw( "{""jsonrpc"":""2.0"",""id"":" & gTkLsp.initId & ",""method"":""initialize"",""params"":{" & _
-        """processId"":" & getpid() & ",""clientInfo"":{""name"":""tiko-editor""}," & _
+        """processId"":" & TkPid() & ",""clientInfo"":{""name"":""tiko-editor""}," & _
         """rootUri"":" & TkJ_Esc(TikoLsp_PathToUri(sRoot)) & "," & _
-        """workspaceFolders"":[{""uri"":" & TkJ_Esc(TikoLsp_PathToUri(sRoot)) & ",""name"":" & TkJ_Esc(mid(sRoot, instrrev(sRoot, "/") + 1)) & "}]," & _
+        """workspaceFolders"":[{""uri"":" & TkJ_Esc(TikoLsp_PathToUri(sRoot)) & ",""name"":" & TkJ_Esc(TkNameOf(sRoot)) & "}]," & _
         """capabilities"":{""general"":{""positionEncodings"":[""utf-16""]},""textDocument"":{" & _
             """synchronization"":{""didSave"":false},""publishDiagnostics"":{}," & _
             """hover"":{""contentFormat"":[""markdown"",""plaintext""]},""definition"":{}}}}}" )
@@ -505,15 +505,9 @@ private function TikoLsp_Start( byref sRootDir as string ) as boolean
 end function
 
 sub TikoLsp_Stop()
-    if gTkLsp.watchId then g_source_remove_( gTkLsp.watchId ) : gTkLsp.watchId = 0
-    if gTkLsp.running then
-        tklsp_close( gTkLsp.fdIn )
-        tklsp_close( gTkLsp.fdOut )
-        if gTkLsp.pid > 0 then tklsp_kill( gTkLsp.pid, 15 )
-    end if
+    TkProc_Stop( gTkLsp.proc )
     gTkLsp.running = false
     gTkLsp.initialized = false
-    gTkLsp.pid = 0
     gTkLsp.defId = 0 : gTkLsp.hoverId = 0
     ' documents are opened again when a new server starts; clear their underlines
     for i as long = 0 to ubound(gTkLspDocs)
@@ -528,7 +522,7 @@ end sub
 ' ----------------------------------------------------------------------------------------
 ' Timer: open, change and close documents
 ' ----------------------------------------------------------------------------------------
-private function TikoLsp_Tick cdecl ( byval user as gpointer ) as gboolean
+private sub TikoLsp_Tick()
     TikoLang_LoadSettings()
     for i as long = 0 to ubound(gTkLspDocs)
         gTkLspDocs(i).seen = false
@@ -541,7 +535,7 @@ private function TikoLsp_Tick cdecl ( byval user as gpointer ) as gboolean
             if (pDoc->hWindow(0) <> 0) andalso (pDoc->IsNewFlag = false) then bTikoDoc = TikoLang_UsesTiko(pDoc->DiskFilename)
             if bTikoDoc then
                 dim as string sPath = WideToUtf8(@pDoc->DiskFilename)
-                if left(sPath, 1) = "/" then
+                if TkIsAbsolute(sPath) then
                     dim as string sUri = TikoLsp_PathToUri(sPath)
                     dim as long i = TikoLsp_FindDoc(pDoc)
                     if (i >= 0) andalso (gTkLspDocs(i).uri <> sUri) then
@@ -553,7 +547,7 @@ private function TikoLsp_Tick cdecl ( byval user as gpointer ) as gboolean
                     if i < 0 then
                         ' new document: start the server if needed and open it
                         dim as string sRoot = TikoLang_FindPackage(pDoc->DiskFilename)
-                        if len(sRoot) = 0 then sRoot = left(sPath, instrrev(sPath, "/"))
+                        if len(sRoot) = 0 then sRoot = TkDirOf(sPath)
                         if TikoLsp_Start(sRoot) then
                             for k as long = 0 to ubound(gTkLspDocs)
                                 if gTkLspDocs(k).pDoc = 0 then i = k : exit for
@@ -594,13 +588,38 @@ private function TikoLsp_Tick cdecl ( byval user as gpointer ) as gboolean
     next
     ' no tiko document left: stop the server
     if (bAny = false) andalso gTkLsp.running then TikoLsp_Stop()
+end sub
+
+' The timer (every 30 ms): messages from the server; every 10th time the documents
+private sub TikoLsp_OnTimer()
+    TikoLsp_Pump()
+    gTkLsp.ticks += 1
+    if gTkLsp.ticks >= 10 then
+        gTkLsp.ticks = 0
+        TikoLsp_Tick()
+    end if
+end sub
+
+#ifdef __FB_LINUX__
+private function TikoLsp_TimerProc cdecl ( byval user as gpointer ) as gboolean
+    TikoLsp_OnTimer()
     return true
 end function
+#else
+private sub TikoLsp_TimerProc( byval hwnd as HWND, byval uMsg as UINT, byval idEvent as UINT_PTR, byval dwTime as DWORD )
+    TikoLsp_OnTimer()
+end sub
+#endif
 
 ' Called for every editor window of a tiko file (TikoLang_SetupLexer)
 sub TikoLsp_SetupWindow( byval pSci as any ptr )
-    if gTkLsp.timerId = 0 then
-        gTkLsp.timerId = g_timeout_add( 300, cast(GSourceFunc, @TikoLsp_Tick), NULL )
+    if gTkLsp.timerOn = false then
+        gTkLsp.timerOn = true
+#ifdef __FB_LINUX__
+        g_timeout_add( 30, cast(GSourceFunc, @TikoLsp_TimerProc), NULL )
+#else
+        SetTimer( NULL, 0, 30, cast(TIMERPROC, @TikoLsp_TimerProc) )
+#endif
     end if
     SciMsg( pSci, SCI_INDICSETSTYLE, TKLSP_INDIC_ERROR, INDIC_SQUIGGLE )
     SciMsg( pSci, SCI_INDICSETFORE, TKLSP_INDIC_ERROR, BGR(240, 60, 60) )

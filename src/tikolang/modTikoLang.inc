@@ -11,9 +11,7 @@
 
 #pragma once
 
-extern "C"
-    declare function realpath( byval path as const zstring ptr, byval resolved as zstring ptr ) as zstring ptr
-end extern
+#include once "tkplat.bi"
 
 dim shared as string gTikoLangKeywords
 dim shared as boolean gTikoLangKeywordsLoaded
@@ -29,12 +27,9 @@ type TIKOLANG_SETTINGS
 end type
 dim shared gTikoLang as TIKOLANG_SETTINGS
 
-' folder of the editor executable, with a trailing "/"
+' folder of the editor executable, with a trailing separator
 private function TikoLang_ExeDir() as string
-    dim as DWSTRING w = AfxGetExePathName
-    dim as string s = w.utf8
-    if right(s, 1) <> "/" then s &= "/"
-    return s
+    return TkExeDir()
 end function
 
 function TikoLang_IsTikoExtension( byref wszFilename as wstring ) as boolean
@@ -47,7 +42,7 @@ end function
 ' A project file is UTF-16 (BOM) text whose first line is "' PROJECT FILE"
 function TikoLang_IsProjectFile( byref wszFilename as wstring ) as boolean
     if lcase(AfxStrPathname("EXTN", wszFilename)) <> APPEXTENSION then return false
-    dim as string sPath = WideToUtf8(@wszFilename)
+    dim as string sPath = TkFs(WideToUtf8(@wszFilename))
     dim as long f = freefile
     if open(sPath for binary access read as #f) <> 0 then return false
     dim as string sHead = space(64)
@@ -85,7 +80,7 @@ sub TikoLang_LoadSettings()
     gTikoLang.Loaded = true
     gTikoLang.LanguageServer = true
     dim as long f = freefile
-    if open(TikoLang_SettingsFile() for input as #f) <> 0 then exit sub
+    if open(TkFs(TikoLang_SettingsFile()) for input as #f) <> 0 then exit sub
     do until eof(f)
         dim as string sLine
         line input #f, sLine
@@ -106,7 +101,7 @@ end sub
 
 sub TikoLang_SaveSettings()
     dim as long f = freefile
-    if open(TikoLang_SettingsFile() for output as #f) <> 0 then exit sub
+    if open(TkFs(TikoLang_SettingsFile()) for output as #f) <> 0 then exit sub
     print #f, "' Which compiler builds which files (Options > Environment Options > Compilers)"
     print #f, "BasCompiler=" & iif(gTikoLang.BasWithTiko, "tiko", "fbc")
     print #f, "TikoCompiler=" & iif(gTikoLang.TikoWithFbc, "fbc", "tiko")
@@ -128,7 +123,7 @@ end function
 function TikoLang_UseLldb() as boolean
     TikoLang_LoadSettings()
     if gTikoLang.DebugWithLldb = false then return false
-    return AfxFileExists(DWSTRING(TikoLang_ExeDir() & "bin/tiko-lldb-mi", CP_UTF8)) <> 0
+    return TkFileExists(TikoLang_ExeDir() & "bin" & TK_SEP & "tiko-lldb-mi" & TK_EXE)
 end function
 
 ' The document that a compile would build: the project's main file or the active document
@@ -152,38 +147,43 @@ function TikoLang_FindCompiler() as DWSTRING
     if len(gTikoLang.CompilerPath) then
         ' the path chosen in the options (a missing file is reported by the compile)
         dim as string sChosen = gTikoLang.CompilerPath
-        if left(sChosen, 2) = "~/" then sChosen = environ("HOME") & mid(sChosen, 2)
+        if left(sChosen, 2) = "~/" then sChosen = TkHomeDir() & mid(sChosen, 2)
         return DWSTRING(sChosen, CP_UTF8)
     end if
     dim as string sEnv = environ("TIKO_COMPILER")
-    if (len(sEnv) > 0) andalso (AfxFileExists(DWSTRING(sEnv)) <> 0) then return DWSTRING(sEnv)
+    if (len(sEnv) > 0) andalso TkFileExists(sEnv) then return DWSTRING(sEnv, CP_UTF8)
 
-    dim as string sSelf = TikoLang_ExeDir() & "tiko"
-    dim as zstring ptr pSelf = realpath( sSelf, NULL )
-    dim as string sSelfReal = iif(pSelf, *pSelf, sSelf)
-    if pSelf then free(pSelf)
-
+    ' On the PATH: the compiler is "tiko" too, so skip this editor and take only a tiko that
+    ' has its toolchain beside it (Linux: <root>/bin/tiko, Windows: <root>\tiko.exe)
+    dim as string sSelfReal = TkRealPath(TkExeDir() & "tiko" & TK_EXE)
     dim as string sPath = environ("PATH")
-    dim as long nCount = AfxStrParseCount(DWSTRING(sPath), ":")
-    for i as long = 1 to nCount
-        dim as string sDir = AfxStrParse(DWSTRING(sPath), i, ":").utf8
-        if len(sDir) = 0 then continue for
-        dim as string sCand = sDir & "/tiko"
-        if AfxFileExists(DWSTRING(sCand)) = 0 then continue for
-        dim as zstring ptr pReal = realpath( sCand, NULL )
-        dim as string sReal = iif(pReal, *pReal, sCand)
-        if pReal then free(pReal)
-        if sReal = sSelfReal then continue for
-        ' a tiko-lang toolchain keeps its runtime beside the compiler
-        if AfxFileExists(DWSTRING(sDir & "/../lib")) orelse AfxFileExists(DWSTRING(sDir & "/../pkg")) then
-            return DWSTRING(sCand)
-        end if
-    next
+    dim as long p = 1
+    do while p <= len(sPath)
+        dim as long q = instr(p, sPath, TK_PATHLIST_SEP)
+        if q = 0 then q = len(sPath) + 1
+        dim as string sDir = trim(mid(sPath, p, q - p), chr(34))
+        p = q + 1
+        if len(sDir) = 0 then continue do
+        sDir = rtrim(sDir, any "/\")
+        dim as string sCand = sDir & TK_SEP & "tiko" & TK_EXE
+        if TkFileExists(sCand) = false then continue do
+        if TkRealPath(sCand) = sSelfReal then continue do
+#ifdef __FB_LINUX__
+        if TkFileExists(sDir & "/../lib") orelse TkFileExists(sDir & "/../pkg") then return DWSTRING(sCand, CP_UTF8)
+#else
+        if TkFileExists(sDir & "\lib") andalso TkFileExists(sDir & "\pkg") then return DWSTRING(sCand, CP_UTF8)
+#endif
+    loop
 
-    dim as string sHome = environ("HOME")
+    ' the usual install folders
+    dim as string sHome = TkHomeDir()
+#ifdef __FB_LINUX__
     dim as string sTry(2) = { sHome & "/.local/tiko-lang/bin/tiko", sHome & "/tiko-lang/bin/tiko", "/opt/tiko-lang/bin/tiko" }
+#else
+    dim as string sTry(2) = { TkExeDir() & "..\tiko-lang\tiko.exe", sHome & "\tiko-lang\tiko.exe", sHome & "\Downloads\tiko-lang\tiko.exe" }
+#endif
     for i as long = 0 to 2
-        if AfxFileExists(DWSTRING(sTry(i))) then return DWSTRING(sTry(i))
+        if TkFileExists(sTry(i)) then return DWSTRING(sTry(i), CP_UTF8)
     next
     return DWSTRING()
 end function
@@ -255,7 +255,7 @@ end function
 ' Reads the --diagnostics-file into the Compiler Results list. Returns true on errors.
 private function TikoLang_ReadTextFile( byref sFile as string ) as string
     dim as long f = freefile
-    if open(sFile for binary access read as #f) <> 0 then return ""
+    if open(TkFs(sFile) for binary access read as #f) <> 0 then return ""
     dim as string sText = space(lof(f))
     get #f, , sText
     close #f
@@ -359,12 +359,12 @@ private function TikoLang_ShowResults( _
                  rtrim(AfxStrFormatKBSize(nFileSize)) & " (" & wstr(nFileSize) & " " & L(199,"bytes") & ") ]"
         SetCompileStatusBarMessage( wszMsg, ghIconGood )
         if gConfig.DisableCompileBeep = false then MessageBeep(MB_OK)
+        dim as DWSTRING wszCounts = L(193,"Errors") & " " & wstr(nErrors) & " " & L(192,"Warnings") & " " & wstr(nWarnings)
         gCompile.wszOutputMsg = gCompile.wszOutputMsg & _
-            L(228,"Successful Compile") & " (" & L(193,"Errors") & " " & nErrors & " " & _
-                                                 L(192,"Warnings") & " " & nWarnings & ")" & vbcrlf & vbcrlf & _
+            L(228,"Successful Compile") & " (" & wszCounts & ")" & vbcrlf & vbcrlf & _
             L(194,"Primary Source:") & " " & gCompile.MainFilename & vbCrLf & _
             L(195,"Target Compilation:") & " " & gCompile.OutputFilename & " (" & _
-                 rtrim(AfxStrFormatKBSize(nFileSize)) & ", " & nFileSize & " " & L(199,"bytes") & ")" & vbcrlf & _
+                 rtrim(AfxStrFormatKBSize(nFileSize)) & ", " & wstr(nFileSize) & " " & L(199,"bytes") & ")" & vbcrlf & _
             L(196,"Compile Time:") & " " & format(gCompile.EndTime - gCompile.StartTime, "###0.0") & _
                  " " & L(198,"seconds") & vbcrlf
     end if
@@ -385,19 +385,15 @@ end function
 ' diagnostics are text lines between them:  path(line,col): kind TKOnnnn: message
 ' ----------------------------------------------------------------------------------------
 
-' Folder (with trailing "/") of the tiko.toml at or above the file, or ""
+' Folder (with trailing separator) of the tiko.toml at or above the file, or ""
 function TikoLang_FindPackage( byref wszFilename as wstring ) as string
     if len(wszFilename) = 0 then return ""
-    dim as string sDir = WideToUtf8(@wszFilename)
-    dim as long p = instrrev(sDir, "/")
-    if p = 0 then return ""
-    sDir = left(sDir, p)
+    dim as string sDir = TkDirOf(WideToUtf8(@wszFilename))
     for i as long = 1 to 64
-        if AfxFileExists(DWSTRING(sDir & "tiko.toml", CP_UTF8)) then return sDir
-        if len(sDir) <= 1 then exit for
-        p = instrrev(sDir, "/", len(sDir) - 1)
-        if p = 0 then exit for
-        sDir = left(sDir, p)
+        if len(sDir) = 0 then exit for
+        if TkFileExists(sDir & "tiko.toml") then return sDir
+        if len(sDir) <= 3 then exit for          ' "/" or "C:\"
+        sDir = TkDirOf(left(sDir, len(sDir) - 1))
     next
     return ""
 end function
@@ -449,7 +445,7 @@ private function TikoLang_DiagLineToRecord( byref sLine as string, byref sRoot a
     if pColon = 0 then return ""
     dim as string sId = mid(sRest, pSp + 1, pColon - pSp - 1)
     dim as string sFile = left(sLine, nParenStart - 1)
-    if left(sFile, 1) <> "/" then sFile = sRoot & sFile
+    if TkIsAbsolute(sFile) = false then sFile = sRoot & sFile
     return sKind & chr(9) & sId & chr(9) & sFile & chr(9) & left(sPos, pComma - 1) & chr(9) & _
            mid(sPos, pComma + 1) & chr(9) & chr(9) & chr(9) & mid(sRest, pColon + 2)
 end function
@@ -488,7 +484,7 @@ private function TikoLang_BuildPackage( _
     SetCursor( LoadCursor(0, IDC_WAIT) )
     SetCompileStatusBarMessage( "#" & L(203, "Compiling") & "... " & DWSTRING(sRoot & "tiko.toml", CP_UTF8), 0 )
 
-    chdir sRoot
+    chdir TkFs(sRoot)
     gCompile.StartTime = timer
     dim as CompileThreadParams ctp
     ctp.wszExe = wszCompiler
@@ -530,7 +526,7 @@ private function TikoLang_BuildPackage( _
                     sTargetRoots = sLine        ' the "roots" of the target being built
                 case "artifact"
                     dim as string sPath = TikoLang_JsonStr(sLine, "path")
-                    if left(sPath, 1) <> "/" then sPath = sRoot & sPath
+                    if TkIsAbsolute(sPath) = false then sPath = sRoot & sPath
                     if len(sAnyArtifact) = 0 then sAnyArtifact = sPath
                     if TikoLang_JsonStr(sLine, "kind") = "exe" then
                         if len(sFirstExe) = 0 then sFirstExe = sPath
@@ -667,7 +663,11 @@ function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolea
     ' The program is named after the main (first) source file
     dim as string sFlagsU = " " & ucase(wszFlags.utf8) & " "
     if instr(sFlagsU, " -DLL ") orelse instr(sFlagsU, " -DYLIB ") then
+#ifdef __FB_LINUX__
         gCompile.OutputFilename = gCompile.MainFolder & "lib" & gCompile.MainName & DLL_EXTENSION
+#else
+        gCompile.OutputFilename = gCompile.MainFolder & gCompile.MainName & DLL_EXTENSION
+#endif
     elseif instr(sFlagsU, " -LIB ") then
         gCompile.OutputFilename = gCompile.MainFolder & "lib" & gCompile.MainName & ".a"
     else
@@ -694,8 +694,8 @@ function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolea
         loop
     end if
 
-    dim as string sDiagFile = *g_get_tmp_dir() & "/tiko-editor-diag-" & str(getpid()) & ".txt"
-    kill sDiagFile
+    dim as string sDiagFile = TkTempDir() & "tiko-editor-diag-" & str(TkPid()) & ".txt"
+    kill TkFs(sDiagFile)
     if AfxFileExists(gCompile.OutputFilename) then AfxDeleteFile(gCompile.OutputFilename)
 
     dim as DWSTRING wszParams = "-v --color never --diagnostics-file " & wDQ & DWSTRING(sDiagFile) & wDQ & _
@@ -732,7 +732,7 @@ function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolea
 
     dim as string sOut = TikoLang_OutputFromLog(ctp.sConsoleText)
     if len(sOut) then
-        if left(sOut, 1) <> "/" then sOut = WideToUtf8(@gCompile.MainFolder) & sOut
+        if TkIsAbsolute(sOut) = false then sOut = WideToUtf8(@gCompile.MainFolder) & sOut
         gCompile.OutputFilename = DWSTRING(sOut, CP_UTF8)
     end if
 
@@ -740,7 +740,7 @@ function TikoLang_Compile( byval wID as long, byval idxBuild as long ) as boolea
     gApp.IsCompiling = false
 
     dim as boolean bFailed = TikoLang_ShowResults( TikoLang_ReadTextFile(sDiagFile), ctp.sConsoleText, wID, true )
-    kill sDiagFile
+    kill TkFs(sDiagFile)
     if bFailed then return true
 
     for y as long = lbound(gConfig.Tools) to ubound(gConfig.Tools)
@@ -772,7 +772,7 @@ sub TikoLang_SetupLexer( byval hSci as any ptr, byref wszFilename as wstring )
         gTikoLangKeywordsLoaded = true
         dim as string sFile = TikoLang_ExeDir() & "settings/keywords/tiko_keywords.txt"
         dim as long f = freefile
-        if open(sFile for input as #f) = 0 then
+        if open(TkFs(sFile) for input as #f) = 0 then
             do until eof(f)
                 dim as string sLine
                 line input #f, sLine
@@ -800,7 +800,7 @@ function TikoLang_ShowHelp( byref wszWord as wstring ) as boolean
     if len(sWord) then
         dim as string sFile = TikoLang_ExeDir() & "settings/help/tiko_wiki_index.txt"
         dim as long f = freefile
-        if open(sFile for input as #f) = 0 then
+        if open(TkFs(sFile) for input as #f) = 0 then
             do until eof(f)
                 dim as string sLine
                 line input #f, sLine

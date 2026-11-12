@@ -21,3 +21,6 @@ settings/keybindings.ini
 settings/tikolang.ini
 bin/tiko-lldb-mi
 settings/ai.ini
+
+# downloaded Windows editor + tiko-lang toolchain used for Windows builds under Wine
+tiko-lang-win64/

@@ -21,12 +21,13 @@
 #define UNICODE
 #define _WIN32_WINNT &h0602  
 
+' Features added to upstream (both platforms): the tiko language (src/tikolang) and the
+' AI assistant chat panel (src/ai). Their hooks in upstream files are inside these #ifdefs.
+#define TIKOLANG_SUPPORT
+#define AI_ASSISTANT
+
 #ifdef __FB_LINUX__
     ' Linux port: GTK3 based platform layer replacing windows.bi and AfxNova
-    ' Also build programs in the tiko language (src/tikolang)
-    #define TIKOLANG_SUPPORT
-    ' AI assistant chat panel (src/ai)
-    #define AI_ASSISTANT
     #include once "lnx/lnx.bi"
 #else
 #include once "windows.bi"

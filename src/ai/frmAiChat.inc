@@ -2,7 +2,7 @@
 '    Licensed under the GNU GPLv3 or later.
 '
 '   +---------------------------------------+
-'   | AI ASSISTANT  model    New Errors  ✕  |  header (painted; actions are clickable)
+'   | AI ASSISTANT  model    New Errors  x  |  header (painted; actions are clickable)
 '   |---------------------------------------|
 '   | You                                   |  transcript: read-only Scintilla, styled by
 '   | ...                                   |  hand; code blocks are followed by clickable
@@ -228,7 +228,7 @@ private sub AiChat_FinishReply()
     SciExec( h, SCI_SETREADONLY, 1, 0 )
     if right(s, 1) = chr(10) then s = left(s, len(s) - 1)
 
-    dim as string sCode
+    dim as string sBlockCode
     dim as boolean bCode = false
     dim as long p = 1
     do while p <= len(s) + 1
@@ -240,8 +240,8 @@ private sub AiChat_FinishReply()
                 ' end of a code block: its actions
                 dim as long nBlock = ubound(gAiCodeBlocks) + 1
                 redim preserve gAiCodeBlocks(nBlock)
-                if right(sCode, 1) = chr(10) then sCode = left(sCode, len(sCode) - 1)
-                gAiCodeBlocks(nBlock) = sCode
+                if right(sBlockCode, 1) = chr(10) then sBlockCode = left(sBlockCode, len(sBlockCode) - 1)
+                gAiCodeBlocks(nBlock) = sBlockCode
                 dim as string sLabels(2) = { "Insert at cursor", "Replace selection", "Copy" }
                 AiChat_Append( "  ", AIS_TEXT )
                 for k as long = 0 to 2
@@ -254,12 +254,12 @@ private sub AiChat_FinishReply()
                     gAiActions(nA).block = nBlock
                     AiChat_Append( iif(k < 2, "     ", chr(10)), AIS_TEXT )
                 next
-                sCode = ""
+                sBlockCode = ""
             end if
             bCode = not bCode
         elseif bCode then
             AiChat_Append( " " & sLine & chr(10), AIS_CODE )
-            sCode &= sLine & chr(10)
+            sBlockCode &= sLine & chr(10)
         else
             AiChat_AppendProse( sLine )
         end if
@@ -551,16 +551,16 @@ private sub AiChat_Poll()
 end sub
 
 private sub AiChat_Stop()
-    if gAiChat.transfer then gAiChat.transfer->cancel = true
+    Ai_CancelTransfer( gAiChat.transfer )
 end sub
 
 ' ----------------------------------------------------------------------------------------
 ' Code actions
 ' ----------------------------------------------------------------------------------------
 private sub AiChat_RunAction( byval i as long )
-    dim as string sCode = gAiCodeBlocks(gAiActions(i).block)
+    dim as string sBlockCode = gAiCodeBlocks(gAiActions(i).block)
     if gAiActions(i).kind = 3 then
-        SciExec( gAiChat.hTranscript, SCI_COPYTEXT, len(sCode), cast(LPARAM, strptr(sCode)) )
+        SciExec( gAiChat.hTranscript, SCI_COPYTEXT, len(sBlockCode), cast(LPARAM, strptr(sBlockCode)) )
         exit sub
     end if
     dim pDoc as clsDocument ptr = gTTabCtl.GetActiveDocumentPtr()
@@ -572,7 +572,7 @@ private sub AiChat_RunAction( byval i as long )
     dim as boolean bReplace = (gAiActions(i).kind = 2) andalso (nB > nA)
     if bReplace = false then nA = SciExec( hEdit, SCI_GETCURRENTPOS, 0, 0 ) : nB = nA
     ' whole lines stay whole lines: keep the line break the replaced text ended with
-    dim as string sText = sCode
+    dim as string sText = sBlockCode
     if bReplace then
         dim as long nEndCol = SciExec( hEdit, SCI_GETCOLUMN, nB, 0 )
         if nEndCol = 0 then sText &= chr(10)
@@ -685,7 +685,12 @@ private sub frmAiChat_SetupScintilla( byval h as HWND, byval bTranscript as bool
     next
     SciExec( h, SCI_SETMARGINLEFT, 0, AiChat_Scale(8) )
     SciExec( h, SCI_SETMARGINRIGHT, 0, AiChat_Scale(6) )
-    dim as string sProse = "Selawik", sMono = gConfig.EditorFontname.utf8
+#ifdef __FB_LINUX__
+    dim as string sProse = "Selawik"
+#else
+    dim as string sProse = "Segoe UI"
+#endif
+    dim as string sMono = gConfig.EditorFontname.utf8
     dim as long nSize = valint(gConfig.EditorFontSize.utf8)
     if nSize < 8 then nSize = 10
     SciExec( h, SCI_STYLESETFONT, STYLE_DEFAULT, cast(LPARAM, strptr(sProse)) )
@@ -763,11 +768,11 @@ private sub frmAiChat_Paint( byval hwnd as HWND )
     gAiChat.rcErrors = type(x - wErrors, 0, x, nHead) : x -= wErrors + AiChat_Scale(4)
     gAiChat.rcNew = type(x - wNew, 0, x, nHead) : x -= wNew
     dim as RECT rcTitle = type(nSplit + nPad, 0, x - nPad, nHead)
-    b.PaintText( "AI ASSISTANT  ·  " & DWSTRING(Ai_ModelName(), CP_UTF8), @rcTitle, DT_LEFT or DT_VCENTER or DT_SINGLELINE or DT_END_ELLIPSIS )
+    b.PaintText( "AI ASSISTANT  " & wchr(&hB7) & "  " & DWSTRING(Ai_ModelName(), CP_UTF8), @rcTitle, DT_LEFT or DT_VCENTER or DT_SINGLELINE or DT_END_ELLIPSIS )
     b.SetForeColors( ghOutput.ForeColorHot, ghOutput.ForeColorHot )
     b.PaintText( "New chat", @gAiChat.rcNew, DT_CENTER or DT_VCENTER or DT_SINGLELINE )
     b.PaintText( "Explain errors", @gAiChat.rcErrors, DT_CENTER or DT_VCENTER or DT_SINGLELINE )
-    b.PaintText( wchr(&h2715), @gAiChat.rcClose, DT_CENTER or DT_VCENTER or DT_SINGLELINE )
+    b.PaintText( wchr(&hD7), @gAiChat.rcClose, DT_CENTER or DT_VCENTER or DT_SINGLELINE )
     b.SetPenColor( ghOutput.Divider )
     b.PaintLine( 1, rc.left + nSplit, nHead - 1, rc.right, nHead - 1 )
     ' border around the input box
@@ -792,6 +797,20 @@ private function frmAiChat_WndProc( byval hwnd as HWND, byval uMsg as UINT, byva
             return 0
         case WM_ERASEBKGND
             return 1
+#ifndef __FB_LINUX__
+        case WM_CTLCOLORSTATIC, WM_CTLCOLORBTN
+            ' the "Include current file" checkbox in the panel's colours
+            static as HBRUSH hbrPanel
+            static as COLORREF clrPanel = &hFFFFFFFF
+            if clrPanel <> ghOutput.BackColor then
+                if hbrPanel then DeleteObject( hbrPanel )
+                clrPanel = ghOutput.BackColor
+                hbrPanel = CreateSolidBrush( clrPanel )
+            end if
+            SetTextColor( cast(HDC, wParam), ghOutput.ForeColorHot )
+            SetBkColor( cast(HDC, wParam), clrPanel )
+            return cast(LRESULT, hbrPanel)
+#endif
         case WM_SIZE
             frmAiChat_PositionChildren()
             return 0
