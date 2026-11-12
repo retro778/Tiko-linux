@@ -22,4 +22,7 @@ An AI assistant panel (View > View AI Assistant, Ctrl+Shift+A) chats with Claude
 or OpenAI about the current file, explains compile errors and inserts suggested code. It uses
 `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` or a key entered in Environment Options > AI Assistant.
 
+The tiko language support and the AI assistant also build for Windows from the same sources
+(`make win`, using the upstream Windows toolchain through Wine).
+
 See [PORTING.md](PORTING.md) for the architecture, upstream changes and current status.

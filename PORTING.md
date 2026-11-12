@@ -184,6 +184,35 @@ Z/Y typed in the chat reach the chat controls instead of the editor commands
 * Platform fix found here: a button whose label changes at run time got no size for the new
   label (GTK's queued relayout is not applied to our children); `LnxEditSetText` re-allocates it.
 
+## Windows build of the added features
+
+The tiko language support and the AI assistant also build with the upstream Windows toolchain
+(fbc64 + AfxNova): `TIKOLANG_SUPPORT` and `AI_ASSISTANT` are defined on both platforms and
+`make win` builds `tiko.exe` and `bin/tiko-lldb-mi.exe` through Wine into an unpacked upstream
+tiko-editor folder (`WINDIR_TIKO`, default `tiko-lang-win64/tiko-editor-main`, untracked).
+`src/tiko.rc` and `src/tiko_manifest.xml` come from upstream for this.
+
+* `tikolang/tkplat.bi`: paths, temp folder, pid, exe folder for both platforms (the added code
+  keeps paths as UTF-8 strings; `TkFs()` converts for the run time library's file statements,
+  which take ANSI on Windows). Sources must stay ASCII: fbc on Windows reads them as ANSI.
+* `tikolang/tkproc.bi`: a child process with pipes (fork/exec on Linux, CreateProcess on
+  Windows), read without blocking. The tiko-lsp client polls it from one 30 ms timer on both
+  platforms; `tiko-lldb-mi` uses it for lldb-dap.
+* Compiler lookup on Windows: options page path, `TIKO_COMPILER`, a `tiko.exe` on the PATH with
+  `lib\` and `pkg\` beside it (not the editor itself), `..\tiko-lang\tiko.exe` beside the
+  editor folder, `%USERPROFILE%\tiko-lang`, `%USERPROFILE%\Downloads\tiko-lang`.
+* AI transport on Windows: WinHTTP (declared in `modAiClient.inc`, no extra DLL); cancelling
+  closes the request handle. Keys: environment variables, else `settings\ai.ini`.
+* File dialog filters: `TikoLang_FileTypes` (hook in `modRoutines.inc`, both platforms).
+* Debugger: the byref / empty string display fixes apply on both platforms; "Debugger: lldb"
+  starts `bin\tiko-lldb-mi.exe`, which runs the program in a new console (`runInTerminal` ->
+  `CREATE_NEW_CONSOLE`). lldb-dap.exe needs `python310.dll` on Windows.
+* Tested under Wine 10 with tiko 0.1.4 (Windows) + LLVM 19.1.7: build errors in Compiler
+  Results, build and run, tiko.toml package build, tiko-lsp squiggles, gdb debugging of a tiko
+  program, both options pages, AI chat (mock server) and the HTTPS error path. Not tested:
+  lldb on Windows (needs Python 3.10 in Wine). `"""` block string colouring needs a rebuilt
+  `Lexilla64.dll` (not done; the keywords are coloured).
+
 ## File format compatibility
 
 * Unicode files (config, `.tiko`, sessions, `.lang`) are UTF‑16LE + BOM + CRLF (verified byte identical).

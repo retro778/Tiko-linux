@@ -35,7 +35,18 @@ tiko: $(SCI_LIB) $(LEX_LIB) $(LEXTIKO_OBJ) src/*.bas src/*.bi src/*.inc src/lnx/
 bin/tiko-lldb-mi: src/tikolang/tiko-lldb-mi.bas src/tikolang/tkjson.bi
 	$(FBC) -w all src/tikolang/tiko-lldb-mi.bas -x bin/tiko-lldb-mi
 
+# Windows build of the same sources with the upstream toolchain (fbc64 + AfxNova), run through
+# Wine on Linux. WINDIR_TIKO is an unpacked upstream tiko-editor (its toolchains/ folder is used;
+# the result is written beside its bin/ and settings/): make win WINDIR_TIKO=path
+WINDIR_TIKO ?= tiko-lang-win64/tiko-editor-main
+WIN_FBC      = $(abspath $(WINDIR_TIKO))/toolchains/FreeBASIC-1.10.1-winlibs-gcc-9.3.0/fbc64.exe
+win:
+	cd src && WINEDEBUG=-all wine $(WIN_FBC) tiko.bas tiko.rc -x $(abspath $(WINDIR_TIKO))/tiko.exe
+	cd src/tikolang && WINEDEBUG=-all wine $(WIN_FBC) tiko-lldb-mi.bas -x $(abspath $(WINDIR_TIKO))/bin/tiko-lldb-mi.exe
+	cp settings/keywords/tiko_keywords.txt $(WINDIR_TIKO)/settings/keywords/
+	cp settings/help/tiko_wiki_index.txt $(WINDIR_TIKO)/settings/help/
+
 clean:
 	rm -f tiko bin/tiko-lldb-mi $(LEXTIKO_OBJ)
 
-.PHONY: all clean
+.PHONY: all clean win

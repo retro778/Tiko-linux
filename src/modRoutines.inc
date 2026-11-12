@@ -1229,6 +1229,9 @@ function AfxIFileOpenDialogW( _
             rgFileTypes(3).pszSpec = @wstr("*.bi")
             rgFileTypes(4).pszSpec = @wstr("*.rc")
             rgFileTypes(5).pszSpec = @wstr("*.*")
+#ifdef TIKOLANG_SUPPORT
+            TikoLang_FileTypes( @rgFileTypes(1), 5 )     ' tiko language files beside the FreeBASIC ones
+#endif
             pofd->lpVtbl->SetFileTypes(pofd, 5, @rgFileTypes(1))
             ' Set the title of the dialog
             hr = pofd->lpVtbl->SetTitle(pofd, L(80,"Insert File"))
@@ -1343,6 +1346,9 @@ function AfxIFileOpenDialogMultiple( _
             rgFileTypes(3).pszSpec = @wstr("*.bi")
             rgFileTypes(4).pszSpec = @wstr("*.rc")
             rgFileTypes(5).pszSpec = @wstr("*.*")
+#ifdef TIKOLANG_SUPPORT
+            TikoLang_FileTypes( @rgFileTypes(1), 5 )     ' tiko language files beside the FreeBASIC ones
+#endif
             pofd->lpVtbl->SetFileTypes(pofd, 5, @rgFileTypes(1))
     end select
 
@@ -1489,6 +1495,9 @@ function AfxIFileSaveDialog( _
             rgFileTypes(3).pszSpec = @wstr("*.bi")
             rgFileTypes(4).pszSpec = @wstr("*.rc")
             rgFileTypes(5).pszSpec = @wstr("*.*")
+#ifdef TIKOLANG_SUPPORT
+            TikoLang_FileTypes( @rgFileTypes(1), 5 )
+#endif
             psfd->lpVtbl->SetFileTypes(psfd, 5, @rgFileTypes(1))
             psfd->lpVtbl->SetTitle(psfd, L(8,"Save As..."))
             if pwszDefExt then 

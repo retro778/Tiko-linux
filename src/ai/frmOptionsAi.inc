@@ -52,9 +52,14 @@ function frmOptionsAi_Show( byval hWndParent as HWND ) as LRESULT
     pWindow->AddControl("LABEL", , IDC_FRMOPTIONSAI_LBLOKEY, frmOptionsAi_KeyLabel("openai"), 0, 196, 400, 16, nLabel, WS_EX_LEFT)
     pWindow->AddControl("TEXTBOX", , IDC_FRMOPTIONSAI_TXTOKEY, "", 0, 214, 386, 20, nText or ES_PASSWORD, nTextEx)
 
-    pWindow->AddControl("LABEL", , IDC_FRMOPTIONSAI_LBLNOTE, _
-        "Keys entered here are saved in settings/ai.ini (readable by you only). Questions are sent to the chosen " & _
-        "provider with the current file when 'Include current file' is ticked in the panel.", _
+#ifdef __FB_LINUX__
+    dim as DWSTRING wszNote = "Keys entered here are saved in settings/ai.ini (readable by you only). "
+#else
+    dim as DWSTRING wszNote = "Keys entered here are saved in settings\ai.ini. "
+#endif
+    wszNote = wszNote & "Questions are sent to the chosen provider with the current file when " & _
+                        "'Include current file' is ticked in the panel."
+    pWindow->AddControl("LABEL", , IDC_FRMOPTIONSAI_LBLNOTE, wszNote, _
         0, 250, 400, 64, WS_CHILD or WS_VISIBLE or SS_LEFT, WS_EX_LEFT or WS_EX_LTRREADING)
 
     dim as HWND hwnd = HWND_FRMOPTIONSAI

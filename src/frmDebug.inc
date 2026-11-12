@@ -110,13 +110,13 @@ function gdb_init( byval executable as string = "", byval cmdparams as string = 
     ' Use the bundled gdb when present, otherwise the system gdb.
     dim as DWSTRING wszGDBexe = AfxGetExePathName & "bin/gdb/gdb"
     if AfxFileExists(wszGDBexe) = false then wszGDBexe = "gdb"
+#else
+    dim as DWSTRING wszGDBexe = AfxGetExePathName & "\bin\gdb\gdb.exe"
+#endif
 #ifdef TIKOLANG_SUPPORT
     ' Debugger "lldb" (Environment Options > Compilers): tiko-lldb-mi answers the same
     ' gdb/MI commands by driving lldb-dap
-    if TikoLang_UseLldb() then wszGDBexe = AfxGetExePathName & "bin/tiko-lldb-mi"
-#endif
-#else
-    dim as DWSTRING wszGDBexe = AfxGetExePathName & "\bin\gdb\gdb.exe"
+    if TikoLang_UseLldb() then wszGDBexe = TikoLang_LldbAdapter()
 #endif
     if len(executable) > 0 then
         cmdline = wszGDBexe & " -q -i=mi2 " & chr(34) & executable & chr(34) & " " & cmdparams
@@ -519,7 +519,7 @@ function gdb_getVariableDisplayValue( byval varValue as string ) as string
     st = AfxStrReplace( st, "'#9'", "(TAB)" )
     st = AfxStrReplace( st, "\" & chr(34), chr(34) )
     varValue = st
-#ifdef __FB_LINUX__
+#ifdef TIKOLANG_SUPPORT
     ' A reference (byref parameter) is shown by gdb as "@0x7ffd...: value"; show the value
     if left(varValue, 3) = "@0x" then
         dim as long nRef = instr(varValue, ": ")
@@ -543,7 +543,7 @@ function gdb_getVariableDisplayValue( byval varValue as string ) as string
             if nLen = 0 then nLen = len(wszExtractString)
             varDisplayString = chr(34) & wszExtractString & chr(34) & "  (len = " & str(nLen) & ")"
         end if    
-#ifdef __FB_LINUX__
+#ifdef TIKOLANG_SUPPORT
         ' An empty string has no buffer: data = 0x0
         if (len(wszExtractString) = 0) andalso (left(lcase(varValue), 11) = "data = 0x0,") then
             varDisplayString = chr(34) & chr(34) & "  (len = 0)"

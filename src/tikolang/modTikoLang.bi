@@ -38,3 +38,5 @@ declare sub TikoLsp_OnDwell( byval hEdit as HWND, byval nPos as long, byval bSta
 declare function TikoLsp_GotoDefinition( byval pDoc as clsDocument ptr ) as boolean
 declare function TikoLang_FindPackage( byref wszFilename as wstring ) as string
 declare function TikoLang_UseLldb() as boolean
+declare function TikoLang_LldbAdapter() as DWSTRING
+declare sub TikoLang_FileTypes( byval pTypes as COMDLG_FILTERSPEC ptr, byval nCount as long )

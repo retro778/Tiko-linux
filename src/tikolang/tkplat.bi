@@ -101,6 +101,18 @@ private function TkHomeDir() as string
 #endif
 end function
 
+' The full path without "..\" parts (Windows; unchanged on Linux)
+private function TkFullPath( byref sPath as string ) as string
+#ifdef __FB_LINUX__
+    return sPath
+#else
+    dim as wstring * (MAX_PATH * 2) wsz
+    dim as DWSTRING w = DWSTRING(sPath, CP_UTF8)
+    if GetFullPathNameW( w, MAX_PATH * 2, @wsz, NULL ) = 0 then return sPath
+    return WideToUtf8(@wsz)
+#endif
+end function
+
 ' A canonical form of a path for comparing two paths (links resolved / case folded)
 private function TkRealPath( byref sPath as string ) as string
 #ifdef __FB_LINUX__

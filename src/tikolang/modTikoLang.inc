@@ -126,6 +126,26 @@ function TikoLang_UseLldb() as boolean
     return TkFileExists(TikoLang_ExeDir() & "bin" & TK_SEP & "tiko-lldb-mi" & TK_EXE)
 end function
 
+' The program that stands in for gdb when debugging with lldb
+function TikoLang_LldbAdapter() as DWSTRING
+    return DWSTRING(TikoLang_ExeDir() & "bin" & TK_SEP & "tiko-lldb-mi" & TK_EXE, CP_UTF8)
+end function
+
+' File dialog filters: the tiko file types beside the FreeBASIC ones
+sub TikoLang_FileTypes( byval pTypes as COMDLG_FILTERSPEC ptr, byval nCount as long )
+    static as wstring * 64 wszSource = "*.bas;*.bi;*.inc;*.rc;*.tiko;*.ti;*.tko"
+    static as wstring * 64 wszCode = "*.bas;*.inc;*.tiko;*.tko"
+    static as wstring * 64 wszHeader = "*.bi;*.ti"
+    for i as long = 0 to nCount - 1
+        if pTypes[i].pszSpec = 0 then continue for
+        select case *pTypes[i].pszSpec
+            case "*.bas;*.bi;*.inc;*.rc": pTypes[i].pszSpec = @wszSource
+            case "*.bas;*.inc":           pTypes[i].pszSpec = @wszCode
+            case "*.bi":                  pTypes[i].pszSpec = @wszHeader
+        end select
+    next
+end sub
+
 ' The document that a compile would build: the project's main file or the active document
 private function TikoLang_MainDocument() as clsDocument ptr
     if gApp.IsProjectActive then return gApp.GetMainDocumentPtr()
@@ -183,7 +203,7 @@ function TikoLang_FindCompiler() as DWSTRING
     dim as string sTry(2) = { TkExeDir() & "..\tiko-lang\tiko.exe", sHome & "\tiko-lang\tiko.exe", sHome & "\Downloads\tiko-lang\tiko.exe" }
 #endif
     for i as long = 0 to 2
-        if TkFileExists(sTry(i)) then return DWSTRING(sTry(i), CP_UTF8)
+        if TkFileExists(sTry(i)) then return DWSTRING(TkFullPath(sTry(i)), CP_UTF8)
     next
     return DWSTRING()
 end function

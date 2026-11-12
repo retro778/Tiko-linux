@@ -18,23 +18,18 @@
 ' lldb-dap is found as $TIKO_LLDB_DAP, else lldb-dap on the PATH, else the newest lldb-dap-NN.
 
 #include once "crt.bi"
+#ifndef __FB_LINUX__
+    #include once "windows.bi"
+#endif
 #include once "tkjson.bi"
+#include once "tkproc.bi"
 
-type TKPOLLFD
-    fd      as long
-    events  as short
-    revents as short
-end type
-
+#ifdef __FB_LINUX__
 extern "C"
     declare function dbg_read alias "read"( byval fd as long, byval buf as any ptr, byval n as uinteger ) as integer
     declare function dbg_write alias "write"( byval fd as long, byval buf as const any ptr, byval n as uinteger ) as integer
-    declare function dbg_close alias "close"( byval fd as long ) as long
-    declare function dbg_pipe alias "pipe"( byval fds as long ptr ) as long
     declare function dbg_fork alias "fork"() as long
     declare function dbg_dup2 alias "dup2"( byval oldfd as long, byval newfd as long ) as long
-    declare function dbg_execv alias "execv"( byval path as const zstring ptr, byval argv as zstring ptr ptr ) as long
-    declare function dbg_poll alias "poll"( byval fds as TKPOLLFD ptr, byval n as ulong, byval timeout as long ) as long
     declare function dbg_open alias "open"( byval path as const zstring ptr, byval flags as long, ... ) as long
     declare function dbg_access alias "access"( byval path as const zstring ptr, byval mode as long ) as long
     declare sub dbg_exit alias "_exit"( byval code as long )
@@ -44,8 +39,52 @@ extern "C"
     declare function dbg_execvp alias "execvp"( byval file as const zstring ptr, byval argv as zstring ptr ptr ) as long
     declare function dbg_ioctl alias "ioctl"( byval fd as long, byval request as culong, ... ) as long
 end extern
+#endif
 
-const POLLIN = 1, POLLHUP = 16
+' ----------------------------------------------------------------------------------------
+' The editor's side: commands arrive on stdin, answers go to stdout (both pipes)
+' ----------------------------------------------------------------------------------------
+sub StdoutWrite( byref s as string )
+#ifdef __FB_LINUX__
+    dbg_write( 1, strptr(s), len(s) )
+#else
+    dim as DWORD n
+    WriteFile( GetStdHandle(STD_OUTPUT_HANDLE), strptr(s), len(s), @n, NULL )
+#endif
+end sub
+
+' Appends what the editor sent to sOut without blocking; returns -1 when stdin is closed
+function StdinRead( byref sOut as string ) as long
+#ifdef __FB_LINUX__
+    dim as TKPROC_POLLFD pfd
+    pfd.fd = 0 : pfd.events = 1
+    if tkp_poll( @pfd, 1, 0 ) <= 0 then return 0
+    dim as string sChunk = space(4096)
+    dim as integer n = dbg_read( 0, strptr(sChunk), len(sChunk) )
+    if n <= 0 then return -1
+    sOut &= left(sChunk, n)
+    return n
+#else
+    dim as HANDLE h = GetStdHandle(STD_INPUT_HANDLE)
+    dim as DWORD nAvail
+    if PeekNamedPipe( h, NULL, 0, NULL, @nAvail, NULL ) = 0 then return -1
+    if nAvail = 0 then return 0
+    if nAvail > 4096 then nAvail = 4096
+    dim as string sChunk = space(nAvail)
+    dim as DWORD n
+    if ReadFile( h, strptr(sChunk), nAvail, @n, NULL ) = 0 then return -1
+    sOut &= left(sChunk, n)
+    return n
+#endif
+end function
+
+function FileExists( byref sPath as string ) as boolean
+#ifdef __FB_LINUX__
+    return dbg_access( sPath, 1 ) = 0
+#else
+    return GetFileAttributesA( sPath ) <> INVALID_FILE_ATTRIBUTES
+#endif
+end function
 
 type TKBREAK
     num      as long          ' MI number
@@ -59,7 +98,7 @@ type TKBREAK
     deleted  as boolean
 end type
 
-dim shared as long gDapIn = -1, gDapOut = -1, gDapPid
+dim shared as TKPROC gDap            ' lldb-dap
 dim shared as string gDapBuf, gMiBuf
 dim shared as long gSeq
 dim shared gEvents() as string
@@ -80,7 +119,7 @@ sub EmitMi( byref sMsg as string )
         sleep 20, 1
     loop
     dim as string s = sMsg & chr(10) & "(gdb)" & chr(10)
-    dbg_write( 1, strptr(s), len(s) )
+    StdoutWrite( s )
     gLastEmit = timer
 end sub
 
@@ -106,6 +145,7 @@ end function
 function FindLldbDap() as string
     dim as string sEnv = environ("TIKO_LLDB_DAP")
     if len(sEnv) then return sEnv
+#ifdef __FB_LINUX__
     dim as string sPath = environ("PATH"), sBest
     dim as long nBest = -1, p = 1
     do while p <= len(sPath)
@@ -114,48 +154,41 @@ function FindLldbDap() as string
         dim as string sDir = mid(sPath, p, q - p)
         p = q + 1
         if len(sDir) = 0 then continue do
-        if dbg_access( sDir & "/lldb-dap", 1 ) = 0 then return sDir & "/lldb-dap"
+        if FileExists( sDir & "/lldb-dap" ) then return sDir & "/lldb-dap"
         ' numbered versions: take the newest
         for v as long = 40 to 14 step -1
             if v <= nBest then exit for
-            if dbg_access( sDir & "/lldb-dap-" & v, 1 ) = 0 then nBest = v : sBest = sDir & "/lldb-dap-" & v : exit for
+            if FileExists( sDir & "/lldb-dap-" & v ) then nBest = v : sBest = sDir & "/lldb-dap-" & v : exit for
         next
     loop
     return sBest
+#else
+    ' on the PATH, else where the LLVM installer puts it
+    dim as string sPath = environ("PATH")
+    dim as long p = 1
+    do while p <= len(sPath)
+        dim as long q = instr(p, sPath, ";")
+        if q = 0 then q = len(sPath) + 1
+        dim as string sDir = rtrim(trim(mid(sPath, p, q - p), chr(34)), any "\/")
+        p = q + 1
+        if (len(sDir) > 0) andalso FileExists( sDir & "\lldb-dap.exe" ) then return sDir & "\lldb-dap.exe"
+    loop
+    dim as string sTry(1) = { environ("ProgramFiles") & "\LLVM\bin\lldb-dap.exe", "C:\Program Files\LLVM\bin\lldb-dap.exe" }
+    for i as long = 0 to 1
+        if FileExists( sTry(i) ) then return sTry(i)
+    next
+    return ""
+#endif
 end function
 
 function StartDap() as boolean
     dim as string sDap = FindLldbDap()
     if len(sDap) = 0 then return false
-    dim as long pIn(1), pOut(1)
-    if dbg_pipe( @pIn(0) ) <> 0 then return false
-    if dbg_pipe( @pOut(0) ) <> 0 then return false
-    gDapPid = dbg_fork()
-    if gDapPid < 0 then return false
-    if gDapPid = 0 then
-        dbg_dup2( pIn(0), 0 )
-        dbg_dup2( pOut(1), 1 )
-        dim as long fdNull = dbg_open( "/dev/null", 1 )
-        if fdNull >= 0 then dbg_dup2( fdNull, 2 )
-        dbg_close( pIn(1) ) : dbg_close( pOut(0) )
-        dim as zstring ptr argv(1) = { strptr(sDap), NULL }
-        dbg_execv( strptr(sDap), @argv(0) )
-        dbg_exit( 127 )
-    end if
-    dbg_close( pIn(0) ) : dbg_close( pOut(1) )
-    gDapIn = pIn(1)
-    gDapOut = pOut(0)
-    return true
+    return TkProc_Start( gDap, sDap )
 end function
 
 sub DapWrite( byref sJson as string )
-    dim as string s = "Content-Length: " & len(sJson) & chr(13, 10, 13, 10) & sJson
-    dim as long nDone = 0
-    do while nDone < len(s)
-        dim as integer n = dbg_write( gDapIn, strptr(s) + nDone, len(s) - nDone )
-        if n <= 0 then exit sub
-        nDone += n
-    loop
+    TkProc_Write( gDap, "Content-Length: " & len(sJson) & chr(13, 10, 13, 10) & sJson )
 end sub
 
 function DapSend( byref sCommand as string, byref sArgs as string ) as long
@@ -166,14 +199,7 @@ end function
 
 ' Reads what lldb-dap has written (waits up to nMs); false when it ended
 function DapFill( byval nMs as long ) as boolean
-    dim as TKPOLLFD pfd
-    pfd.fd = gDapOut : pfd.events = POLLIN
-    if dbg_poll( @pfd, 1, nMs ) <= 0 then return true
-    dim as string sChunk = space(65536)
-    dim as integer n = dbg_read( gDapOut, strptr(sChunk), len(sChunk) )
-    if n <= 0 then return false
-    gDapBuf &= left(sChunk, n)
-    return true
+    return TkProc_Read( gDap, gDapBuf, nMs ) >= 0
 end function
 
 ' One complete message from the buffer, or ""
@@ -208,10 +234,11 @@ sub RunInTerminal( byref sJson as string )
         sEnvK(m) = gTkj(c).key : sEnvV(m) = TkJ_Str(c) : m += 1
         c = gTkj(c).nextSib
     loop
+    dim as long pid = -1
+#ifdef __FB_LINUX__
     dim as zstring ptr argv(n)
     for k as long = 0 to n - 1 : argv(k) = strptr(sArg(k)) : next
     argv(n) = NULL
-    dim as long pid = -1
     if n > 0 then pid = dbg_fork()
     if pid = 0 then
         ' the child: a new session whose controlling terminal is the console
@@ -229,6 +256,27 @@ sub RunInTerminal( byref sJson as string )
         dbg_execvp( argv(0), @argv(0) )
         dbg_exit( 127 )
     end if
+#else
+    ' Windows: the program gets a console window of its own
+    if n > 0 then
+        dim as string sCmd
+        for k as long = 0 to n - 1
+            sCmd &= iif(k, " ", "") & chr(34) & sArg(k) & chr(34)
+        next
+        for k as long = 0 to m - 1
+            SetEnvironmentVariableA( sEnvK(k), sEnvV(k) )
+        next
+        dim as string wCmd = TkProc_Wide(sCmd), wCwd = TkProc_Wide(sCwd)
+        dim as STARTUPINFOW si
+        dim as PROCESS_INFORMATION pi
+        si.cb = sizeof(si)
+        if CreateProcessW( NULL, cast(wstring ptr, strptr(wCmd)), NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, _
+                           iif(len(sCwd), cast(wstring ptr, strptr(wCwd)), NULL), @si, @pi ) then
+            pid = pi.dwProcessId
+            CloseHandle( pi.hThread ) : CloseHandle( pi.hProcess )
+        end if
+    end if
+#endif
     if pid > 0 then
         DapWrite( "{""seq"":0,""type"":""response"",""request_seq"":" & nSeq & ",""success"":true," & _
                   """command"":""runInTerminal"",""body"":{""processId"":" & pid & "}}" )
@@ -240,7 +288,7 @@ end sub
 
 ' Sends a request and waits for its response (events that arrive meanwhile are queued)
 function DapRequest( byref sCommand as string, byref sArgs as string, byval nTimeoutMs as long = 15000 ) as string
-    if gDapIn < 0 then return ""
+    if gDap.running = false then return ""
     dim as long nSeq = DapSend( sCommand, sArgs )
     dim as double t0 = timer
     do
@@ -269,7 +317,7 @@ end function
 ' Breakpoints
 ' ----------------------------------------------------------------------------------------
 sub SyncFile( byref sFile as string )
-    if gLaunched = false andalso gDapIn < 0 then exit sub
+    if (gLaunched = false) andalso (gDap.running = false) then exit sub
     dim as string sList
     dim as long idx(any)
     for i as long = 0 to ubound(gBreaks)
@@ -294,7 +342,7 @@ sub SyncFile( byref sFile as string )
 end sub
 
 sub SyncFunctions()
-    if gDapIn < 0 then exit sub
+    if gDap.running = false then exit sub
     dim as string sList
     dim as long idx(any)
     for i as long = 0 to ubound(gBreaks)
@@ -533,12 +581,26 @@ sub Launch()
         EmitMi( "*stopped,reason=""exited"",exit-code=""127""" )
         exit sub
     end if
-    DapRequest( "initialize", "{""clientID"":""tiko-editor"",""adapterID"":""lldb-dap"",""linesStartAt1"":true," & _
-                              """columnsStartAt1"":true,""pathFormat"":""path""}" )
-    dim as string sDir = left(gProgram, instrrev(gProgram, "/"))
-    ' with a debug console the program runs there (runInTerminal, see RunInTerminal)
+    if len(DapRequest( "initialize", "{""clientID"":""tiko-editor"",""adapterID"":""lldb-dap"",""linesStartAt1"":true," & _
+                              """columnsStartAt1"":true,""pathFormat"":""path""}", 20000 )) = 0 then
+        ' lldb-dap did not answer (on Windows it needs python310.dll): not a normal exit
+        TkProc_Stop( gDap )
+        gExitReported = true
+        EmitMi( "*stopped,reason=""signal-received"",signal-name=""SIGSEGV"",frame={}" )
+        exit sub
+    end if
+    dim as long nSlash = instrrev(gProgram, "/")
+    if instrrev(gProgram, "\") > nSlash then nSlash = instrrev(gProgram, "\")
+    dim as string sDir = left(gProgram, nSlash)
+    ' Linux: with a debug console the program runs there; Windows: in a console of its own
+    ' (runInTerminal, see RunInTerminal)
+#ifdef __FB_LINUX__
+    dim as boolean bTerminal = (len(gTty) > 0)
+#else
+    dim as boolean bTerminal = true
+#endif
     DapRequest( "launch", "{""program"":" & TkJ_Esc(gProgram) & ",""args"":[" & gArgsJson & "],""cwd"":" & TkJ_Esc(sDir) & _
-                          ",""stopOnEntry"":false,""runInTerminal"":" & iif(len(gTty), "true", "false") & "}" )
+                          ",""stopOnEntry"":false,""runInTerminal"":" & iif(bTerminal, "true", "false") & "}" )
     ' wait for "initialized" before sending the breakpoints
     dim as double t0 = timer
     dim as boolean bInit = false
@@ -645,9 +707,9 @@ sub SetEnabled( byref sNums as string, byval bOn as boolean )
 end sub
 
 sub Shutdown()
-    if gDapIn >= 0 then
+    if gDap.running then
         DapRequest( "disconnect", "{""terminateDebuggee"":true}", 3000 )
-        dbg_close( gDapIn ) : gDapIn = -1
+        TkProc_Stop( gDap )
     end if
     gLaunched = false
 end sub
@@ -700,34 +762,32 @@ do while len(command(nArg))
         gArgsJson &= iif(len(gArgsJson), ",", "") & TkJ_Esc(a)
     end if
 loop
-if len(gProgram) andalso (left(gProgram, 1) <> "/") then gProgram = curdir() & "/" & gProgram
+#ifdef __FB_LINUX__
+if (len(gProgram) > 0) andalso (left(gProgram, 1) <> "/") then gProgram = curdir() & "/" & gProgram
+#else
+if (len(gProgram) > 0) andalso (mid(gProgram, 2, 1) <> ":") andalso (left(gProgram, 1) <> "\") then gProgram = curdir() & "\" & gProgram
+#endif
 
 do until gQuit
-    dim as TKPOLLFD pfd(1)
-    pfd(0).fd = 0 : pfd(0).events = POLLIN
-    pfd(1).fd = gDapOut : pfd(1).events = POLLIN
-    dim as long nFds = iif(gDapOut >= 0, 2, 1)
-    if dbg_poll( @pfd(0), nFds, 100 ) > 0 then
-        if pfd(0).revents and (POLLIN or POLLHUP) then
-            dim as string sChunk = space(4096)
-            dim as integer n = dbg_read( 0, strptr(sChunk), len(sChunk) )
-            if n <= 0 then
-                Shutdown()
-                exit do
+    ' commands from the editor
+    dim as long nGot = StdinRead( gMiBuf )
+    if nGot < 0 then
+        Shutdown()
+        exit do
+    end if
+    ' output of lldb-dap (waits a little when the editor sent nothing)
+    if gDap.running then
+        if DapFill( iif(nGot > 0, 0, 20) ) = false then
+            ' lldb-dap ended
+            TkProc_Stop( gDap )
+            if gLaunched andalso (gExitReported = false) then
+                gExitReported = true
+                EmitMi( "*stopped,reason=""exited-normally""" )
             end if
-            gMiBuf &= left(sChunk, n)
+            gLaunched = false
         end if
-        if (nFds = 2) andalso (pfd(1).revents and (POLLIN or POLLHUP)) then
-            if DapFill(0) = false then
-                ' lldb-dap ended
-                dbg_close( gDapOut ) : gDapOut = -1
-                if gLaunched andalso (gExitReported = false) then
-                    gExitReported = true
-                    EmitMi( "*stopped,reason=""exited-normally""" )
-                end if
-                gLaunched = false
-            end if
-        end if
+    elseif nGot = 0 then
+        sleep 20, 1
     end if
     ' MI commands, one per line
     do

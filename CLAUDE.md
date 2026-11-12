@@ -19,6 +19,7 @@ make clean      # removes ./tiko, bin/tiko-lldb-mi and obj/LexTiko.o (not deps/)
 ./tiko [file.bas | file.tiko | project.tiko]
 ./install.sh         # per-user menu entry + ~/.local/bin/tiko-editor link to this folder (--uninstall)
 LNX_TRACE=1 ./tiko   # prints top-level window SetWindowPos/ShowWindow and child allocations
+make win             # Windows build (tiko.exe, bin/tiko-lldb-mi.exe) through Wine into tiko-lang-win64/tiko-editor-main
 ```
 
 - Compiler: FreeBASIC `fbc` (Linux, 64-bit). The whole app is one translation unit: `src/tiko.bas`
@@ -35,6 +36,12 @@ LNX_TRACE=1 ./tiko   # prints top-level window SetWindowPos/ShowWindow and child
 - External tools: `fbc`; for the tiko language the tiko-lang toolchain (`~/.local/tiko-lang/bin/tiko`,
   `tiko-lsp`) plus clang; `gdb` and/or `lldb-dap-19` for debugging; `kchmviewer` for F1; libcurl
   (linked through `curl.bi`'s `#inclib`) for the AI assistant.
+
+- The same `src/` builds for Windows with the upstream toolchain (`make win`, about 25 s). Code in
+  `src/tikolang` and `src/ai` must compile on both: use `tkplat.bi` / `tkproc.bi` for paths and child
+  processes, keep sources ASCII (Windows fbc reads them as ANSI), no `#ifdef` inside a continued
+  statement. Test the Windows build under Wine on the virtual X server (`wine tiko.exe 'Z:\path\file'`,
+  start-up takes ~20 s); Windows tiko needs `C:\Program Files\LLVM` in the Wine prefix.
 
 ## Testing
 
