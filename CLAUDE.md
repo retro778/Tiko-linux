@@ -30,10 +30,11 @@ LNX_TRACE=1 ./tiko   # prints top-level window SetWindowPos/ShowWindow and child
   then run under `gdb`. `-exx` reports the source line of null-pointer accesses.
 - Runtime files live next to the executable: `settings/` (themes, languages, keywords, help) and
   `bin/` (SegoeFluentIcons.ttf icon font, Selawik UI fonts, tiko.png, tiko-lldb-mi).
-  `settings/settings.ini`, `settings/tikolang.ini`, `default.session`, `keybindings.ini` are
-  per-user files written at runtime (gitignored).
+  `settings/settings.ini`, `settings/tikolang.ini`, `settings/ai.ini` (may hold API keys, mode 600),
+  `default.session`, `keybindings.ini` are per-user files written at runtime (gitignored).
 - External tools: `fbc`; for the tiko language the tiko-lang toolchain (`~/.local/tiko-lang/bin/tiko`,
-  `tiko-lsp`) plus clang; `gdb` and/or `lldb-dap-19` for debugging; `kchmviewer` for F1.
+  `tiko-lsp`) plus clang; `gdb` and/or `lldb-dap-19` for debugging; `kchmviewer` for F1; libcurl
+  (linked through `curl.bi`'s `#inclib`) for the AI assistant.
 
 ## Testing
 
@@ -64,10 +65,12 @@ export DISPLAY=:99   # then ./tiko, xdotool, import -window root / import -windo
 **Upstream code (`src/*.bas|bi|inc`)** is Paul Squires' Windows source copied verbatim: Win32 window
 procedures (`frmX_WndProc`), AfxNova `CWindow`, custom GDI painting via `clsDoubleBuffer`, a
 `GetMessage` loop with pre-filters in `frmMain_Show`/`modMsgPump.inc`. Linux-specific changes are
-only allowed as small `#ifdef __FB_LINUX__` blocks (tiko language hooks: `#ifdef TIKOLANG_SUPPORT`;
-both listed in PORTING.md); prefer fixing things in the platform layer instead. Files are CRLF; edit
+only allowed as small `#ifdef __FB_LINUX__` blocks (feature hooks: `#ifdef TIKOLANG_SUPPORT` for the tiko
+language, `#ifdef AI_ASSISTANT` for the AI panel; all listed in PORTING.md); prefer fixing things in the
+platform layer instead. New features live in their own folders (`src/tikolang/`, `src/ai/`) and only hook
+into upstream files. Files are CRLF; edit
 them preserving CRLF (Python with `newline=''`). Platform macros (`EXE_EXTENSION`, `DLL_EXTENSION`,
-`TOOLCHAIN_FBC64`, `TOOLCHAIN_INCFOLDER`, `TIKOLANG_SUPPORT`) are in `tiko.bas`.
+`TOOLCHAIN_FBC64`, `TOOLCHAIN_INCFOLDER`, `TIKOLANG_SUPPORT`, `AI_ASSISTANT`) are in `tiko.bas`.
 
 **Platform layer (`src/lnx/`, included via `lnx/lnx.bi`)** implements exactly the Win32/AfxNova
 surface tiko uses on GTK3 ("hybrid" design):
@@ -119,7 +122,8 @@ hook in `frmMain_PositionWindows`), libcurl streaming client for the Anthropic M
 Chat Completions in a worker thread that only buffers bytes (`modAiClient.inc`; parsing happens on the UI
 thread because `tkjson.bi` uses one global node pool), options page `frmOptionsAi.inc`, settings
 `settings/ai.ini` (gitignored, mode 600). Test it against a local mock server by setting
-`AnthropicBaseUrl` / `OpenAIBaseUrl` in `ai.ini` — real API calls cost the user money.
+`AnthropicBaseUrl` / `OpenAIBaseUrl` in `ai.ini` (back up and restore the user's `ai.ini`). Real API
+calls cost the user money: ask before making one. A mock over plain HTTP does not exercise TLS.
 
 **Lexer**: `src/lexer/LexTiko.cxx` (derived from Lexilla LexBasic, registered as "tiko" like the
 unpublished Windows lexer) is created via `TikoCreateLexer()`. Property `lexer.tiko.blockstrings`
