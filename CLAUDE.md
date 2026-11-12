@@ -161,3 +161,7 @@ Remote: private GitHub repo `retro778/Tiko-linux` (renamed from kito-lnx; use `g
 Releases are tags `v1.3.2-linux.N` with a tarball `tiko-<tag>-x86_64.tar.gz` (+ `.sha256`) of
 `tiko-linux/`: stripped `tiko` and `bin/tiko-lldb-mi` plus `git ls-files bin settings LICENSE README.md PORTING.md install.sh`
 (copy with `-z`/`xargs -0`: `settings/languages/español.lang`), never the per-user settings files.
+Windows releases are tags `v1.3.2-win.N` with `tiko-<tag>-x86_64.zip` (+ `.sha256`) of `tiko-windows/`: the
+upstream tiko-editor folder (bin, settings, toolchains, LICENSE, README.md) after `make win` and
+`make win-lexer`, with our tracked `src/`, `PORTING.md` and a `README-tiko-lang.md`; no `*_upstream_original.*`
+backups and no per-user settings files.
