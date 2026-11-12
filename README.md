@@ -13,12 +13,17 @@ builds come from the same sources. Licensed under the GNU GPLv3 or later (see LI
 
 ## Downloads
 
-Releases are on the [releases page](https://github.com/retro778/Tiko-linux/releases):
+Current releases (all on the [releases page](https://github.com/retro778/Tiko-linux/releases)):
 
 | Platform | Release | File |
 |---|---|---|
-| Linux (x86_64, GTK 3, glibc 2.38+) | latest `v1.3.2-linux.N` | `tiko-1.3.2-linux.N-x86_64.tar.gz` |
-| Windows (64-bit) | latest `v1.3.2-win.N` | `tiko-1.3.2-win.N-x86_64.zip` |
+| Linux (x86_64, GTK 3, glibc 2.38+) | [v1.3.2-linux.6](https://github.com/retro778/Tiko-linux/releases/tag/v1.3.2-linux.6) | `tiko-1.3.2-linux.6-x86_64.tar.gz` |
+| Windows (64-bit) | [v1.3.2-win.1](https://github.com/retro778/Tiko-linux/releases/tag/v1.3.2-win.1) | `tiko-1.3.2-win.1-x86_64.zip` |
+
+Linux release 6 runs the language server and the lldb adapter on the process code shared with the
+Windows build (no change in behaviour) and adds `TIKO_LLDB_MI_LOG=<file>` to log what the lldb adapter
+exchanges with lldb. It includes everything from the earlier releases: the AI assistant, tiko language
+builds, `tiko.toml` packages, the menu entry and the `tiko-editor` command.
 
 **Linux:** extract, then `./tiko` in the `tiko-linux` folder. `./install.sh` adds a "Tiko Editor"
 menu entry and the `tiko-editor` command (`~/.local/bin`), both pointing at that folder (nothing

@@ -181,3 +181,4 @@ Windows releases are tags `v1.3.2-win.N` with `tiko-<tag>-x86_64.zip` (+ `.sha25
 upstream tiko-editor folder (bin, settings, toolchains, LICENSE, README.md) after `make win` and
 `make win-lexer`, with our tracked `src/`, `PORTING.md` and a `README-tiko-lang.md`; no `*_upstream_original.*`
 backups and no per-user settings files.
+After publishing a release, update the release table (tag, file name, what is new) in `README.md`.
