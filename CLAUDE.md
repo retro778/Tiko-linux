@@ -5,8 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 Native Linux (GTK3) port of the Windows FreeBASIC IDE [Tiko](https://github.com/PaulSquires/tiko-editor),
-extended (Linux only) to also build programs in the [tiko programming language](https://github.com/PaulSquires/tiko-lang).
-The goal is exact compatibility with the Windows version (look, layout, features, shortcuts, file
+extended with support for the [tiko programming language](https://github.com/PaulSquires/tiko-lang) and an
+AI assistant panel. The same `src/` also builds the Windows editor with those two additions (released as
+`v1.3.2-win.N`). The goal is exact compatibility with the Windows version (look, layout, features, shortcuts, file
 formats) while keeping `src/` as close to upstream as possible so upstream changes can be merged
 file by file. `PORTING.md` is the living status document (architecture table, upstream changes,
 tiko language support, verified features, known issues) — keep it updated when behaviour changes.
@@ -38,11 +39,24 @@ make win-lexer       # bin/Lexilla64.dll for Windows (MinGW); close a running Wi
   `tiko-lsp`) plus clang; `gdb` and/or `lldb-dap-19` for debugging; `kchmviewer` for F1; libcurl
   (linked through `curl.bi`'s `#inclib`) for the AI assistant.
 
-- The same `src/` builds for Windows with the upstream toolchain (`make win`, about 25 s). Code in
-  `src/tikolang` and `src/ai` must compile on both: use `tkplat.bi` / `tkproc.bi` for paths and child
-  processes, keep sources ASCII (Windows fbc reads them as ANSI), no `#ifdef` inside a continued
-  statement. Test the Windows build under Wine on the virtual X server (`wine tiko.exe 'Z:\path\file'`,
-  start-up takes ~20 s); Windows tiko needs `C:\Program Files\LLVM` in the Wine prefix.
+
+## Windows build
+
+`make win` compiles the same `src/` with the upstream Windows toolchain (fbc64 + AfxNova, about 25 s)
+through Wine into `tiko-lang-win64/tiko-editor-main` (untracked: an unpacked upstream tiko-editor; the
+Windows tiko-lang toolchain sits beside it in `tiko-lang-win64/tiko-lang`).
+
+- Code in `src/tikolang` and `src/ai` must compile on both platforms: use `tkplat.bi` (paths, temp
+  folder, `TkFs()` for the run time's ANSI file statements) and `tkproc.bi` (child process with pipes);
+  keep sources ASCII (Windows fbc reads them as ANSI; use `wchr()`); no `#ifdef` inside a continued
+  statement. After changing them, build both (`make` and `make win`) and re-test Linux too.
+- Test under Wine on the virtual X server: `wine tiko.exe 'Z:\path\file.tiko'` from the editor folder
+  (start-up takes ~20 s; pass paths with backslashes or the file opens twice). Close the Windows editor
+  before `make win` (a running `tiko.exe` cannot be overwritten; `wineserver -k` ends leftovers).
+- The Wine prefix has LLVM 19 (`C:\Program Files\LLVM`, needed by Windows tiko) and Python 3.10
+  (`C:\Python310`, `WINEPATH` it for lldb-dap). Windows lldb does not stop at breakpoints under Wine, so
+  "Debugger: lldb" cannot be tested there; gdb works. A Windows program started from a Linux script gets
+  Unix pipes that `PeekNamedPipe` rejects: test `tiko-lldb-mi.exe` through the editor, not a script.
 
 ## Testing
 
@@ -118,16 +132,17 @@ is built with tiko — decided by extension plus the user's choice on the Enviro
 diagnostics are fed into the upstream Compiler Results list. `.tiko` is both the editor's project
 extension and the language's source extension: a `.tiko` file is a project only if it starts with
 `' PROJECT FILE` (`TikoLang_IsProjectFile`).
-- `modTikoLsp.inc`: tiko-lsp client (JSON-RPC over pipes read by a GLib watch, diagnostics as
+- `modTikoLsp.inc`: tiko-lsp client (JSON-RPC over `tkproc.bi` pipes polled by a 30 ms timer, diagnostics as
   Scintilla indicators 20/21, hover on `SCN_DWELLSTART`, F12). JSON reader: `tkjson.bi`.
 - `tiko-lldb-mi.bas`: answers the gdb/MI subset `frmDebug.inc` uses by driving lldb-dap, so the
   upstream debugger window works with lldb. `frmDebug`'s reader (`gdb_receive`) keeps only the first
   message of a burst, so the adapter spaces its answers 150 ms apart and writes nothing unparsed.
-  Test it without the GUI by piping MI commands (`break "file":N`, `-exec-run`, ...) to it.
+  Test it without the GUI by piping MI commands (`break "file":N`, `-exec-run`, ...) to it;
+  `TIKO_LLDB_MI_LOG=<file>` logs the MI and DAP traffic.
 
 **AI assistant (`src/ai/`, `#ifdef AI_ASSISTANT`)**: chat panel docked right (`frmAiChat.inc`, laid out by a
-hook in `frmMain_PositionWindows`), libcurl streaming client for the Anthropic Messages API / OpenAI
-Chat Completions in a worker thread that only buffers bytes (`modAiClient.inc`; parsing happens on the UI
+hook in `frmMain_PositionWindows`), streaming client for the Anthropic Messages API / OpenAI Chat
+Completions (libcurl on Linux, WinHTTP on Windows) in a worker thread that only buffers bytes (`modAiClient.inc`; parsing happens on the UI
 thread because `tkjson.bi` uses one global node pool), options page `frmOptionsAi.inc`, settings
 `settings/ai.ini` (gitignored, mode 600). Test it against a local mock server by setting
 `AnthropicBaseUrl` / `OpenAIBaseUrl` in `ai.ini` (back up and restore the user's `ai.ini`). Real API
@@ -135,7 +150,8 @@ calls cost the user money: ask before making one. A mock over plain HTTP does no
 
 **Lexer**: `src/lexer/LexTiko.cxx` (derived from Lexilla LexBasic, registered as "tiko" like the
 unpublished Windows lexer) is created via `TikoCreateLexer()`. Property `lexer.tiko.blockstrings`
-enables tiko `"""` block strings (styled `SCE_B_DATE`).
+enables tiko `"""` block strings (styled `SCE_B_DATE`). On Windows the editor loads `bin\Lexilla64.dll`:
+`make win-lexer` builds it from `LexillaTiko.cxx` (the Lexilla DLL interface for this one lexer) + `LexTiko.cxx`.
 
 ## FreeBASIC pitfalls hit in this port
 
