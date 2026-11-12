@@ -209,9 +209,16 @@ tiko-editor folder (`WINDIR_TIKO`, default `tiko-lang-win64/tiko-editor-main`, u
   `CREATE_NEW_CONSOLE`). lldb-dap.exe needs `python310.dll` on Windows.
 * Tested under Wine 10 with tiko 0.1.4 (Windows) + LLVM 19.1.7: build errors in Compiler
   Results, build and run, tiko.toml package build, tiko-lsp squiggles, gdb debugging of a tiko
-  program, both options pages, AI chat (mock server) and the HTTPS error path. Not tested:
-  lldb on Windows (needs Python 3.10 in Wine). `"""` block string colouring needs a rebuilt
-  `Lexilla64.dll` (not done; the keywords are coloured).
+  program, both options pages, AI chat (mock server) and the HTTPS error path. `"""` block strings (new
+  `Lexilla64.dll`).
+* Lexer on Windows: `make win-lexer` builds `bin/Lexilla64.dll` with MinGW
+  (`g++-mingw-w64-x86-64`) from `src/lexer/LexillaTiko.cxx` (the Lexilla DLL interface with the
+  one lexer "tiko") + `LexTiko.cxx` + Lexilla's lexlib, statically linked. It replaces upstream's
+  DLL, whose tiko lexer has no block strings.
+* lldb on Windows is built but could not be tested: under Wine, Windows lldb does not stop at
+  breakpoints at all (plain `lldb.exe` runs the program through), and lldb-dap.exe (needs
+  `python310.dll` on the PATH) never answers. `TIKO_LLDB_MI_LOG=<file>` makes `tiko-lldb-mi`
+  log the MI and DAP traffic for diagnosing it on real Windows.
 
 ## File format compatibility
 

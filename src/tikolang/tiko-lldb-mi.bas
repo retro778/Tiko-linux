@@ -44,6 +44,18 @@ end extern
 ' ----------------------------------------------------------------------------------------
 ' The editor's side: commands arrive on stdin, answers go to stdout (both pipes)
 ' ----------------------------------------------------------------------------------------
+' Optional log of everything exchanged: set TIKO_LLDB_MI_LOG to a file name
+sub LogLine( byref sTag as string, byref s as string )
+    static as string sFile
+    static as boolean bChecked
+    if bChecked = false then bChecked = true : sFile = environ("TIKO_LLDB_MI_LOG")
+    if len(sFile) = 0 then exit sub
+    dim as long f = freefile
+    if open(sFile for append as #f) <> 0 then exit sub
+    print #f, sTag & " " & left(s, 2000)
+    close #f
+end sub
+
 sub StdoutWrite( byref s as string )
 #ifdef __FB_LINUX__
     dbg_write( 1, strptr(s), len(s) )
@@ -120,6 +132,7 @@ sub EmitMi( byref sMsg as string )
     loop
     dim as string s = sMsg & chr(10) & "(gdb)" & chr(10)
     StdoutWrite( s )
+    LogLine( "MI>", sMsg )
     gLastEmit = timer
 end sub
 
@@ -183,11 +196,13 @@ end function
 
 function StartDap() as boolean
     dim as string sDap = FindLldbDap()
+    LogLine( "lldb-dap:", iif(len(sDap), sDap, "not found") )
     if len(sDap) = 0 then return false
     return TkProc_Start( gDap, sDap )
 end function
 
 sub DapWrite( byref sJson as string )
+    LogLine( "DAP>", sJson )
     TkProc_Write( gDap, "Content-Length: " & len(sJson) & chr(13, 10, 13, 10) & sJson )
 end sub
 
@@ -211,6 +226,7 @@ function DapTake() as string
     if len(gDapBuf) < h + 3 + n then return ""
     dim as string s = mid(gDapBuf, h + 4, n)
     gDapBuf = mid(gDapBuf, h + 4 + n)
+    LogLine( "DAP<", s )
     return s
 end function
 
@@ -717,6 +733,7 @@ end sub
 sub OnMiCommand( byref sLine as string )
     dim as string s = trim(sLine, any chr(13, 10, 32, 9))
     if len(s) = 0 then exit sub
+    LogLine( "MI<", s )
     dim as string sWord = s, sRest
     dim as long sp = instr(s, " ")
     if sp then sWord = left(s, sp - 1) : sRest = trim(mid(s, sp + 1))

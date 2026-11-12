@@ -20,6 +20,7 @@ make clean      # removes ./tiko, bin/tiko-lldb-mi and obj/LexTiko.o (not deps/)
 ./install.sh         # per-user menu entry + ~/.local/bin/tiko-editor link to this folder (--uninstall)
 LNX_TRACE=1 ./tiko   # prints top-level window SetWindowPos/ShowWindow and child allocations
 make win             # Windows build (tiko.exe, bin/tiko-lldb-mi.exe) through Wine into tiko-lang-win64/tiko-editor-main
+make win-lexer       # bin/Lexilla64.dll for Windows (MinGW); close a running Windows tiko.exe before either
 ```
 
 - Compiler: FreeBASIC `fbc` (Linux, 64-bit). The whole app is one translation unit: `src/tiko.bas`

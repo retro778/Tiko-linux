@@ -46,7 +46,15 @@ win:
 	cp settings/keywords/tiko_keywords.txt $(WINDIR_TIKO)/settings/keywords/
 	cp settings/help/tiko_wiki_index.txt $(WINDIR_TIKO)/settings/help/
 
+# bin/Lexilla64.dll for the Windows build: the "tiko" lexer (same LexTiko.cxx) with MinGW,
+# statically linked so it needs no MinGW run time DLLs. Replaces upstream's Lexilla64.dll.
+MINGW_CXX ?= x86_64-w64-mingw32-g++
+win-lexer: $(DEPS)/lexilla/src/makefile
+	$(MINGW_CXX) -shared -O2 -std=c++17 -static -s -I $(DEPS)/lexilla/include -I $(DEPS)/lexilla/lexlib \
+		-I $(DEPS)/scintilla/include src/lexer/LexillaTiko.cxx src/lexer/LexTiko.cxx $(DEPS)/lexilla/lexlib/*.cxx \
+		-o $(WINDIR_TIKO)/bin/Lexilla64.dll
+
 clean:
 	rm -f tiko bin/tiko-lldb-mi $(LEXTIKO_OBJ)
 
-.PHONY: all clean win
+.PHONY: all clean win win-lexer
